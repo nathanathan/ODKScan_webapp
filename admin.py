@@ -2,6 +2,7 @@ from ODKScan_webapp.models import Template, FormImage
 from django.contrib import admin
 from django.contrib.contenttypes.models import ContentType
 from django.http import HttpResponseRedirect
+import os
 
 def transcribe(modeladmin, request, queryset):
     selected = request.POST.getlist(admin.ACTION_CHECKBOX_NAME)
@@ -33,8 +34,18 @@ class FormImageAdmin(admin.ModelAdmin):
             obj.save()
             #Do Processing here:
             import subprocess
+            #TODO: Move APP_ROOT?
+            APP_ROOT = os.path.dirname(__file__)
             #This blocks
-            subprocess.check_call(['echo', obj.image.path])
+            subprocess.Popen(['touch',
+                              'testing_output_location',
+                              #obj.image.path,
+                              ],
+                cwd=os.path.join(APP_ROOT,
+                                 'mScan',
+                                 'TestSuite'),
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE).communicate()
             obj.status = 'p'
             obj.save()
 admin.site.register(FormImage, FormImageAdmin)
