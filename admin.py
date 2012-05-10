@@ -32,20 +32,27 @@ class FormImageAdmin(admin.ModelAdmin):
     def save_model(self, request, obj, form, change):
             obj.user = request.user
             obj.save()
-            #Do Processing here:
+            #Does image processing:
             import subprocess
             #TODO: Move APP_ROOT?
             APP_ROOT = os.path.dirname(__file__)
-            #This blocks
-            subprocess.Popen(['touch',
-                              'testing_output_location',
-                              #obj.image.path,
+            #This blocks, for scaling we should add a "processing" status and do it asyncronously.
+            stdoutdata, stderrdata = subprocess.Popen(['./ODKScan.run',
+                              'assets/form_templates/example',
+                              obj.image.path,
+                              '../img0'#TODO: How to orgainize output?
                               ],
                 cwd=os.path.join(APP_ROOT,
-                                 'mScan',
-                                 'TestSuite'),
+                                 'ODKScan-core'),
+                env={'LD_LIBRARY_PATH':'/usr/local/lib'},
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE).communicate()
-            obj.status = 'p'
+            if(len(stderrdata) == 0):
+                obj.status = 'p'
+            else:
+                obj.status = 'e'
             obj.save()
+            #Debug output
+            import sys
+            print >>sys.stderr, '['+stderrdata+']'
 admin.site.register(FormImage, FormImageAdmin)
