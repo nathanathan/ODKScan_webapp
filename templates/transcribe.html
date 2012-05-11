@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Transcription view</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <!-- Le styles -->
+    <link href="http://twitter.github.com/bootstrap/assets/css/bootstrap.css" rel="stylesheet">
+  </head>
+
+  <body>
+	<table class="table table-striped table-bordered">
+	<tr>
+	{% for field in json_template.fields %}
+		{% if field.label %}
+		<th>{{field.label}}</th>
+		{% else %}
+		<th>{{field.name}}</th>
+		{% endif %}
+	{% empty %}
+		<p>No fields in template</p>
+	{% endfor %}
+	</tr>
+	{% if json_outputs %}
+	    <tr>
+	    {% for json_output in json_outputs %}
+	    	{% for field in json_output.fields %}
+	    		<td>
+	    		{% for segment in field.segments %}
+	    			<img src="{{segment.imagePath}}" />
+	    		{% endfor %}
+	    		<br />
+	    		<input value="{{field.value}}"></input>
+	    		</td>
+	    	{% endfor %}
+	    {% endfor %}
+		</tr>
+	{% else %}
+	    <p>No output available.</p>
+	{% endif %}
+	</table>
+
+  </body>
+</html>
