@@ -7,8 +7,6 @@ from django.db import models
 #from form_utils.widgets import ImageWidget
 #from ODKScan_webapp.widgets import AdminImageWidget
 
-
-
 from django.template import Context, loader
 from django.http import HttpResponse
 
@@ -18,7 +16,7 @@ def process_json_output(pyobj):
     and each field has a value property.
     """
     for field in pyobj['fields']:
-        field['value'] = "Hi"
+        field['value'] = field.get('value', 'value')
         for segment in field['segments']:
             segment['imagePath'] = "/media" + segment['imagePath'].split("media")[1]
     return pyobj
@@ -38,10 +36,11 @@ def transcribe(modeladmin, request, queryset):
             continue
         if form_template is None:
             form_template = formImage.template
-        elif form_template is not formImage.template:
-            raise Exception("Forms have different templates")
+        elif form_template.name != formImage.template.name:
+            raise Exception("Mixed templates: " + form_template.name + " and " + formImage.template.name)
         fp = codecs.open(json_path, mode="r", encoding="utf-8")
         pyobj = json.load(fp, encoding='utf-8')
+        pyobj['formImage'] = formImage
         process_json_output(pyobj)
         json_outputs.append(pyobj)
         #print >>sys.stderr, json.dumps(pyobj, ensure_ascii=False, indent=4)
@@ -69,8 +68,8 @@ admin.site.register(Template, TemplateAdmin)
 
 class FormImageAdmin(admin.ModelAdmin):
     list_display = ['filename', 'upload_time', 'status',]
-    list_filter = ('upload_time', 'status',)
-    fields = ('image', 'template', 'markedup_image_path',)
+    list_filter = ('upload_time', 'status', 'template')
+    fields = ('image', 'template', 'markedup_image_path', 'error_message',)
     readonly_fields = ('markedup_image_path', 'error_message',)
     #formfield_overrides = { models.ImageField: {'widget': AdminImageWidget}}
     actions = [transcribe]
@@ -79,29 +78,29 @@ class FormImageAdmin(admin.ModelAdmin):
         return obj.image.name
     
     def save_model(self, request, obj, form, change):
-            obj.user = request.user
-            obj.save()
-            #Does image processing:
-            import subprocess
-            #TODO: Move APP_ROOT?
-            APP_ROOT = os.path.dirname(__file__)
-            obj.markedup_image_path = os.path.dirname(obj.image.path)
-            #This blocks, for scaling we should add a "processing" status and do it asyncronously.
-            stdoutdata, stderrdata = subprocess.Popen(['./ODKScan.run',
-                              'assets/form_templates/example',
-                              obj.image.path,
-                              obj.markedup_image_path
-                              ],
-                cwd=os.path.join(APP_ROOT,
-                                 'ODKScan-core'),
-                env={'LD_LIBRARY_PATH':'/usr/local/lib'},
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE).communicate()
-            if(len(stderrdata) == 0):
-                obj.status = 'p'
-            else:
-                obj.status = 'e'
-                obj.error_message = stderrdata
-            obj.save()
+        obj.user = request.user
+        obj.save()
+        #Does image processing:
+        import subprocess
+        #TODO: Move APP_ROOT?
+        APP_ROOT = os.path.dirname(__file__)
+        obj.markedup_image_path = os.path.dirname(obj.image.path)
+        #This blocks, for scaling we should add a "processing" status and do it asyncronously.
+        stdoutdata, stderrdata = subprocess.Popen(['./ODKScan.run',
+                          'assets/form_templates/example',
+                          obj.image.path,
+                          obj.markedup_image_path
+                          ],
+            cwd=os.path.join(APP_ROOT,
+                             'ODKScan-core'),
+            env={'LD_LIBRARY_PATH':'/usr/local/lib'},
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE).communicate()
+        if(len(stderrdata) == 0):
+            obj.status = 'p'
+        else:
+            obj.status = 'e'
+            obj.error_message = stderrdata
+        obj.save()
         
 admin.site.register(FormImage, FormImageAdmin)

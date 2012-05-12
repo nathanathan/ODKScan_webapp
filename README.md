@@ -1,12 +1,14 @@
 ODKScan_webapp
 ==============
 
-A Django app interface for ODKScan
+A Django app interface for ODK Scan
 
 Installation
 ===========
 
 Setup ODKScan-core in the app directory (see: https://github.com/nathanathan/ODKScan-core)
+
+Clone the ODK Scan template maker in the static directory (see: https://github.com/nathanathan/TemplateMaker)
 
 Enable the django admin site
 

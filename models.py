@@ -5,6 +5,7 @@ def get_template_path(instance, filename):
     return os.path.join(instance.name, filename)
 class Template(models.Model):
     name = models.CharField(max_length=200, unique=True)
+    #Make json a text input?
     json = models.FileField(upload_to=get_template_path)
     image = models.ImageField(upload_to=get_template_path)
 
@@ -30,5 +31,6 @@ class FormImage(models.Model):
     status = models.CharField(max_length=1, choices=STATUSES)
     error_message = models.TextField(blank=True, null=True)
     upload_time = models.DateTimeField(auto_now=True)
+    #these can be gotten from image, so I'm not sure they're necessairy:
     markedup_image_path = models.FilePathField(blank=True, null=True) #rename output_path
     json_output_path = models.FilePathField(blank=True, null=True) #remove
