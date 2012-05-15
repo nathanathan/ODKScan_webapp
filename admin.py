@@ -7,7 +7,7 @@ from django.db import models
 #from form_utils.widgets import ImageWidget
 #from ODKScan_webapp.widgets import AdminImageWidget
 
-from django.template import Context, loader
+from django.template import RequestContext, loader
 from django.http import HttpResponse
 
 def process_json_output(pyobj):
@@ -16,7 +16,7 @@ def process_json_output(pyobj):
     and each field has a value property.
     """
     for field in pyobj['fields']:
-        field['value'] = field.get('value', 'value')
+        field['value'] = field.get('value', "")
         for segment in field['segments']:
             segment['imagePath'] = "/media" + segment['imagePath'].split("media")[1]
     return pyobj
@@ -49,7 +49,7 @@ def transcribe(modeladmin, request, queryset):
     form_template_fp = codecs.open(form_template.json.path, mode="r", encoding="utf-8")
     json_template = json.load(form_template_fp, encoding='utf-8')
     t = loader.get_template('transcribe.html')
-    c = Context({
+    c = RequestContext(request, {
                  'json_template':json_template,
                  'json_outputs':json_outputs,
                  })
