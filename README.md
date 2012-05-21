@@ -6,9 +6,10 @@ A Django app interface for ODK Scan
 Installation
 ===========
 
-Setup ODKScan-core in the app directory (see: https://github.com/nathanathan/ODKScan-core)
+In your django app directory run:
 
-Clone the ODK Scan template maker in the static directory (see: https://github.com/nathanathan/TemplateMaker)
+	git clone git://github.com/nathanathan/ODKScan_webapp.git --recursive
+	#If this was forked you might need to alter the nathanathan part.
 
 Enable the django admin site
 
