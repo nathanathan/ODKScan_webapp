@@ -1,0 +1,3 @@
+[submodule "ODKScan-core"]
+	path = ODKScan-core
+	url = git://github.com/nathanathan/ODKScan-core.git
