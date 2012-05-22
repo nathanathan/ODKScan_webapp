@@ -98,7 +98,7 @@ class FormImageAdmin(admin.ModelAdmin):
             stderr=subprocess.PIPE).communicate()
         obj.error_message = stderrdata
         json_path = os.path.join(obj.output_path, 'output.json')
-        if(len(stderrdata) == 0 and os.path.exists(json_path)):
+        if os.path.exists(json_path):
             obj.status = 'p'
         else:
             obj.status = 'e'
