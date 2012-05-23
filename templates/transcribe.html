@@ -42,7 +42,8 @@
     outline-width: 1px;
 }
 .segments {
-    width: 2in;
+    max-width: 4in;
+    display: inline-block;
 }
 	</style>
   </head>
@@ -68,11 +69,13 @@
 		    <tr>
 			{% for field in json_output.fields %}
 				<td class="{{field.name}}">
+				<input name="{{json_output.formImage.id}}-{{field.name}}" value="{{field.value}}"></input>
+				<br />
 				<div class="segments">
 				{% for segment in field.segments %}
-					{% comment %} Note sure if this scaling technique works everywhere.{% endcomment %}
+					{% comment %} Note sure if this scaling technique works everywhere. {% endcomment %}
 					<div class="segment-container">
-					<img src="{{segment.image_path}}" height="60%" />
+					<img src="{{segment.image_path}}" style="height:{{segment.height_inches}}in; width:{{segment.width_inches}}in;" />
 					{% comment %} Could do this to make classifications alterable: (a few bugs would need to be fixed first)
 					{% for item in segment.items %}
 						<div class="item" style="top:{{item.item_y}}px;left:{{item.item_x}}px;height:{{field.classifier.classifier_height}}px;width:{{field.classifier.classifier_width}}px;"></div>
@@ -81,8 +84,6 @@
 					</div>
 				{% endfor %}
 				</div>
-				<br />
-				<input name="{{json_output.formImage.id}}-{{field.name}}" value="{{field.value}}"></input>
 				</td>
 			{% endfor %}
 			</tr>

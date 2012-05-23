@@ -13,12 +13,21 @@ from django.http import HttpResponse
 
 def process_json_output(pyobj):
     """
-    Modifies segment image paths so I can put them directly in HTML link.
+    Modifies segment image paths and sizes so it is easy to use them in the transcribe.html template.
     """
     for field in pyobj['fields']:
         for segment in field['segments']:
-            #This is a big convoluted because I'm planning to change the property name
-            segment['image_path'] = "/media" + segment.get('image_path', segment.get('imagePath')).split("media")[1]
+            #Modify path
+            image_path = segment.get('image_path')
+            if not image_path: continue
+            segment['image_path'] = "/media" + image_path.split("media")[1]
+            #Modify image size
+            dpi = 100 #A guess for dots per inch
+            segment_width = segment.get("segment_width", field.get("segment_width", pyobj.get("segment_width")))
+            segment_height = segment.get("segment_height", field.get("segment_height", pyobj.get("segment_height")))
+            if not segment_width or not segment_height: continue
+            segment['width_inches'] = float(segment_width) / dpi
+            segment['height_inches'] = float(segment_height) / dpi
     return pyobj
 
 #Put under views?
