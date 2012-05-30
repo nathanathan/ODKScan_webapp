@@ -22,12 +22,12 @@ def process_json_output(pyobj):
             if not image_path: continue
             segment['image_path'] = "/media" + image_path.split("media")[1]
             #Modify image size
-            dpi = 100 #A guess for dots per inch
+            dpi = 100.0 #A guess for dots per inch
             segment_width = segment.get("segment_width", field.get("segment_width", pyobj.get("segment_width")))
             segment_height = segment.get("segment_height", field.get("segment_height", pyobj.get("segment_height")))
             if not segment_width or not segment_height: continue
-            segment['width_inches'] = float(segment_width) / dpi
-            segment['height_inches'] = float(segment_height) / dpi
+            #segment['width_inches'] = float(segment_width) / dpi
+            #segment['height_inches'] = float(segment_height) / dpi
     return pyobj
 
 #Put under views?
@@ -48,7 +48,7 @@ def transcribe(modeladmin, request, queryset):
         elif form_template.name != formImage.template.name:
             raise Exception("Mixed templates: " + form_template.name + " and " + formImage.template.name)
         fp = codecs.open(json_path, mode="r", encoding="utf-8")
-        pyobj = json.load(fp, encoding='utf-8')
+        pyobj = json.load(fp, encoding='utf-8')#This is where we load the json output
         pyobj['formImage'] = formImage
         process_json_output(pyobj)
         json_outputs.append(pyobj)
@@ -89,7 +89,7 @@ class FormImageAdmin(admin.ModelAdmin):
     def save_model(self, request, obj, form, change):
         obj.user = request.user
         obj.save()
-        #Does image processing:
+        #This is where wee make the call to ODKScan core
         import subprocess
         #TODO: Move APP_ROOT?
         APP_ROOT = os.path.dirname(__file__)
@@ -105,6 +105,7 @@ class FormImageAdmin(admin.ModelAdmin):
             env={'LD_LIBRARY_PATH':'/usr/local/lib'}, #TODO: This could cause problems on other systems, document or fix
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE).communicate()
+        print >>sys.stdout, stdoutdata
         obj.error_message = stderrdata
         json_path = os.path.join(obj.output_path, 'output.json')
         if os.path.exists(json_path):
