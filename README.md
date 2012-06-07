@@ -16,7 +16,7 @@ Now in your django app directory run:
 In settings.py:
 
 * Give values to MEDIA_ROOT and MEDIA_URL (e.g. "/media/")
-* Add "" to INSTALLED_APPS
+* Add "ODKScan_webapp" to INSTALLED_APPS
 
 Paste this at the bottom of urls.py:
 

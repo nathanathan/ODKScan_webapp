@@ -1,7 +1,20 @@
+from ODKScan_webapp.models import Template, FormImage
 from django.http import HttpResponse, HttpResponseBadRequest
 import sys, os, tempfile
+import json, codecs
 from django.shortcuts import render_to_response, redirect
 from django.core.context_processors import csrf
+
+def print_pyobj_to_json(pyobj, path=None):
+    """
+    dump a python nested array/dict structure to the specified file or stdout if no file is specified
+    """
+    if path:
+        fp = codecs.open(path, mode="w", encoding="utf-8")
+        json.dump(pyobj, fp=fp, ensure_ascii=False, indent=4)
+        fp.close()
+    else:
+        print json.dumps(pyobj, ensure_ascii=False, indent=4)
 
 def group_by_prefix(dict):
     """
@@ -19,33 +32,26 @@ def group_by_prefix(dict):
             new_dict[prefix] = group
     return new_dict
 
-def dict_to_csv(dict_array, csvfile):
-    """
-    Convert an array of dictionaries to a csv where the keys are the column headers.
-    """
-    import csv
-    column_headers = set()
-    for row in dict_array:
-        column_headers = column_headers.union(row.keys())
-    csv_writer = csv.DictWriter(csvfile, column_headers, delimiter=',', quotechar='"', quoting=csv.QUOTE_ALL)
-    header_dict = dict((x,x) for x in column_headers)
-    csv_writer.writerow(header_dict)
-    csv_writer.writerows(dict_array)
-
-def save_transcription(request):
+def save_transcriptions(request):
     c = {}
     c.update(csrf(request))
     if request.method == 'POST': # If the form has been submitted...
         row_dict = group_by_prefix(request.POST)
-        temp_file = tempfile.mktemp()
-        csvfile = open(temp_file, 'wb')
-        dict_to_csv(row_dict.values(), csvfile)
-        csvfile.close()
-        response = HttpResponse(mimetype='application/octet-stream')
-        response['Content-Disposition'] = 'attachment; filename=output.csv'
-        fo = open(temp_file)
-        response.write(fo.read())
-        fo.close()
-        return response
+        for formImageId, transcription in row_dict.items():
+            form_image = FormImage.objects.get(id=formImageId)
+            json_path = os.path.join(form_image.output_path, 'output.json')
+            if not os.path.exists(json_path):
+                raise Exception('No json for form image')
+            fp = codecs.open(json_path, mode="r", encoding="utf-8")
+            pyobj = json.load(fp, encoding='utf-8')#This is where we load the json output
+            fp.close()
+            for field in pyobj.get('fields'):
+                field_transcription = transcription.get(field['name'])
+                if field_transcription:
+                    field['transcription'] = field_transcription
+            print_pyobj_to_json(pyobj, json_path)
+            form_image.status = 'm'
+            form_image.save()
+            return HttpResponse("hello")
     else:
         return HttpResponseBadRequest("Only post requests please.")

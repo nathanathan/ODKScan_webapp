@@ -23,7 +23,8 @@ class Template(models.Model):
 STATUSES = (
     ('e', 'Error'),
     ('p', 'Processed'),
-    ('t', 'Transcribed'),
+    ('m', 'Modified'),
+    ('f', 'Finalized'),
 )
 def get_form_image_path(instance, filename):
     import time

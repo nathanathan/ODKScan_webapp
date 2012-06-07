@@ -1,69 +1,13 @@
 from ODKScan_webapp.models import Template, FormImage
+from ODKScan_webapp.actions import transcribe, finalize, generate_csv
 from django.contrib import admin
 from django.conf import settings
-from django.contrib.contenttypes.models import ContentType
-from django.http import HttpResponseRedirect
 import os, sys
-from django.db import models
+
+#from django.db import models
 #from form_utils.widgets import ImageWidget
 #from ODKScan_webapp.widgets import AdminImageWidget
 
-from django.template import RequestContext, loader
-from django.http import HttpResponse
-
-def process_json_output(pyobj):
-    """
-    Modifies segment image paths and sizes so it is easy to use them in the transcribe.html template.
-    """
-    for field in pyobj['fields']:
-        for segment in field['segments']:
-            #Modify path
-            image_path = segment.get('image_path')
-            if not image_path: continue
-            segment['image_path'] = "/media" + image_path.split("media")[1]
-            #Modify image size
-            dpi = 100.0 #A guess for dots per inch
-            segment_width = segment.get("segment_width", field.get("segment_width", pyobj.get("segment_width")))
-            segment_height = segment.get("segment_height", field.get("segment_height", pyobj.get("segment_height")))
-            if not segment_width or not segment_height: continue
-            #segment['width_inches'] = float(segment_width) / dpi
-            #segment['height_inches'] = float(segment_height) / dpi
-    return pyobj
-
-#Put under views?
-def transcribe(modeladmin, request, queryset):
-    selected = request.POST.getlist(admin.ACTION_CHECKBOX_NAME)
-    ct = ContentType.objects.get_for_model(queryset.model)
-    #return HttpResponseRedirect("/transcribe/?ct=%s&ids=%s" % (ct.pk, ",".join(selected)))
-    import json, codecs
-    import sys
-    form_template = None
-    json_outputs = []
-    for formImage in queryset:
-        json_path = os.path.join(formImage.output_path, 'output.json')
-        if not os.path.exists(json_path):
-            continue
-        if form_template is None:
-            form_template = formImage.template
-        elif form_template.name != formImage.template.name:
-            raise Exception("Mixed templates: " + form_template.name + " and " + formImage.template.name)
-        fp = codecs.open(json_path, mode="r", encoding="utf-8")
-        pyobj = json.load(fp, encoding='utf-8')#This is where we load the json output
-        pyobj['formImage'] = formImage
-        process_json_output(pyobj)
-        json_outputs.append(pyobj)
-        #print >>sys.stderr, json.dumps(pyobj, ensure_ascii=False, indent=4)
-    if form_template is None:
-        raise Exception("no template")
-    form_template_fp = codecs.open(form_template.json.path, mode="r", encoding="utf-8")
-    json_template = json.load(form_template_fp, encoding='utf-8')
-    t = loader.get_template('transcribe.html')
-    c = RequestContext(request, {
-                 'json_template':json_template,
-                 'json_outputs':json_outputs,
-                 })
-    return HttpResponse(t.render(c))
-transcribe.short_description = "Transcribe selected forms."
 
 class FormImageInline(admin.TabularInline):
     fields = ('image', 'template',)
@@ -81,7 +25,7 @@ class FormImageAdmin(admin.ModelAdmin):
     fields = ('image', 'template', 'error_message',)
     readonly_fields = ('error_message',) #TODO: Only display error if it exists
     #formfield_overrides = { models.ImageField: {'widget': AdminImageWidget}}
-    actions = [transcribe]
+    actions = [transcribe, finalize, generate_csv]
 
     def filename(self, obj):
         return os.path.split(obj.image.name)[1]
