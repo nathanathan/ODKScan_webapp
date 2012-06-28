@@ -72,7 +72,7 @@
 						{% for segment in field.segments %}
 							{% comment %} Not sure if this scaling technique works everywhere. {% endcomment %}
 							<div class="segment-container">
-								<a href="/formView?segment={{segment.name}}&formLocation=/media/{{json_output.outputDir}}/&formId={{json_output.formImage.id}}&user={{user}}">
+								<a href="/formView?segment={{segment.name}}&formLocation=/media/{{json_output.outputDir}}/&formId={{json_output.formImage.id}}&user={{user}}" target="_blank">
 								<img 
 								src="/media/{{json_output.outputDir}}/segments/{{segment.name}}.jpg"
 								style="height:{{segment.height_inches}}in; width:{{segment.width_inches}}in;" />
