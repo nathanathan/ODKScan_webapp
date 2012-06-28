@@ -19,6 +19,11 @@ class Template(models.Model):
         return self.__unicode__()
     def __unicode__(self):
         return self.name
+#    def save(self, *args, **kwargs):
+#        if self.pk is None:
+#            #This is being changed
+#            self.json
+#        super(Model, self).save(*args, **kwargs)
 
 STATUSES = (
     ('e', 'Error'),

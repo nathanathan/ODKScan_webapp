@@ -32,7 +32,7 @@ Paste this at the bottom of urls.py:
 	#This is for serving static files:
 	from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 	urlpatterns += staticfiles_urlpatterns()
-	urlpatterns += [url(r'^save_transcription', 'ODKScan_webapp.views.save_transcription')]
+	urlpatterns += [url(r'^save_transcription', 'ODKScan_webapp.views.save_transcriptions')]
 
 Check to see if the ODKScan_webapp appears on your django admin page.
 

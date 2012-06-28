@@ -4,6 +4,7 @@ import sys, os, tempfile
 import json, codecs
 from django.shortcuts import render_to_response, redirect
 from django.core.context_processors import csrf
+from django.template import RequestContext, loader
 
 def print_pyobj_to_json(pyobj, path=None):
     """
@@ -11,7 +12,7 @@ def print_pyobj_to_json(pyobj, path=None):
     """
     if path:
         fp = codecs.open(path, mode="w", encoding="utf-8")
-        json.dump(pyobj, fp=fp, ensure_ascii=False, indent=4)
+        json.dump(pyobj, fp=fp, ensure_ascii=False)#, indent=4)
         fp.close()
     else:
         print json.dumps(pyobj, ensure_ascii=False, indent=4)
@@ -39,7 +40,7 @@ def save_transcriptions(request):
         row_dict = group_by_prefix(request.POST)
         for formImageId, transcription in row_dict.items():
             form_image = FormImage.objects.get(id=formImageId)
-            json_path = os.path.join(form_image.output_path, 'output.json')
+            json_path = os.path.join(form_image.output_path, 'users', str(request.user), 'output.json')#TODO
             if not os.path.exists(json_path):
                 raise Exception('No json for form image')
             fp = codecs.open(json_path, mode="r", encoding="utf-8")
@@ -55,3 +56,13 @@ def save_transcriptions(request):
             return HttpResponse("hello")
     else:
         return HttpResponseBadRequest("Only post requests please.")
+
+def form_view(request):
+    t = loader.get_template('formView.html')
+    c = RequestContext(request, {})
+    return HttpResponse(t.render(c))
+
+def field_view(request):
+    t = loader.get_template('fieldView.html')
+    c = RequestContext(request, {})
+    return HttpResponse(t.render(c))

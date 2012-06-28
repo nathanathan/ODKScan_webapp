@@ -13,7 +13,7 @@ def process_json_output(pyobj):
             #Modify path
             image_path = segment.get('image_path')
             if not image_path: continue
-            segment['image_path'] = "/media" + image_path.split("media")[1]
+            segment['name'] = os.path.basename(image_path.split("media")[1]).split(".jpg")[0]
             #Modify image size
             dpi = 100.0 #A guess for dots per inch
             segment_width = segment.get("segment_width", field.get("segment_width", pyobj.get("segment_width")))
@@ -28,6 +28,17 @@ def transcribe(modeladmin, request, queryset):
     json_outputs = []
     for formImage in queryset:
         json_path = os.path.join(formImage.output_path, 'output.json')
+
+        user_json_path = os.path.join(formImage.output_path, 'users', str(request.user), 'output.json')
+        if not os.path.exists(user_json_path):
+            try:
+                os.makedirs(os.path.dirname(user_json_path))
+            except:
+                pass
+            import shutil
+            shutil.copyfile(json_path, user_json_path)
+        json_path = user_json_path
+        
         if formImage.status == 'f':
             raise Exception("You cannot transcribe a finalized from.")
         if not os.path.exists(json_path):
@@ -39,7 +50,8 @@ def transcribe(modeladmin, request, queryset):
         fp = codecs.open(json_path, mode="r", encoding="utf-8")
         pyobj = json.load(fp, encoding='utf-8')#This is where we load the json output
         pyobj['formImage'] = formImage
-        process_json_output(pyobj)
+        process_json_output(pyobj)#TODO: Ideally this would take place at processing time
+        pyobj['outputDir'] = os.path.basename(formImage.output_path)
         json_outputs.append(pyobj)
         #print >>sys.stderr, json.dumps(pyobj, ensure_ascii=False, indent=4)
     if form_template is None:
@@ -51,6 +63,7 @@ def transcribe(modeladmin, request, queryset):
                  'json_template_name':form_template.name,
                  'json_template':json_template,
                  'json_outputs':json_outputs,
+                 'user':request.user,
                  })
     return HttpResponse(t.render(c))
 transcribe.short_description = "Transcribe selected forms."
@@ -110,26 +123,27 @@ def generate_csv(modeladmin, request, queryset):
     return response
 generate_csv.short_description = "Generate CSV from selected forms."
 
-def save_transcriptions(request):
-    c = {}
-    c.update(csrf(request))
-    if request.method == 'POST': # If the form has been submitted...
-        row_dict = group_by_prefix(request.POST)
-        for formImageId, transcription in row_dict.items():
-            form_image = FormImage.objects.get(id=formImageId)
-            json_path = os.path.join(form_image.output_path, 'output.json')
-            if not os.path.exists(json_path):
-                raise Exception('No json for form image')
-            fp = codecs.open(json_path, mode="r", encoding="utf-8")
-            pyobj = json.load(fp, encoding='utf-8')#This is where we load the json output
-            fp.close()
-            for field in pyobj.get('fields'):
-                field_transcription = transcription.get(field['name'])
-                if field_transcription:
-                    field['transcription'] = field_transcription
-            print_pyobj_to_json(pyobj, json_path)
-            form_image.status = 'm'
-            form_image.save()
-            return HttpResponse("hello")
-    else:
-        return HttpResponseBadRequest("Only post requests please.")
+
+#def save_transcriptions(request):
+#    c = {}
+#    c.update(csrf(request))
+#    if request.method == 'POST': # If the form has been submitted...
+#        row_dict = group_by_prefix(request.POST)
+#        for formImageId, transcription in row_dict.items():
+#            form_image = FormImage.objects.get(id=formImageId)
+#            json_path = os.path.join(form_image.output_path, 'output.json')
+#            if not os.path.exists(json_path):
+#                raise Exception('No json for form image')
+#            fp = codecs.open(json_path, mode="r", encoding="utf-8")
+#            pyobj = json.load(fp, encoding='utf-8')#This is where we load the json output
+#            fp.close()
+#            for field in pyobj.get('fields'):
+#                field_transcription = transcription.get(field['name'])
+#                if field_transcription:
+#                    field['transcription'] = field_transcription
+#            print_pyobj_to_json(pyobj, json_path)
+#            form_image.status = 'm'
+#            form_image.save()
+#            return HttpResponse("hello")
+#    else:
+#        return HttpResponseBadRequest("Only post requests please.")
