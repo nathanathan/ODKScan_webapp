@@ -4,6 +4,7 @@ from django.http import HttpResponseRedirect
 import json, codecs
 import sys, os, tempfile
 
+#Deprecated
 def process_json_output(pyobj):
     """
     Modifies segment image paths and sizes so it is easy to use them in the transcribe.html template.
@@ -23,7 +24,7 @@ def process_json_output(pyobj):
             #segment['height_inches'] = float(segment_height) / dpi
     return pyobj
 
-def transcribe(modeladmin, request, queryset):
+def renderTableView(modeladmin, request, queryset, autofill, showSegs):
     form_template = None
     json_outputs = []
     for formImage in queryset:
@@ -64,9 +65,70 @@ def transcribe(modeladmin, request, queryset):
                  'json_template':json_template,
                  'json_outputs':json_outputs,
                  'user':request.user,
+                 'autofill':True,
+                 'showSegs':True,
+                 })
+    return t.render(c)
+
+def transcribe(modeladmin, request, queryset):
+    return HttpResponse(renderTableView(modeladmin, request, queryset, True, True))
+transcribe.short_description = "Transcribe selected forms."
+
+def transcribe(modeladmin, request, queryset):
+    return HttpResponse(renderTableView(modeladmin, request, queryset, True, False))
+transcribeNoImages.short_description = "Transcribe (no images)"
+
+def transcribeNoAutofill(modeladmin, request, queryset):
+    return HttpResponse(renderTableView(modeladmin, request, queryset, False, True))
+transcribeNoAutofill.short_description = "Transcribe (no autofill)"
+
+#TODO: Pass it getparams
+def transcribeFormView(modeladmin, request, queryset):
+    form_template = None
+    json_outputs = []
+    formImage = queryset[0]
+    json_path = os.path.join(formImage.output_path, 'output.json')
+
+    user_json_path = os.path.join(formImage.output_path, 'users', str(request.user), 'output.json')
+    if not os.path.exists(user_json_path):
+        try:
+            os.makedirs(os.path.dirname(user_json_path))
+        except:
+            pass
+        import shutil
+        shutil.copyfile(json_path, user_json_path)
+    json_path = user_json_path
+    
+    if formImage.status == 'f':
+        raise Exception("You cannot transcribe a finalized from.")
+    if not os.path.exists(json_path):
+        continue
+    if form_template is None:
+        form_template = formImage.template
+    elif form_template.name != formImage.template.name:
+        raise Exception("Mixed templates: " + form_template.name + " and " + formImage.template.name)
+    fp = codecs.open(json_path, mode="r", encoding="utf-8")
+    pyobj = json.load(fp, encoding='utf-8')#This is where we load the json output
+    pyobj['formImage'] = formImage
+    process_json_output(pyobj)#TODO: Ideally this would take place at processing time
+    pyobj['outputDir'] = os.path.basename(formImage.output_path)
+    json_outputs.append(pyobj)
+    #print >>sys.stderr, json.dumps(pyobj, ensure_ascii=False, indent=4)
+    if form_template is None:
+        raise Exception("no template")
+    form_template_fp = codecs.open(form_template.json.path, mode="r", encoding="utf-8")
+    json_template = json.load(form_template_fp, encoding='utf-8')
+    t = loader.get_template('formView.html')
+    c = RequestContext(request, {
+                 'json_template_name':form_template.name,
+                 'json_template':json_template,
+                 'json_outputs':json_outputs,
+                 'user':request.user,
+                 'autofill':False,
+                 'showSegs':False,
                  })
     return HttpResponse(t.render(c))
-transcribe.short_description = "Transcribe selected forms."
+transcribeFormView.short_description = "Transcribe (formView)"
 
 def finalize(modeladmin, request, queryset):
     """

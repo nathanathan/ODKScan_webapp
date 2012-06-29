@@ -54,10 +54,12 @@
 							name="{{json_output.formImage.id}}-{{field.name}}">
 								{% for item in field.segments.0.items %}
 									<option value="{{item.value}}"
-									{% if field.transcription %}{% comment %} Empty string? {% endcomment %}
-										{% if item.value in field.transcription %}selected{% endif %}
-									{% else %}
-										{% if item.value in field.value %}selected{% endif %}
+									{% if autofill %}
+										{% if field.transcription %}{% comment %} Empty string? {% endcomment %}
+											{% if item.value in field.transcription %}selected{% endif %}
+										{% else %}
+											{% if item.value in field.value %}selected{% endif %}
+										{% endif %}
 									{% endif %}
 									>
 									{% firstof item.label item.value %}
@@ -65,10 +67,11 @@
 								{% endfor %}
 							</select>
 						{% else %}
-							<input name="{{json_output.formImage.id}}-{{field.name}}" value="{% firstof field.transcription field.value %}"></input>
+							<input name="{{json_output.formImage.id}}-{{field.name}}" value="{% if autofill %}{% firstof field.transcription field.value %}{% endif %}"></input>
 						{% endif %}
 						<br />
 						<div class="segments">
+						{% if showSegs %}
 						{% for segment in field.segments %}
 							{% comment %} Not sure if this scaling technique works everywhere. {% endcomment %}
 							<div class="segment-container">
@@ -79,6 +82,7 @@
 								</a>
 							</div>
 						{% endfor %}
+						{% endif %}
 						</div>
 					</td>
 				{% endif %}
