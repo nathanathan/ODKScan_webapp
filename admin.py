@@ -1,4 +1,4 @@
-from ODKScan_webapp.models import Template, FormImage
+from ODKScan_webapp.models import Template, FormImage, LogItem
 import ODKScan_webapp.actions as actions
 from django.contrib import admin
 from django.conf import settings
@@ -17,6 +17,9 @@ def process_json_output(filepath):
     fp = codecs.open(filepath, mode="r", encoding="utf-8")
     pyobj = json.load(fp, encoding='utf-8')#This is where we load the json output
     for field in pyobj['fields']:
+        if field['type'] is 'select':
+            #This is because xforms use space to delimit options while the jquery val function uses commas
+            field['value'] = field['value'].replace(' ', ',')
         for segment in field['segments']:
             #Modify path
             image_path = segment.get('image_path')
@@ -48,7 +51,13 @@ class FormImageAdmin(admin.ModelAdmin):
     fields = ('image', 'template', 'error_message',)
     readonly_fields = ('error_message',) #TODO: Only display error if it exists
     #formfield_overrides = { models.ImageField: {'widget': AdminImageWidget}}
-    actions = [actions.transcribe, actions.transcribeNoImages, actions.transcribeNoAutofill, actions.transcribeFormView, actions.finalize, actions.generate_csv]
+    actions = [actions.transcribe,
+               actions.transcribeNoImages,
+               actions.transcribeNoAutofill,
+               actions.transcribeNoEverything,
+               actions.transcribeFormView,
+               actions.finalize,
+               actions.generate_csv]
 
     def filename(self, obj):
         return os.path.split(obj.image.name)[1]
@@ -81,5 +90,9 @@ class FormImageAdmin(admin.ModelAdmin):
         else:
             obj.status = 'e'
         obj.save()
-        
 admin.site.register(FormImage, FormImageAdmin)
+
+class LogItemAdmin(admin.ModelAdmin):
+    pass
+admin.site.register(LogItem, LogItemAdmin)
+

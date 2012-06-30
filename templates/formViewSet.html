@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Transcription view</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <!-- Le styles -->
+    <link href="/static/transcription/assets/css/bootstrap.css" rel="stylesheet">
+    <link href="/static/transcription/tableView.css" rel="stylesheet">
+    
+    <link href="/static/transcription/chosen/chosen/chosen.css" rel="stylesheet">
+    
+  </head>
+
+  <body>
+  	<ol>
+	    {% for json_output in json_outputs %}
+	    	<li>
+				<a href="/formView?formLocation=/media/{{json_output.outputDir}}/&formId={{json_output.form_id}}&user={{user}}">
+					<img 
+					src="/media/{{json_output.outputDir}}/aligned.jpg"
+					style="width:4in;" />
+				</a>
+			</li>
+		{% empty %}
+			<p>No output available.</p>
+	    {% endfor %}
+	</ol>
+	<script src="/static/transcription/assets/js/jquery.js"></script>
+    <script src="/static/djangoCSRF.js" type="text/javascript"></script>
+    <script src="/static/transcription/chosen/chosen/chosen.jquery.min.js" type="text/javascript"></script>
+  </body>
+</html>

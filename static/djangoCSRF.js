@@ -37,33 +37,40 @@ jQuery(document).ajaxSend(function(event, xhr, settings) {
 });
 
 function saveModified(callback){
-	var groupedParams = {};
-	var modArray = $('.modified').serializeArray();
-	for(i in modArray){
-		var mod = modArray[i];
-		if(mod.name in groupedParams){
-			groupedParams[mod.name] += ', ' + mod.value;
-		} else {
-			groupedParams[mod.name] = mod.value;
-		}
-	}
-	console.log($.param(groupedParams));
-	$.post("/save_transcription/", $.param(groupedParams),
+	$.post("/save_transcription/", $('.modified').serialize(),
 		function(){
 			console.log('saved');
 			$('.modified').removeClass('modified');
 			callback();
 		});
 }
-function modified(){
+function modified(e){
     $(this).addClass('modified');
 	$('.save').attr("disabled", false).text('save');
+	
+	//for logging:
+    var arr = $(this).attr('name').split('-');
+    var params = {
+	    formImage : arr[0],
+	    view : new Date().toString(),//'table???',
+	    fieldName : arr[1],
+	    previousValue : new Date().toString(),//'??',
+	    newValue : $(this).val()
+    };
+    $.ajax({
+	  url: "/log/",
+	  type: "POST",
+	  data: params,
+	  cache: false
+	}).fail(function( xhr ) {
+		$('body').replaceWith($('<pre>').text(xhr.responseText));
+	});
 }
 jQuery(function($) {
 	$("form").submit(function(e) {
-	    	e.preventDefault();
-	    	console.log('submit');
-	    	$('.save').attr("disabled", true).text('saving...');
-	    	saveModified(function(){$('.save').attr("disabled", true).text('saved');});
+    	e.preventDefault();
+    	console.log('submit');
+    	$('.save').attr("disabled", true).text('saving...');
+    	saveModified(function(){$('.save').attr("disabled", true).text('saved');});
 	});
 });

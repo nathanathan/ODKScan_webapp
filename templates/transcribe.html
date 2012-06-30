@@ -18,7 +18,7 @@
   <body>
   	<form action="/save_transcription/" method="post">{% csrf_token %}
   		<div style="position:fixed;background-color:white;width:100%;">
-			<h1 style="float:left;">{{json_template_name}}</h1>
+			<h1 style="float:left;">{{template_name}}</h1>
 			<button class="btn save" type="submit" style="float:right;">
 				Save
 			</button>
@@ -51,7 +51,7 @@
 							{% if field.type == "select" %}
 							multiple
 							{% endif %}
-							name="{{json_output.formImage.id}}-{{field.name}}">
+							name="{{json_output.form_id}}-{{field.name}}">
 								{% for item in field.segments.0.items %}
 									<option value="{{item.value}}"
 									{% if autofill %}
@@ -67,7 +67,7 @@
 								{% endfor %}
 							</select>
 						{% else %}
-							<input name="{{json_output.formImage.id}}-{{field.name}}" value="{% if autofill %}{% firstof field.transcription field.value %}{% endif %}"></input>
+							<input name="{{json_output.form_id}}-{{field.name}}" value="{% if autofill %}{% firstof field.transcription field.value %}{% endif %}"></input>
 						{% endif %}
 						<br />
 						<div class="segments">
@@ -75,7 +75,7 @@
 						{% for segment in field.segments %}
 							{% comment %} Not sure if this scaling technique works everywhere. {% endcomment %}
 							<div class="segment-container">
-								<a href="/formView?segment={{segment.name}}&formLocation=/media/{{json_output.outputDir}}/&formId={{json_output.formImage.id}}&user={{user}}" target="_blank">
+								<a href="/formView?segment={{segment.name}}&formLocation=/media/{{json_output.outputDir}}/&formId={{json_output.form_id}}&user={{user}}" target="_blank">
 								<img 
 								src="/media/{{json_output.outputDir}}/segments/{{segment.name}}.jpg"
 								style="height:{{segment.height_inches}}in; width:{{segment.width_inches}}in;" />

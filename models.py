@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 import os
 
 #TODO: At the moment templates (and maybe form images) can only be saved once.
@@ -45,3 +46,14 @@ class FormImage(models.Model):
     def _get_output_path(self):
         return os.path.dirname(os.path.dirname(self.image.path))
     output_path = property(_get_output_path)
+    
+    
+#For logging:
+class LogItem(models.Model):
+    user = models.ForeignKey(User, blank=True, null=True)
+    formImage = models.ForeignKey(FormImage)
+    view = models.CharField(max_length=200)
+    fieldName = models.CharField(max_length=200)
+    previousValue = models.CharField(max_length=200)
+    newValue = models.CharField(max_length=200)
+    changeTime = models.DateTimeField(auto_now=True)
