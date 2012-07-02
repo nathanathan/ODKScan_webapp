@@ -4,12 +4,37 @@ from django.http import HttpResponseRedirect
 import json, codecs
 import sys, os, tempfile
 
-#Deprecated
-def process_json_output(pyobj):
+##Deprecated
+#def process_json_output(pyobj):
+#    """
+#    Modifies segment image paths and sizes so it is easy to use them in the transcribe.html template.
+#    """
+#    for field in pyobj['fields']:
+#        for segment in field['segments']:
+#            #Modify path
+#            image_path = segment.get('image_path')
+#            if not image_path: continue
+#            segment['name'] = os.path.basename(image_path.split("media")[1]).split(".jpg")[0]
+#            #Modify image size
+#            dpi = 100.0 #A guess for dots per inch
+#            segment_width = segment.get("segment_width", field.get("segment_width", pyobj.get("segment_width")))
+#            segment_height = segment.get("segment_height", field.get("segment_height", pyobj.get("segment_height")))
+#            if not segment_width or not segment_height: continue
+#            #segment['width_inches'] = float(segment_width) / dpi
+#            #segment['height_inches'] = float(segment_height) / dpi
+#    return pyobj
+
+def process_json_output(filepath):
     """
     Modifies segment image paths and sizes so it is easy to use them in the transcribe.html template.
     """
+    import json, codecs
+    fp = codecs.open(filepath, mode="r", encoding="utf-8")
+    pyobj = json.load(fp, encoding='utf-8')#This is where we load the json output
     for field in pyobj['fields']:
+        if field['type'] is 'select':
+            #This is because xforms use space to delimit options while the jquery val function uses commas
+            field['value'] = field['value'].replace(' ', ',')
         for segment in field['segments']:
             #Modify path
             image_path = segment.get('image_path')
@@ -23,6 +48,37 @@ def process_json_output(pyobj):
             #segment['width_inches'] = float(segment_width) / dpi
             #segment['height_inches'] = float(segment_height) / dpi
     return pyobj
+
+def process_forms(modeladmin, request, queryset):
+        #This is where we make the call to ODKScan core
+        import subprocess
+        #TODO: Move APP_ROOT?
+        APP_ROOT = os.path.dirname(__file__)
+        
+        for obj in queryset:
+            if not obj.status or obj.status == 'e':
+                #print >>sys.stderr, obj.output_path
+                #This blocks, for scaling we should add a "processing" status and do it asyncronously.
+                stdoutdata, stderrdata = subprocess.Popen(['./ODKScan.run',
+                                  os.path.dirname(obj.template.image.path) + '/',
+                                  obj.image.path,
+                                  obj.output_path
+                                  ],
+                    cwd=os.path.join(APP_ROOT,
+                                     'ODKScan-core'),
+                    env={'LD_LIBRARY_PATH':'/usr/local/lib'}, #TODO: This could cause problems on other systems, document or fix
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE).communicate()
+                print >>sys.stdout, stdoutdata
+                obj.error_message = stderrdata
+                json_path = os.path.join(obj.output_path, 'output.json')
+                if os.path.exists(json_path):
+                    process_json_output(json_path)
+                    obj.status = 'p'
+                else:
+                    obj.status = 'e'
+                obj.save()
+process_forms.short_description = "Process selected forms."
 
 def renderTableView(modeladmin, request, queryset, autofill, showSegs):
     form_template = None
@@ -48,7 +104,7 @@ def renderTableView(modeladmin, request, queryset, autofill, showSegs):
             pyobj = json.load(fp, encoding='utf-8')#This is where we load the json output
             fp.close()
             pyobj['form_id'] = int(formImage.id)
-            process_json_output(pyobj)#TODO: Ideally this would take place at processing time
+            #process_json_output(pyobj)#TODO: Ideally this would take place at processing time
             pyobj['outputDir'] = os.path.basename(formImage.output_path)
             pyobj['templateName'] = form_template.name
             pyobj['userName'] = str(request.user)

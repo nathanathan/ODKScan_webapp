@@ -46,14 +46,19 @@ class FormImage(models.Model):
     def _get_output_path(self):
         return os.path.dirname(os.path.dirname(self.image.path))
     output_path = property(_get_output_path)
-    
-    
+
 #For logging:
 class LogItem(models.Model):
     user = models.ForeignKey(User, blank=True, null=True)
-    formImage = models.ForeignKey(FormImage)
-    view = models.CharField(max_length=200)
-    fieldName = models.CharField(max_length=200)
-    previousValue = models.CharField(max_length=200)
-    newValue = models.CharField(max_length=200)
-    changeTime = models.DateTimeField(auto_now=True)
+    url = models.CharField(max_length=1000, null=True)#Just to be sure nothing gets left out.
+    formImage = models.ForeignKey(FormImage, null=True)
+    view = models.CharField(max_length=200, null=True)
+    fieldName = models.CharField(max_length=200, null=True)
+    previousValue = models.CharField(max_length=200, null=True)
+    newValue = models.CharField(max_length=200, null=True)
+    activity = models.CharField(max_length=200, null=True)
+    forms = models.CharField(max_length=200, null=True)
+    segment = models.CharField(max_length=200, null=True)
+    timestamp = models.DateTimeField(auto_now=True, null=True)
+    
+    

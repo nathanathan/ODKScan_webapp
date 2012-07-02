@@ -46,6 +46,11 @@ def save_transcriptions(request):
     c = {}
     c.update(csrf(request))
     if request.method == 'POST': # If the form has been submitted...
+        #Logging:
+        LogItem.create(user=request.user,
+                       activity='save_transcriptions',
+                       forms=','.join(request.POST.keys())
+                       ).save()
         row_dict = group_by_prefix(query_dict_to_dict(request.POST))
         for formImageId, transcription in row_dict.items():
             form_image = FormImage.objects.get(id=formImageId)
@@ -81,9 +86,11 @@ def log(request):
     c.update(csrf(request))
     if request.method == 'POST': # If the form has been submitted...
         li_params = query_dict_to_dict(request.POST)
+        
         #print >>sys.stderr, li_params
         li_params['user'] = request.user
-        li_params['formImage'] = FormImage.objects.get(id=li_params['formImage'])
+        if 'formImage' in li_params:
+            li_params['formImage'] = FormImage.objects.get(id=li_params['formImage'])
         log_item = LogItem(**li_params)
         log_item.save()
         return HttpResponse("hi")

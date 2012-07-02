@@ -51,10 +51,10 @@ function modified(e){
 	//for logging:
     var arr = $(this).attr('name').split('-');
     var params = {
+    	url : String(window.location),
 	    formImage : arr[0],
-	    view : new Date().toString(),//'table???',
+	    view : window.location.pathname,
 	    fieldName : arr[1],
-	    previousValue : new Date().toString(),//'??',
 	    newValue : $(this).val()
     };
     $.ajax({

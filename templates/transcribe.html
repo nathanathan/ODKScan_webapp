@@ -75,11 +75,14 @@
 						{% for segment in field.segments %}
 							{% comment %} Not sure if this scaling technique works everywhere. {% endcomment %}
 							<div class="segment-container">
-								<a href="/formView?segment={{segment.name}}&formLocation=/media/{{json_output.outputDir}}/&formId={{json_output.form_id}}&user={{user}}" target="_blank">
 								<img 
-								src="/media/{{json_output.outputDir}}/segments/{{segment.name}}.jpg"
-								style="height:{{segment.height_inches}}in; width:{{segment.width_inches}}in;" />
-								</a>
+								class="segment"
+								href="/formView?segment={{field.name}}_image_{{forloop.counter0}}&formLocation=/media/{{json_output.outputDir}}/&formId={{json_output.form_id}}&user={{user}}"
+								src="/media/{{json_output.outputDir}}/segments/{{field.name}}_image_{{forloop.counter0}}.jpg"
+								/>
+							{% for item in field.segments.0.items %}
+							<div style="position:absolute;left:{{item.item_x}}px;top:{{item.item_y}}px;">{% firstof item.label item.value %}</div>
+							{% endfor %}
 							</div>
 						{% endfor %}
 						{% endif %}
