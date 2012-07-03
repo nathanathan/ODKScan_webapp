@@ -60,5 +60,16 @@ class LogItem(models.Model):
     forms = models.CharField(max_length=200, null=True)
     segment = models.CharField(max_length=200, null=True)
     timestamp = models.DateTimeField(auto_now=True, null=True)
-    
-    
+
+LOCATIONS = (
+    ('s', 'Seattle'),
+    ('i', 'India'),
+)
+GENDERS = (
+    ('m', 'Male'),
+    ('f', 'Female'),
+)  
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, primary_key=True)
+    location = models.CharField(max_length=1, choices=LOCATIONS)
+    gender = models.CharField(max_length=1, choices=GENDERS)

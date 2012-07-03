@@ -41,10 +41,10 @@ def process_json_output(filepath):
             if not image_path: continue
             segment['name'] = os.path.basename(image_path.split("media")[1]).split(".jpg")[0]
             #Modify image size
-            dpi = 100.0 #A guess for dots per inch
-            segment_width = segment.get("segment_width", field.get("segment_width", pyobj.get("segment_width")))
-            segment_height = segment.get("segment_height", field.get("segment_height", pyobj.get("segment_height")))
-            if not segment_width or not segment_height: continue
+            #dpi = 100.0 #A guess for dots per inch
+            #segment_width = segment.get("segment_width", field.get("segment_width", pyobj.get("segment_width")))
+            #segment_height = segment.get("segment_height", field.get("segment_height", pyobj.get("segment_height")))
+            #if not segment_width or not segment_height: continue
             #segment['width_inches'] = float(segment_width) / dpi
             #segment['height_inches'] = float(segment_height) / dpi
     return pyobj
@@ -73,7 +73,7 @@ def process_forms(modeladmin, request, queryset):
                 obj.error_message = stderrdata
                 json_path = os.path.join(obj.output_path, 'output.json')
                 if os.path.exists(json_path):
-                    process_json_output(json_path)
+                    process_json_output(json_path)#Not sure I need this.
                     obj.status = 'p'
                 else:
                     obj.status = 'e'
@@ -104,7 +104,6 @@ def renderTableView(modeladmin, request, queryset, autofill, showSegs):
             pyobj = json.load(fp, encoding='utf-8')#This is where we load the json output
             fp.close()
             pyobj['form_id'] = int(formImage.id)
-            #process_json_output(pyobj)#TODO: Ideally this would take place at processing time
             pyobj['outputDir'] = os.path.basename(formImage.output_path)
             pyobj['templateName'] = form_template.name
             pyobj['userName'] = str(request.user)
@@ -200,12 +199,10 @@ def transcribeFormView(modeladmin, request, queryset):
             pyobj = json.load(fp, encoding='utf-8')#This is where we load the json output
             fp.close()
             pyobj['form_id'] = int(formImage.id)
-            process_json_output(pyobj)#TODO: Ideally this would take place at processing time
             pyobj['outputDir'] = os.path.basename(formImage.output_path)
             pyobj['templateName'] = form_template.name
             pyobj['userName'] = str(request.user)
-            pyobj['autofill'] = autofill
-            pyobj['showSegs'] = showSegs
+            pyobj['formView'] = True
             from ODKScan_webapp.views import print_pyobj_to_json
             print_pyobj_to_json(pyobj, user_json_path)
         json_path = user_json_path

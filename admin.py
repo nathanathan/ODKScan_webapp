@@ -10,6 +10,46 @@ import os, sys
 
 
 
+from django.utils.translation import ugettext_lazy as _
+from django.contrib.admin import SimpleListFilter
+
+class CompleteFilter(SimpleListFilter):
+    # Human-readable title which will be displayed in the
+    # right admin sidebar just above the filter options.
+    title = _('Transcribed')
+
+    # Parameter for the filter that will be used in the URL query.
+    parameter_name = 'transcribed'
+
+    def lookups(self, request, model_admin):
+        """
+        Returns a list of tuples. The first element in each
+        tuple is the coded value for the option that will
+        appear in the URL query. The second element is the
+        human-readable name for the option that will appear
+        in the right sidebar.
+        """
+        return (
+            ('transcribed', _('transcribed')),
+            ('untranscribed', _('untranscribed')),
+        )
+
+    def queryset(self, request, queryset):
+        """
+        Returns the filtered queryset based on the value
+        provided in the query string and retrievable via
+        `self.value()`.
+        """
+        ##This function is really terrible code by the way, and for any amount of scaling should be redone
+        def isTranscribed(form_image):
+            json_path = os.path.join(form_image.output_path, 'users', str(request.user), 'output.json')
+            return os.path.exists(json_path)
+        if self.value() == 'transcribed':
+            return queryset.filter(pk__in=[x.pk for x in list(queryset) if isTranscribed(x)])
+        if self.value() == 'untranscribed':
+            return queryset.exclude(pk__in=[x.pk for x in list(queryset) if isTranscribed(x)])
+
+
 class FormImageInline(admin.TabularInline):
     fields = ('image', 'template',)
     model = FormImage
@@ -22,7 +62,7 @@ admin.site.register(Template, TemplateAdmin)
 
 class FormImageAdmin(admin.ModelAdmin):
     list_display = ['filename', 'upload_time', 'status',]
-    list_filter = ('upload_time', 'status', 'template')
+    list_filter = ('upload_time', 'status', 'template', CompleteFilter,)
     fields = ('image', 'template', 'error_message',)
     readonly_fields = ('error_message',) #TODO: Only display error if it exists
     #formfield_overrides = { models.ImageField: {'widget': AdminImageWidget}}
@@ -47,3 +87,20 @@ class LogItemAdmin(admin.ModelAdmin):
     pass
 admin.site.register(LogItem, LogItemAdmin)
 
+
+
+#For user extensions
+from ODKScan_webapp.models import UserProfile
+from django.contrib.auth.admin import UserAdmin
+from django.contrib.auth.models import User
+class ProfileInline(admin.StackedInline):
+    model = UserProfile
+    fk_name = 'user'
+    max_num = 1
+
+
+class CustomUserAdmin(UserAdmin):
+    inlines = [ProfileInline,]
+
+admin.site.unregister(User)
+admin.site.register(User, CustomUserAdmin)
