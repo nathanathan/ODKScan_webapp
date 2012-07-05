@@ -52,6 +52,7 @@
 							multiple
 							{% endif %}
 							name="{{json_output.form_id}}-{{field.name}}">
+								<option value>
 								{% for item in field.segments.0.items %}
 									<option value="{{item.value}}"
 									{% if autofill %}
