@@ -93,14 +93,14 @@ admin.site.register(LogItem, LogItemAdmin)
 from ODKScan_webapp.models import UserProfile
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
-class ProfileInline(admin.StackedInline):
+class ProfileInline(admin.ModelAdmin):#admin.StackedInline):
     model = UserProfile
     fk_name = 'user'
-    max_num = 1
+    #max_num = 1
+admin.site.register(UserProfile, ProfileInline)
 
-
-class CustomUserAdmin(UserAdmin):
-    inlines = [ProfileInline,]
-
-admin.site.unregister(User)
-admin.site.register(User, CustomUserAdmin)
+#class CustomUserAdmin(UserAdmin):
+#    inlines = [ProfileInline,]
+#
+#admin.site.unregister(User)
+#admin.site.register(User, CustomUserAdmin)
