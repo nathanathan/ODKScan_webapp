@@ -47,7 +47,7 @@ def save_transcriptions(request):
     c.update(csrf(request))
     if request.method == 'POST': # If the form has been submitted...
         #Logging:
-        LogItem.create(user=request.user,
+        LogItem.objects.create(user=request.user,
                        activity='save_transcriptions',
                        forms=','.join(request.POST.keys())
                        ).save()
