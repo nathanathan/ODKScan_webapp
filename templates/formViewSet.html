@@ -15,7 +15,9 @@
         
 <style media="screen" type="text/css">
 .finBtn{
-	width:100%;
+	position:fixed;
+	top:50px;
+	left:15px;
 }
 </style>
 
@@ -36,7 +38,7 @@
 		    {% endfor %}
 		</ol>
 	</div>
-	<button class='finBtn'></button>
+	<button class='btn btn-large finBtn'>Finish</button>
 	<iframe width='100%' height='1200px' scrolling="no" frameborder=0>
 	</iframe>
 	<script src="/static/transcription/assets/js/jquery.js"></script>
@@ -49,7 +51,7 @@
     	var $li = $(this).parent();
     	$('.active').removeClass('active');
     	$li.addClass('active');
-    	var $finBtn = $('<button>').addClass('finBtn').text('Finish');
+    	var $finBtn = $('<button class="btn btn-large finBtn">').text('Finish');
     	$finBtn.click(function(){
     		$li.removeClass('active');
     		$li.children().addClass('alert');

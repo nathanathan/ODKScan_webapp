@@ -46,7 +46,11 @@ class FormImage(models.Model):
     def _get_output_path(self):
         return os.path.dirname(os.path.dirname(self.image.path))
     output_path = property(_get_output_path)
-
+    def __str__(self):
+        return self.__unicode__()
+    def __unicode__(self):
+        return os.path.splitext(os.path.basename(self.image.name))[0]
+    
 #For logging:
 class LogItem(models.Model):
     user = models.ForeignKey(User, blank=True, null=True)

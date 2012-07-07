@@ -13,6 +13,19 @@
     
     <link href="/static/transcription/chosen/chosen/chosen.css" rel="stylesheet">
     
+<style media="screen" type="text/css">
+.finBtn{
+	width:100%;
+}
+.item-overlay{
+	opacity:0.0;
+}
+.item-overlay:hover{
+	opacity:1.0;
+	background-color:blue;
+}
+</style>
+
   </head>
 
   <body>
@@ -26,6 +39,7 @@
 		<h1>_</h1>
 		<table class="table table-striped table-bordered">
 		<tr>
+		<th>Image Name</th>
 		{% for field in json_template.fields %}
 			{% if not field.mask %}
 				{% if field.label %}
@@ -43,6 +57,7 @@
 		</tr>
 	    {% for json_output in json_outputs %}
 			<tr>
+			<td>{{json_output.imageName}}</td>
 			{% for field in json_output.fields %}
 				{% if not field.mask %}
 					<td class="{{field.name}}">
@@ -74,15 +89,16 @@
 						<div class="segments">
 						{% if showSegs %}
 						{% for segment in field.segments %}
-							{% comment %} Not sure if this scaling technique works everywhere. {% endcomment %}
 							<div class="segment-container">
 								<img 
 								class="segment"
+								formId="{{json_output.form_id}}"
+								fieldName="{{field.name}}"
 								href="/formView?segment={{field.name}}_image_{{forloop.counter0}}&formLocation=/media/{{json_output.outputDir}}/&formId={{json_output.form_id}}&user={{user}}"
 								src="/media/{{json_output.outputDir}}/segments/{{field.name}}_image_{{forloop.counter0}}.jpg"
 								/>
 							{% for item in field.segments.0.items %}
-							<div style="position:absolute;left:{{item.item_x}}px;top:{{item.item_y}}px;">{% firstof item.label item.value %}</div>
+								<div class='label item-overlay' style="position:absolute;left:{{item.item_x}}px;top:{{item.item_y}}px;">{% firstof item.label item.value %}</div>
 							{% endfor %}
 							</div>
 						{% endfor %}

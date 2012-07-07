@@ -62,7 +62,7 @@ admin.site.register(Template, TemplateAdmin)
 
 class FormImageAdmin(admin.ModelAdmin):
     list_display = ['filename', 'upload_time', 'status',]
-    list_filter = ('upload_time', 'status', 'template', CompleteFilter,)
+    list_filter = (CompleteFilter, 'status', 'template', )#'upload_time', 
     fields = ('image', 'template', 'error_message',)
     readonly_fields = ('error_message',) #TODO: Only display error if it exists
     #formfield_overrides = { models.ImageField: {'widget': AdminImageWidget}}
@@ -84,7 +84,8 @@ class FormImageAdmin(admin.ModelAdmin):
 admin.site.register(FormImage, FormImageAdmin)
 
 class LogItemAdmin(admin.ModelAdmin):
-    pass
+    list_display = ['timestamp', 'user', 'formImage',]
+    list_filter = ('timestamp', 'user', 'formImage',)
 admin.site.register(LogItem, LogItemAdmin)
 
 

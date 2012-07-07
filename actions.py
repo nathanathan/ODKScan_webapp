@@ -105,6 +105,7 @@ def renderTableView(modeladmin, request, queryset, autofill, showSegs):
             fp.close()
             pyobj['form_id'] = int(formImage.id)
             pyobj['outputDir'] = os.path.basename(formImage.output_path)
+            pyobj['imageName'] = str(formImage)
             pyobj['templateName'] = form_template.name
             pyobj['userName'] = str(request.user)
             pyobj['autofill'] = autofill
@@ -200,6 +201,7 @@ def transcribeFormView(modeladmin, request, queryset):
             fp.close()
             pyobj['form_id'] = int(formImage.id)
             pyobj['outputDir'] = os.path.basename(formImage.output_path)
+            pyobj['imageName'] = str(formImage)
             pyobj['templateName'] = form_template.name
             pyobj['userName'] = str(request.user)
             pyobj['formView'] = True
