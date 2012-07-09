@@ -48,11 +48,39 @@
     $('iframe').hide();
     $('a').click(function(e){
     	e.preventDefault();
+		//For logging
+	    var params = {
+	    	activity : "form-view-start",
+	    	url : $(this).attr('href')
+	    };
+	    $.ajax({
+		  url: "/log/",
+		  type: "POST",
+		  data: params,
+		  cache: false
+		}).fail(function( xhr ) {
+			$('body').replaceWith($('<pre>').text(xhr.responseText));
+		});
+    	
     	var $li = $(this).parent();
     	$('.active').removeClass('active');
     	$li.addClass('active');
     	var $finBtn = $('<button class="btn btn-large finBtn">').text('Finish');
     	$finBtn.click(function(){
+			//For logging
+		    var params = {
+		    	activity : "form-view-finish",
+		    	url : $('iframe').attr('src')
+		    };
+		    $.ajax({
+			  url: "/log/",
+			  type: "POST",
+			  data: params,
+			  cache: false
+			}).fail(function( xhr ) {
+				$('body').replaceWith($('<pre>').text(xhr.responseText));
+			});
+			
     		$li.removeClass('active');
     		$li.children().addClass('alert');
     		$('iframe').hide();
