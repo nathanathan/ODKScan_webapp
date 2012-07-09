@@ -56,28 +56,28 @@ def process_forms(modeladmin, request, queryset):
         APP_ROOT = os.path.dirname(__file__)
         
         for obj in queryset:
-            if not obj.status or obj.status == 'e':
-                #print >>sys.stderr, obj.output_path
-                #This blocks, for scaling we should add a "processing" status and do it asyncronously.
-                stdoutdata, stderrdata = subprocess.Popen(['./ODKScan.run',
-                                  os.path.dirname(obj.template.image.path) + '/',
-                                  obj.image.path,
-                                  obj.output_path
-                                  ],
-                    cwd=os.path.join(APP_ROOT,
-                                     'ODKScan-core'),
-                    env={'LD_LIBRARY_PATH':'/usr/local/lib'}, #TODO: This could cause problems on other systems, document or fix
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE).communicate()
-                print >>sys.stdout, stdoutdata
-                obj.error_message = stderrdata
-                json_path = os.path.join(obj.output_path, 'output.json')
-                if os.path.exists(json_path):
-                    process_json_output(json_path)#Not sure I need this.
-                    obj.status = 'p'
-                else:
-                    obj.status = 'e'
-                obj.save()
+            #if not obj.status or obj.status == 'e':
+            #print >>sys.stderr, obj.output_path
+            #This blocks, for scaling we should add a "processing" status and do it asyncronously.
+            stdoutdata, stderrdata = subprocess.Popen(['./ODKScan.run',
+                              os.path.dirname(obj.template.image.path) + '/',
+                              obj.image.path,
+                              obj.output_path
+                              ],
+                cwd=os.path.join(APP_ROOT,
+                                 'ODKScan-core'),
+                env={'LD_LIBRARY_PATH':'/usr/local/lib'}, #TODO: This could cause problems on other systems, document or fix
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE).communicate()
+            print >>sys.stdout, stdoutdata
+            obj.error_message = stderrdata
+            json_path = os.path.join(obj.output_path, 'output.json')
+            if os.path.exists(json_path):
+                process_json_output(json_path)#Not sure I need this.
+                obj.status = 'p'
+            else:
+                obj.status = 'e'
+            obj.save()
 process_forms.short_description = "Process selected forms."
 
 def renderTableView(modeladmin, request, queryset, autofill, showSegs):

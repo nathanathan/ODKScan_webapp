@@ -67,10 +67,10 @@ def save_transcriptions(request):
             print_pyobj_to_json(pyobj, json_path)
             form_image.status = 'm'
             form_image.save()
-            return HttpResponse("hello")
+        return HttpResponse()
     else:
         return HttpResponseBadRequest("Only post requests please.")
-
+    
 def form_view(request):
     t = loader.get_template('formView.html')
     c = RequestContext(request, {})
