@@ -1,5 +1,5 @@
 from django.contrib.auth.models import User
-from ODKScan_webapp.models import Template, FormImage, LogItem
+from ODKScan_webapp.models import Template, FormImage, LogItem, UserFromCondition
 from django.http import HttpResponse, HttpResponseBadRequest
 import sys, os, tempfile
 import json, codecs
@@ -144,6 +144,27 @@ def load_json_to_pyobj(path):
     fp.close()
     return pyobj
 
+def fillUserFromCondition(request):
+    """
+    This is really REALLY slow, would be better to iterate though users and forms.
+    """
+    for logItem in LogItem.objects.all():
+        if logItem.formImage:
+            user_dir = os.path.join(logItem.formImage.output_path, 'users')
+            json_path = os.path.join(user_dir, logItem.user.username, 'output.json')
+            pyobj = load_json_to_pyobj(json_path)
+            try:
+                UserFromCondition.objects.create(user=logItem.user,
+                                                 formImage=logItem.formImage,
+                                                 tableView=(not pyobj.get('formView', False)),
+                                                 formView=pyobj.get('formView', False),
+                                                 showSegs=pyobj.get('showSegs', False),
+                                                 autofill=pyobj.get('autofill', False)
+                                                 ).save()
+            except:
+                pass
+    return HttpResponse("done", mimetype="application/json")
+
 def analyse_transcriptions(request):
     fi_dict = {}
     for form_image in FormImage.objects.all():
@@ -153,14 +174,32 @@ def analyse_transcriptions(request):
         if os.path.exists(user_dir):
             user_list = os.listdir(user_dir)
             for user in user_list:
+                userObject = User.objects.get(username=user)
+                #Filter by user properties here
                 json_path = os.path.join(user_dir, user, 'output.json')
                 pyobj = load_json_to_pyobj(json_path)
                 userStats = gen_form_stats(pyobj)
-                userObject = User.objects.get(username=user)
-                startEndStamp = LogItem.objects.filter(user=userObject, formImage=form_image).aggregate(Max('timestamp'), Min('timestamp'))
+                filtered_log_items = LogItem.objects.filter(user=userObject, formImage=form_image)
+                startEndStamp = filtered_log_items.aggregate(Max('timestamp'), Min('timestamp'))
                 if startEndStamp.get('timestamp__max'):
                     userStats['time_spent'] = str(startEndStamp['timestamp__max'] - startEndStamp['timestamp__min'])
-                userStats['fields_logitems'] = LogItem.objects.filter(user=userObject, formImage=form_image).values('fieldName').annotate(modifications=Count('pk'), end=Max('timestamp'), start=Min('timestamp'))
+                #userStats['fields_logitems'] = LogItem.objects.filter(user=userObject, formImage=form_image).values('fieldName').annotate(modifications=Count('pk'), end=Max('timestamp'), start=Min('timestamp'))
+                fieldNames = filtered_log_items.values('fieldName').annotate()
+                backspaces = 0
+                chars_added = 0
+                for fieldName in fieldNames:
+                    previous = None
+                    for log_item in filtered_log_items.filter(fieldName=fieldName['fieldName']).order_by('timestamp').all():
+                        if previous:
+                            cur = log_item.newValue if log_item.newValue else ''
+                            difference = len(cur) - len(previous)
+                            if difference > 0:
+                                chars_added += difference
+                            else:
+                                backspaces -= difference
+                        previous = log_item.newValue
+                userStats['backspaces'] = backspaces
+                userStats['chars_added'] = chars_added
                 user_dict[user] = userStats
         fi_dict[str(form_image)] = user_dict
     t = loader.get_template('analyseTranscriptions.html')
@@ -209,7 +248,7 @@ def add_to_correct_transcription(correct_transcription, transcription):
         possible_values = set(ct_field['values'])
         ct_value = t_field.get('transcription', t_field.get('value'))
         if ct_value:
-            possible_values.add(ct_value)
+            possible_values.add(str(ct_value))
         ct_field['values'] = list(possible_values)
     return correct_transcription
 
@@ -230,5 +269,7 @@ def correct_transcriptions(request):
                 pyobj = load_json_to_pyobj(json_path)
                 add_to_correct_transcription(correct_transcription, pyobj)
         fi_dict[str(form_image)] = correct_transcription
-    return HttpResponse(json.dumps(fi_dict), mimetype="application/json")
+        print_pyobj_to_json(correct_transcription, os.path.join(form_image.output_path, 'corrected.json'))
+    return HttpResponse("done", mimetype="application/json")
+    #return HttpResponse(json.dumps(fi_dict), mimetype="application/json")
 

@@ -140,3 +140,14 @@ class UserProfile(models.Model):
                                null=True, blank=True)
     other_comments = models.TextField(null=True, blank=True)
     location = models.CharField(max_length=1, choices=LOCATIONS)
+
+class UserFromCondition(models.Model):
+    class Meta:
+        unique_together = ['user', 'formImage']
+    user = models.ForeignKey(User)
+    formImage = models.ForeignKey(FormImage)
+    autofill = models.BooleanField()
+    showSegs = models.BooleanField()
+    formView = models.BooleanField()
+    tableView = models.BooleanField()
+    
