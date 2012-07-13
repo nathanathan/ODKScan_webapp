@@ -117,7 +117,8 @@ def levenshtein(s1, s2):
  
     return previous_row[-1]
 
-excluded_users = ['user', 'test1', 'test2', 'test_final', 'T1', 'T2']
+android_excluded_users = ['t7']
+excluded_users = ['user', 'test1', 'test2', 'test_final', 'T1', 'T2'] + android_excluded_users
 
 def load_json_to_pyobj(path):
     fp = codecs.open(path, mode="r", encoding="utf-8")
@@ -341,25 +342,67 @@ def fillUserFormCondition(request):
 
 #Also need to genrate output.json
 def importAndroidData(request):
-import sqlite3, time, os
-conn = sqlite3.connect('/home/nathan/Desktop/log.sqlite')
-c = conn.cursor()
-for id,timestamp,action_type,instance_path,question_path,param1,param2 in c.execute('SELECT * FROM log'):
-    #Make regex to parse report_card_<form>_<user>_showSegs_autofill.xml
-    if action_type == 'text changed'
-        li_params = {
-                    'user' : instance_path,
-                    'url' : instance_path,
-                    'formImage' : instance_path,
-                    'view' : 'android-condition',
-                    'fieldName' : os.path.split(question_path)[1] if question_path else None,
-                    'previousValue' : param1,
-                    'newValue' : param2,
-                    'activity' : 'android-' + action_type,
-                    'timestamp' : time.localtime(timestamp),#int(timestamp)*1./1000),
-                  }
-        print li_params
-        #LogItem.objects.create(**li_params).save()
+    output = ''
+    #Create the log items
+    import sqlite3, time, os, re
+    conn = sqlite3.connect('/home/nathan/Desktop/log.sqlite')
+    c = conn.cursor()
+    file_path_regex = re.compile(r"/sdcard/odk/instances/.*/report_card_(?P<form>\w\d+)_(?P<user>\w\d+)(?P<showSegs>_showSegs)?(?P<autofill>_autofill)?.xml$")
+    for id,timestamp,action_type,instance_path,question_path,param1,param2 in c.execute('SELECT * FROM log'):
+        if not instance_path:
+            continue
+        fp_parse = file_path_regex.search(instance_path)
+        if fp_parse:
+            fp_parse_dict = fp_parse.groupdict()
+            if action_type == 'text changed':
+                showSegs = fp_parse_dict['showSegs'] if fp_parse_dict['showSegs'] else ""
+                autofill = fp_parse_dict['autofill'] if fp_parse_dict['autofill'] else ""
+                user = fp_parse_dict['user']
+                form = fp_parse_dict['form']
+                if user in excluded_users:
+                    continue
+                li_params = {
+                            'user' : User.objects.get(username=user),
+                            'url' : instance_path,
+                            'formImage' : FormImage.objects.get(image__contains='/photo/'+form),
+                            'view' : 'android-condition' + showSegs + autofill,
+                            'fieldName' : os.path.split(question_path)[-1] if question_path else None,
+                            'previousValue' : param1,
+                            'newValue' : param2,
+                            'activity' : 'android-' + action_type,
+                            'timestamp' : time.localtime(int(timestamp)*1./1000),
+                          }
+                LogItem.objects.create(**li_params).save()
+        else:
+            raise Exception("cound not parse: " + str(instance_path))
+    return HttpResponse(output, mimetype="application/json")
         
-importAndroidData(1)
+def generateAndroidOutput(request):
+    output = ''
+    import os, re
+    #Create the output files from the log items
+    view_regex = re.compile(r"^android-condition(?P<showSegs>_showSegs)?(?P<autofill>_autofill)?$")
+    for form_image in FormImage.objects.all():#Filter J forms
+        for user in User.objects.all():
+            if user in excluded_users:
+                continue
+            filtered_li = LogItem.objects.filter(formImage=form_image, user=user,activity='android-text changed')
+            if len(filtered_li) > 0:
+                path_to_initial_json = os.path.join(form_image.output_path, 'output.json')
+                initial_json = load_json_to_pyobj(path_to_initial_json)
+                viewParse = view_regex.search(filtered_li[0].view).groupdict()
+                initial_json['autofill'] = bool(viewParse.get('autofill'))
+                initial_json['showSegs'] = bool(viewParse.get('showSegs'))
+                for field in initial_json['fields']:
+                    ordered_field_li = filtered_li.filter(fieldName=field['name']).order_by('-timestamp')
+                    if len(ordered_field_li) > 0:
+                        field['transcription'] = ordered_field_li[0].newValue
+                    else:
+                        pass
+                user_json_path = os.path.join(form_image.output_path, 'users', user.username, 'output.json')
+                if os.path.exists(user_json_path):
+                    raise Exception('path exists: ' + user_json_path)
+                output += user_json_path + '\n'
+                #print_pyobj_to_json(user_json_path)
+    return HttpResponse(output, mimetype="application/json")
         

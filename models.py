@@ -141,7 +141,7 @@ class UserProfile(models.Model):
     other_comments = models.TextField(null=True, blank=True)
     location = models.CharField(max_length=1, choices=LOCATIONS)
 
-class UserFromCondition(models.Model):
+class UserFormCondition(models.Model):
     class Meta:
         unique_together = ['user', 'formImage']
     user = models.ForeignKey(User)
