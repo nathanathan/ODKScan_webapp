@@ -1,5 +1,5 @@
 from django.contrib.auth.models import User
-from ODKScan_webapp.models import Template, FormImage, LogItem, UserFromCondition
+from ODKScan_webapp.models import Template, FormImage, LogItem, UserFormCondition
 from django.http import HttpResponse, HttpResponseBadRequest
 import sys, os, tempfile
 import json, codecs
@@ -117,26 +117,7 @@ def levenshtein(s1, s2):
  
     return previous_row[-1]
 
-#def get_total_edits(queryset):
-#    for log_item in queryset:
-
-def gen_form_stats(pyobj):
-    stats = {}
-    stats['number_of_fields'] = len(pyobj['fields'])
-    for field in pyobj['fields']:
-        if 'transcription' in field:
-            stats['fields_transcribed'] = stats.get('fields_transcribed', 0) + 1
-            if 'value' in field:
-                if field['value'] == field['transcription']:
-                    stats['fields_transcribed_unmodified'] = stats.get('fields_transcribed_unmodified', 0) + 1
-                else:
-                    stats['fields_transcribed_modified'] = stats.get('fields_transcribed_modified', 0) + 1
-                if 'actual_value' in field:
-                    if field['actual_value'] == field['transcription']:
-                        stats['correct_transcribed_fields'] = stats.get('correct_transcribed_fields', 0) + 1
-                    else:
-                        stats['incorrect_transcribed_fields'] = stats.get('incorrect_transcribed_fields', 0) + 1
-    return stats
+excluded_users = ['user', 'test1', 'test2', 'test_final', 'T1', 'T2']
 
 def load_json_to_pyobj(path):
     fp = codecs.open(path, mode="r", encoding="utf-8")
@@ -144,55 +125,97 @@ def load_json_to_pyobj(path):
     fp.close()
     return pyobj
 
-def fillUserFromCondition(request):
-    """
-    This is really REALLY slow, would be better to iterate though users and forms.
-    """
-    for logItem in LogItem.objects.all():
-        if logItem.formImage:
-            user_dir = os.path.join(logItem.formImage.output_path, 'users')
-            json_path = os.path.join(user_dir, logItem.user.username, 'output.json')
-            pyobj = load_json_to_pyobj(json_path)
-            try:
-                UserFromCondition.objects.create(user=logItem.user,
-                                                 formImage=logItem.formImage,
-                                                 tableView=(not pyobj.get('formView', False)),
-                                                 formView=pyobj.get('formView', False),
-                                                 showSegs=pyobj.get('showSegs', False),
-                                                 autofill=pyobj.get('autofill', False)
-                                                 ).save()
-            except:
-                pass
-    return HttpResponse("done", mimetype="application/json")
+def gen_form_stats(pyobj, ground_truth):
+    accuracy_matrix = {
+                     'correct_transcription' : None,
+                     'incorrect_transcription' : None,
+                     'no_transcription' : None,
+                     }
+    for key in accuracy_matrix.keys():
+        accuracy_matrix[key] = {
+               'correct_autofill' : 0,
+               'incorrect_autofill' : 0,
+               'no_autofill' : 0,
+               }
+    for field, gt_field in zip(pyobj['fields'], ground_truth['fields']):
+        if 'transcription' in field:
+            if field['transcription'] == gt_field['value']:
+                if 'value' in field and pyobj.get('autofill', True):
+                    if field['value'] == gt_field['value']:
+                        accuracy_matrix['correct_transcription']['correct_autofill']+=1
+                    else:
+                        accuracy_matrix['correct_transcription']['incorrect_autofill']+=1
+                else:
+                    accuracy_matrix['correct_transcription']['no_autofill']+=1
+            else:
+                if 'value' in field and pyobj.get('autofill', True):
+                    if field['value'] == gt_field['value']:
+                        accuracy_matrix['incorrect_transcription']['correct_autofill']+=1
+                    else:
+                        accuracy_matrix['incorrect_transcription']['incorrect_autofill']+=1
+                else:
+                    accuracy_matrix['incorrect_transcription']['no_autofill']+=1
+        else:
+            if 'value' in field and pyobj.get('autofill', True):
+                if field['value'] == gt_field['value']:
+                    accuracy_matrix['no_transcription']['correct_autofill']+=1
+                else:
+                    accuracy_matrix['no_transcription']['incorrect_autofill']+=1
+            else:
+                accuracy_matrix['no_transcription']['no_autofill']+=1
+    
+    stats = {
+             'accuracy_matrix' : accuracy_matrix,
+             'number_of_fields' : len(pyobj['fields']),
+             }
+    return stats
+
 
 def analyse_transcriptions(request):
     fi_dict = {}
     for form_image in FormImage.objects.all():
+        ground_truth = load_json_to_pyobj(os.path.join(form_image.output_path, 'corrected.json'))
         user_dir = os.path.join(form_image.output_path, 'users')
         user_list = []
         user_dict = {}
         if os.path.exists(user_dir):
             user_list = os.listdir(user_dir)
             for user in user_list:
+                if user in excluded_users:
+                    continue
                 userObject = User.objects.get(username=user)
                 #Filter by user properties here
                 json_path = os.path.join(user_dir, user, 'output.json')
                 pyobj = load_json_to_pyobj(json_path)
-                userStats = gen_form_stats(pyobj)
+                userStats = gen_form_stats(pyobj, ground_truth)
                 filtered_log_items = LogItem.objects.filter(user=userObject, formImage=form_image)
-                startEndStamp = filtered_log_items.aggregate(Max('timestamp'), Min('timestamp'))
-                if startEndStamp.get('timestamp__max'):
-                    userStats['time_spent'] = str(startEndStamp['timestamp__max'] - startEndStamp['timestamp__min'])
+                condition = UserFormCondition.objects.get(user=userObject, formImage=form_image)
+                if condition.tableView:
+                    userStats['table_view'] = True
+                    #We need to group and average times in this case since it's not necessairily sequencial
+                    #formImages = FormImage.objects.filter(image__contains='/photo/'+str(form_image)[0])
+                    #This query has some added uglyness because in the practice runs the forms of the same name group (i.e. J) aren't all in the same condition
+                    #Perhaps I should just make an exception for them
+                    formImages = UserFormCondition.objects.filter(formImage__image__contains='/photo/'+str(form_image)[0], user=userObject, tableView=True).values('formImage').annotate()
+                    startEndStamp = LogItem.objects.filter(user=userObject, formImage__in=formImages).aggregate(Max('timestamp'), Min('timestamp'))
+                    if startEndStamp.get('timestamp__max'):
+                        userStats['time_spent'] = str((startEndStamp['timestamp__max'] - startEndStamp['timestamp__min'])/4)
+                else:
+                    startEndStamp = filtered_log_items.aggregate(Max('timestamp'), Min('timestamp'))
+                    if startEndStamp.get('timestamp__max'):
+                        userStats['time_spent'] = str(startEndStamp['timestamp__max'] - startEndStamp['timestamp__min'])
                 #userStats['fields_logitems'] = LogItem.objects.filter(user=userObject, formImage=form_image).values('fieldName').annotate(modifications=Count('pk'), end=Max('timestamp'), start=Min('timestamp'))
                 fieldNames = filtered_log_items.values('fieldName').annotate()
                 backspaces = 0
                 chars_added = 0
+                total_lev_distance_traveled = 0
                 for fieldName in fieldNames:
                     previous = None
                     for log_item in filtered_log_items.filter(fieldName=fieldName['fieldName']).order_by('timestamp').all():
                         if previous:
                             cur = log_item.newValue if log_item.newValue else ''
                             difference = len(cur) - len(previous)
+                            total_lev_distance_traveled += abs(levenshtein(cur, previous))
                             if difference > 0:
                                 chars_added += difference
                             else:
@@ -200,8 +223,10 @@ def analyse_transcriptions(request):
                         previous = log_item.newValue
                 userStats['backspaces'] = backspaces
                 userStats['chars_added'] = chars_added
-                user_dict[user] = userStats
-        fi_dict[str(form_image)] = user_dict
+                userStats['total_lev_distance_traveled'] = total_lev_distance_traveled
+                user_dict[str(form_image)] = userStats
+                fi_dict[user] = fi_dict.get(user, {})
+                fi_dict[user].update(user_dict)
     t = loader.get_template('analyseTranscriptions.html')
     c = RequestContext(request, {"formImages" : fi_dict})
     return HttpResponse(t.render(c))
@@ -232,6 +257,18 @@ def analyse_group(request, username=None):
             fi_dict[str(form_image)] = userStats
     return HttpResponse(json.dumps(fi_dict), mimetype="application/json")
 
+def most_common_item(li):
+    hist = {}
+    for item in li:
+        hist[item] = hist.get(item, 0) + 1
+    max_item = None
+    max_occurences = 0
+    for key, value in hist.items():
+        if value > max_occurences:
+            max_occurences = value
+            max_item = key
+    return max_item
+
 def add_to_correct_transcription(correct_transcription, transcription):
     ct_fields = correct_transcription.get('fields')
     if not ct_fields:
@@ -240,24 +277,26 @@ def add_to_correct_transcription(correct_transcription, transcription):
             ct_field = {}
             ct_field['name'] = field['name']
             ct_value = field.get('transcription', field.get('value'))
-            ct_field['values'] = [ct_value] if ct_value else []
+            ct_field['values'] = [str(ct_value)] if ct_value else []
             ct_fields.append(ct_field)
         correct_transcription['fields'] = ct_fields
     for t_field, ct_field in zip(transcription['fields'], ct_fields):
         assert t_field['name'] == ct_field['name']
-        possible_values = set(ct_field['values'])
-        ct_value = t_field.get('transcription', t_field.get('value'))
-        if ct_value:
-            possible_values.add(str(ct_value))
-        ct_field['values'] = list(possible_values)
+        new_value = t_field.get('transcription', t_field.get('value'))
+        if new_value:
+            ct_field['values'].append(str(new_value))
+        ct_field['unique_values'] = list(set(ct_field['values']))
+        ct_field['value'] = most_common_item(ct_field['values'])
+        ct_field['needs_attention'] =  len(ct_field['unique_values']) > 2 or len(ct_field['unique_values']) == 0
     return correct_transcription
-
-excluded_users = ['user', 'test1', 'test2', 'test_final']
 
 def correct_transcriptions(request):
     fi_dict = {}
     for form_image in FormImage.objects.all():
         correct_transcription = {}
+        
+        add_to_correct_transcription(correct_transcription, load_json_to_pyobj(os.path.join(form_image.output_path, 'output.json')))
+        
         user_dir = os.path.join(form_image.output_path, 'users')
         user_list = []
         if os.path.exists(user_dir):
@@ -273,3 +312,54 @@ def correct_transcriptions(request):
     return HttpResponse("done", mimetype="application/json")
     #return HttpResponse(json.dumps(fi_dict), mimetype="application/json")
 
+def fillUserFormCondition(request):
+    fi_dict = {}
+    for form_image in FormImage.objects.all():
+        user_dir = os.path.join(form_image.output_path, 'users')
+        user_list = []
+        user_dict = {}
+        if os.path.exists(user_dir):
+            user_list = os.listdir(user_dir)
+            for user in user_list:
+                if user in excluded_users:
+                    continue
+                userObject = User.objects.get(username=user)
+                #Filter by user properties here
+                json_path = os.path.join(user_dir, user, 'output.json')
+                pyobj = load_json_to_pyobj(json_path)
+                try:
+                    UserFormCondition.objects.create(user=userObject,
+                                                     formImage=form_image,
+                                                     tableView=(not pyobj.get('formView', False)),
+                                                     formView=pyobj.get('formView', False),
+                                                     showSegs=pyobj.get('showSegs', False),
+                                                     autofill=pyobj.get('autofill', False)
+                                                     ).save()
+                except:
+                    pass
+    return HttpResponse("done", mimetype="application/json")
+
+#Also need to genrate output.json
+def importAndroidData(request):
+import sqlite3, time, os
+conn = sqlite3.connect('/home/nathan/Desktop/log.sqlite')
+c = conn.cursor()
+for id,timestamp,action_type,instance_path,question_path,param1,param2 in c.execute('SELECT * FROM log'):
+    #Make regex to parse report_card_<form>_<user>_showSegs_autofill.xml
+    if action_type == 'text changed'
+        li_params = {
+                    'user' : instance_path,
+                    'url' : instance_path,
+                    'formImage' : instance_path,
+                    'view' : 'android-condition',
+                    'fieldName' : os.path.split(question_path)[1] if question_path else None,
+                    'previousValue' : param1,
+                    'newValue' : param2,
+                    'activity' : 'android-' + action_type,
+                    'timestamp' : time.localtime(timestamp),#int(timestamp)*1./1000),
+                  }
+        print li_params
+        #LogItem.objects.create(**li_params).save()
+        
+importAndroidData(1)
+        
