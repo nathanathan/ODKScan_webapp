@@ -13,6 +13,9 @@ def print_pyobj_to_json(pyobj, path=None):
     dump a python nested array/dict structure to the specified file or stdout if no file is specified
     """
     if path:
+        dir, file = os.path.split(path)
+        if not os.path.exists(dir):
+            os.makedirs(dir)
         fp = codecs.open(path, mode="w", encoding="utf-8")
         json.dump(pyobj, fp=fp, ensure_ascii=False)#, indent=4)
         fp.close()
@@ -175,6 +178,9 @@ def gen_form_stats(pyobj, ground_truth):
 def analyse_transcriptions(request):
     fi_dict = {}
     for form_image in FormImage.objects.all():
+        if str(form_image)[0] == 'J':
+            #Filter out practice forms
+            continue
         ground_truth = load_json_to_pyobj(os.path.join(form_image.output_path, 'corrected.json'))
         user_dir = os.path.join(form_image.output_path, 'users')
         user_list = []
@@ -197,11 +203,15 @@ def analyse_transcriptions(request):
                     #formImages = FormImage.objects.filter(image__contains='/photo/'+str(form_image)[0])
                     #This query has some added uglyness because in the practice runs the forms of the same name group (i.e. J) aren't all in the same condition
                     #Perhaps I should just make an exception for them
-                    formImages = UserFormCondition.objects.filter(formImage__image__contains='/photo/'+str(form_image)[0], user=userObject, tableView=True).values('formImage').annotate()
+                    formImages = UserFormCondition.objects.filter(formImage__image__contains='/photo/'+str(form_image)[0],
+                                                                  user=userObject,
+                                                                  tableView=True).values('formImage').annotate()
                     startEndStamp = LogItem.objects.filter(user=userObject, formImage__in=formImages).aggregate(Max('timestamp'), Min('timestamp'))
                     if startEndStamp.get('timestamp__max'):
                         userStats['time_spent'] = str((startEndStamp['timestamp__max'] - startEndStamp['timestamp__min'])/4)
                 else:
+                    if condition.formView:
+                        userStats['form_view'] = True
                     startEndStamp = filtered_log_items.aggregate(Max('timestamp'), Min('timestamp'))
                     if startEndStamp.get('timestamp__max'):
                         userStats['time_spent'] = str(startEndStamp['timestamp__max'] - startEndStamp['timestamp__min'])
@@ -291,6 +301,7 @@ def add_to_correct_transcription(correct_transcription, transcription):
         ct_field['needs_attention'] =  len(ct_field['unique_values']) > 2 or len(ct_field['unique_values']) == 0
     return correct_transcription
 
+
 def correct_transcriptions(request):
     fi_dict = {}
     for form_image in FormImage.objects.all():
@@ -310,7 +321,7 @@ def correct_transcriptions(request):
                 add_to_correct_transcription(correct_transcription, pyobj)
         fi_dict[str(form_image)] = correct_transcription
         print_pyobj_to_json(correct_transcription, os.path.join(form_image.output_path, 'corrected.json'))
-    return HttpResponse("done", mimetype="application/json")
+    return HttpResponse("corrected", mimetype="application/json")
     #return HttpResponse(json.dumps(fi_dict), mimetype="application/json")
 
 def fillUserFormCondition(request):
@@ -331,7 +342,7 @@ def fillUserFormCondition(request):
                 try:
                     UserFormCondition.objects.create(user=userObject,
                                                      formImage=form_image,
-                                                     tableView=(not pyobj.get('formView', False)),
+                                                     tableView=(not pyobj.get('formView', False) and not pyobj.get('android', False)),
                                                      formView=pyobj.get('formView', False),
                                                      showSegs=pyobj.get('showSegs', False),
                                                      autofill=pyobj.get('autofill', False)
@@ -366,15 +377,16 @@ def importAndroidData(request):
                             'url' : instance_path,
                             'formImage' : FormImage.objects.get(image__contains='/photo/'+form),
                             'view' : 'android-condition' + showSegs + autofill,
-                            'fieldName' : os.path.split(question_path)[-1] if question_path else None,
+                            'fieldName' : os.path.split(question_path)[-1][:-3] if question_path else None,
                             'previousValue' : param1,
                             'newValue' : param2,
                             'activity' : 'android-' + action_type,
                             'timestamp' : time.localtime(int(timestamp)*1./1000),
                           }
+                #print question_path
                 LogItem.objects.create(**li_params).save()
         else:
-            raise Exception("cound not parse: " + str(instance_path))
+            raise Exception("Could not parse: " + str(instance_path))
     return HttpResponse(output, mimetype="application/json")
         
 def generateAndroidOutput(request):
@@ -382,7 +394,10 @@ def generateAndroidOutput(request):
     import os, re
     #Create the output files from the log items
     view_regex = re.compile(r"^android-condition(?P<showSegs>_showSegs)?(?P<autofill>_autofill)?$")
-    for form_image in FormImage.objects.all():#Filter J forms
+    for form_image in FormImage.objects.all():
+        if str(form_image)[0] == 'J':
+            #Filter out practice forms
+            continue
         for user in User.objects.all():
             if user in excluded_users:
                 continue
@@ -393,6 +408,9 @@ def generateAndroidOutput(request):
                 viewParse = view_regex.search(filtered_li[0].view).groupdict()
                 initial_json['autofill'] = bool(viewParse.get('autofill'))
                 initial_json['showSegs'] = bool(viewParse.get('showSegs'))
+                initial_json['formView'] = False
+                initial_json['tableView'] = False
+                initial_json['android'] = True
                 for field in initial_json['fields']:
                     ordered_field_li = filtered_li.filter(fieldName=field['name']).order_by('-timestamp')
                     if len(ordered_field_li) > 0:
@@ -403,6 +421,16 @@ def generateAndroidOutput(request):
                 if os.path.exists(user_json_path):
                     raise Exception('path exists: ' + user_json_path)
                 output += user_json_path + '\n'
-                #print_pyobj_to_json(user_json_path)
+                print_pyobj_to_json(initial_json, user_json_path)
     return HttpResponse(output, mimetype="application/json")
         
+def full_pipline(request):
+    """
+    Does all the processing to import data generated on the phone
+    """
+    importAndroidData(request)
+    generateAndroidOutput(request)
+    fillUserFormCondition(request)
+    correct_transcriptions(request)
+    analyse_transcriptions(request)
+    
