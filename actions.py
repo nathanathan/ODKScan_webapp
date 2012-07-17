@@ -3,6 +3,7 @@ from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 import json, codecs
 import sys, os, tempfile
+import ODKScan_webapp.utils as utils
 
 ##Deprecated
 #def process_json_output(pyobj):
@@ -110,8 +111,7 @@ def renderTableView(modeladmin, request, queryset, autofill, showSegs):
             pyobj['userName'] = str(request.user)
             pyobj['autofill'] = autofill
             pyobj['showSegs'] = showSegs
-            from ODKScan_webapp.views import print_pyobj_to_json
-            print_pyobj_to_json(pyobj, user_json_path)
+            utils.print_pyobj_to_json(pyobj, user_json_path)
         json_path = user_json_path
 
         fp = codecs.open(json_path, mode="r", encoding="utf-8")
@@ -205,8 +205,7 @@ def transcribeFormView(modeladmin, request, queryset):
             pyobj['templateName'] = form_template.name
             pyobj['userName'] = str(request.user)
             pyobj['formView'] = True
-            from ODKScan_webapp.views import print_pyobj_to_json
-            print_pyobj_to_json(pyobj, user_json_path)
+            utils.print_pyobj_to_json(pyobj, user_json_path)
         json_path = user_json_path
 
         fp = codecs.open(json_path, mode="r", encoding="utf-8")
@@ -243,19 +242,6 @@ def json_output_to_field_dict(json_output):
             field_dict[field['name']] = field_value
     return field_dict
 
-def dict_to_csv(dict_array, csvfile):
-    """
-    Convert an array of dictionaries to a csv where the keys are the column headers.
-    """
-    import csv
-    column_headers = set()
-    for row in dict_array:
-        column_headers = column_headers.union(row.keys())
-    csv_writer = csv.DictWriter(csvfile, column_headers, delimiter=',', quotechar='"', quoting=csv.QUOTE_ALL)
-    header_dict = dict((x,x) for x in column_headers)
-    csv_writer.writerow(header_dict)
-    csv_writer.writerows(dict_array)
-
 def generate_csv(modeladmin, request, queryset):
     dict_array = []
     form_template = None
@@ -273,7 +259,7 @@ def generate_csv(modeladmin, request, queryset):
         dict_array.append(json_output_to_field_dict(pyobj))
     temp_file = tempfile.mktemp()
     csvfile = open(temp_file, 'wb')
-    dict_to_csv(dict_array, csvfile)
+    utils.dict_to_csv(dict_array, csvfile)
     csvfile.close()
     response = HttpResponse(mimetype='application/octet-stream')
     response['Content-Disposition'] = 'attachment; filename=output.csv'

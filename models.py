@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 import os
+import datetime
 
 #TODO: At the moment templates (and maybe form images) can only be saved once.
 #        because django doesn't overwrite or delete the previous versions.
@@ -63,7 +64,7 @@ class LogItem(models.Model):
     activity = models.CharField(max_length=200, null=True)
     forms = models.CharField(max_length=200, null=True)
     segment = models.CharField(max_length=200, null=True)
-    timestamp = models.DateTimeField(auto_now=True, null=True)
+    timestamp = models.DateTimeField(default=datetime.datetime.now)
 
 LOCATIONS = (
     ('s', 'Seattle'),
