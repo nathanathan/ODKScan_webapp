@@ -1,4 +1,4 @@
-import json, codecs
+import json, codecs, os
 
 def dict_to_csv(dict_array, csvfile):
     """

@@ -8,7 +8,7 @@ import json
 import datetime
 import ODKScan_webapp.utils as utils
 
-ANDROID_LOG_PATH = '/home/nathan/Desktop/log.sqlite'
+ANDROID_LOG_PATH = '/home/nathan/Desktop/log26.sqlite'
 
 def levenshtein(s1, s2):
     if len(s1) < len(s2):
@@ -479,22 +479,27 @@ def parseSaveLogItems(request):
     """
     out = ''
     for li in LogItem.objects.filter(activity='save_transcriptions'):
+        if not li.forms:
+            continue
         if len(li.forms) == 0:
             continue
         for form in li.forms.split(','):
             formField = form.split('-')
             formId = formField[0]
-            newLogItem = {
-                'user' : li.user,
-                'url' : li.url,
-                'activity': li.activity,
-                'formImage' : FormImage.objects.filter(pk=formId),
-                'view' : li.view,
-                #'fieldName' : formField[1],
-                #'newValue' : param2,
-                'timestamp' : li.timestamp,
-             }
-            out += str(newLogItem)
+            try:
+                li_params = {
+                    'user' : li.user,
+                    'url' : li.url,
+                    'activity': li.activity,
+                    'formImage' : FormImage.objects.get(id=formId),
+                    'view' : li.view,
+                    #'fieldName' : formField[1],
+                    #'newValue' : param2,
+                    'timestamp' : li.timestamp,
+                 }
+                LogItem.objects.create(**li_params).save()
+            except:
+                out += form
     return HttpResponse(out, mimetype="application/json")
 
 def full_pipeline(request):
