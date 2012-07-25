@@ -38,7 +38,7 @@ def get_time_spent(log_items):
         time_spent = startEndStamp['timestamp__max'] - startEndStamp['timestamp__min']
         time_spent_dict['readable_time_spent'] = str(time_spent)
         time_spent_dict['seconds'] = (time_spent.microseconds + (time_spent.seconds + time_spent.days * 24 * 3600) * 10**6) * 1.0 / 10**6
-        return time_spent
+        return time_spent_dict
     else:
         return None
 
@@ -57,6 +57,7 @@ def compare_fields(field, the_truth):
         return abs(levenshtein(field_value, the_truth['value']))
     
 def gen_form_stats(pyobj, ground_truth, filtered_log_items, condition):
+    autofill = pyobj.get('autofill', True)
     fieds_correctness_time = {}
     accuracy_matrix = {
                      'correct_transcription' : None,
@@ -78,7 +79,7 @@ def gen_form_stats(pyobj, ground_truth, filtered_log_items, condition):
         
         if 'transcription' in field:
             if field['transcription'] == gt_field['value']:
-                if 'value' in field and pyobj.get('autofill', True):
+                if 'value' in field and autofill:
                     if str(field['value']) == gt_field['value']:
                         accuracy_matrix['correct_transcription']['correct_autofill']+=1
                     else:
@@ -86,7 +87,7 @@ def gen_form_stats(pyobj, ground_truth, filtered_log_items, condition):
                 else:
                     accuracy_matrix['correct_transcription']['no_autofill']+=1
             else:
-                if 'value' in field and pyobj.get('autofill', True):
+                if 'value' in field and autofill:
                     if str(field['value']) == gt_field['value']:
                         accuracy_matrix['incorrect_transcription']['correct_autofill']+=1
                     else:
@@ -94,7 +95,7 @@ def gen_form_stats(pyobj, ground_truth, filtered_log_items, condition):
                 else:
                     accuracy_matrix['incorrect_transcription']['no_autofill']+=1
         else:
-            if 'value' in field and pyobj.get('autofill', True):
+            if 'value' in field and autofill:
                 if str(field['value']) == gt_field['value']:
                     accuracy_matrix['no_transcription']['correct_autofill']+=1
                 else:
@@ -108,50 +109,50 @@ def gen_form_stats(pyobj, ground_truth, filtered_log_items, condition):
              }
     return stats
 
-def gen_form_stats_orig(pyobj, ground_truth):
-    accuracy_matrix = {
-                     'correct_transcription' : None,
-                     'incorrect_transcription' : None,
-                     'no_transcription' : None,
-                     }
-    for key in accuracy_matrix.keys():
-        accuracy_matrix[key] = {
-               'correct_autofill' : 0,
-               'incorrect_autofill' : 0,
-               'no_autofill' : 0,
-               }
-    for field, gt_field in zip(pyobj['fields'], ground_truth['fields']):
-        if 'transcription' in field:
-            if field['transcription'] == gt_field['value']:
-                if 'value' in field and pyobj.get('autofill', True):
-                    if str(field['value']) == gt_field['value']:
-                        accuracy_matrix['correct_transcription']['correct_autofill']+=1
-                    else:
-                        accuracy_matrix['correct_transcription']['incorrect_autofill']+=1
-                else:
-                    accuracy_matrix['correct_transcription']['no_autofill']+=1
-            else:
-                if 'value' in field and pyobj.get('autofill', True):
-                    if str(field['value']) == gt_field['value']:
-                        accuracy_matrix['incorrect_transcription']['correct_autofill']+=1
-                    else:
-                        accuracy_matrix['incorrect_transcription']['incorrect_autofill']+=1
-                else:
-                    accuracy_matrix['incorrect_transcription']['no_autofill']+=1
-        else:
-            if 'value' in field and pyobj.get('autofill', True):
-                if str(field['value']) == gt_field['value']:
-                    accuracy_matrix['no_transcription']['correct_autofill']+=1
-                else:
-                    accuracy_matrix['no_transcription']['incorrect_autofill']+=1
-            else:
-                accuracy_matrix['no_transcription']['no_autofill']+=1
-    
-    stats = {
-             'accuracy_matrix' : accuracy_matrix,
-             'number_of_fields' : len(pyobj['fields']),
-             }
-    return stats
+#def gen_form_stats_orig(pyobj, ground_truth):
+#    accuracy_matrix = {
+#                     'correct_transcription' : None,
+#                     'incorrect_transcription' : None,
+#                     'no_transcription' : None,
+#                     }
+#    for key in accuracy_matrix.keys():
+#        accuracy_matrix[key] = {
+#               'correct_autofill' : 0,
+#               'incorrect_autofill' : 0,
+#               'no_autofill' : 0,
+#               }
+#    for field, gt_field in zip(pyobj['fields'], ground_truth['fields']):
+#        if 'transcription' in field:
+#            if field['transcription'] == gt_field['value']:
+#                if 'value' in field and pyobj.get('autofill', True):
+#                    if str(field['value']) == gt_field['value']:
+#                        accuracy_matrix['correct_transcription']['correct_autofill']+=1
+#                    else:
+#                        accuracy_matrix['correct_transcription']['incorrect_autofill']+=1
+#                else:
+#                    accuracy_matrix['correct_transcription']['no_autofill']+=1
+#            else:
+#                if 'value' in field and pyobj.get('autofill', True):
+#                    if str(field['value']) == gt_field['value']:
+#                        accuracy_matrix['incorrect_transcription']['correct_autofill']+=1
+#                    else:
+#                        accuracy_matrix['incorrect_transcription']['incorrect_autofill']+=1
+#                else:
+#                    accuracy_matrix['incorrect_transcription']['no_autofill']+=1
+#        else:
+#            if 'value' in field and pyobj.get('autofill', True):
+#                if str(field['value']) == gt_field['value']:
+#                    accuracy_matrix['no_transcription']['correct_autofill']+=1
+#                else:
+#                    accuracy_matrix['no_transcription']['incorrect_autofill']+=1
+#            else:
+#                accuracy_matrix['no_transcription']['no_autofill']+=1
+#    
+#    stats = {
+#             'accuracy_matrix' : accuracy_matrix,
+#             'number_of_fields' : len(pyobj['fields']),
+#             }
+#    return stats
 
 def listify(dicty, level_labels):
     """
@@ -184,6 +185,90 @@ def flatten_dict(dicty):
     dicty.update(temp_dict)
     return dicty
 
+def genStats(userObject, form_image, pyobj, ground_truth):
+    userStats = {}
+    filtered_log_items = LogItem.objects.filter(user=userObject, formImage=form_image)
+    condition = UserFormCondition.objects.get(user=userObject, formImage=form_image)
+    userStats.update(gen_form_stats(pyobj, ground_truth, filtered_log_items, condition))
+    if condition.tableView:
+        #TODO: Parse the save times
+        userStats['table_view'] = True
+        #We need to group and average times in this case since it's not necessairily sequencial
+        #formImages = FormImage.objects.filter(image__contains='/photo/'+str(form_image)[0])
+        #This query has some added uglyness because in the practice runs the forms of the same name group (i.e. J) aren't all in the same condition
+        #Perhaps I should just make an exception for them
+        formImages = UserFormCondition.objects.filter(formImage__image__contains='/photo/'+str(form_image)[0],
+                                                      user=userObject,
+                                                      tableView=True).values('formImage').annotate()
+        startEndStamp = LogItem.objects.filter(user=userObject, formImage__in=formImages).aggregate(Max('timestamp'), Min('timestamp'))
+        if startEndStamp.get('timestamp__max'):
+            time_spent = (startEndStamp['timestamp__max'] - startEndStamp['timestamp__min'])/4
+            userStats['readable_time_spent'] = str(time_spent)
+            userStats['time_spent'] = (time_spent.microseconds + (time_spent.seconds + time_spent.days * 24 * 3600) * 10**6) / 10**6
+    else:
+        if condition.formView:
+            userStats['form_view'] = True
+        userStats.update(get_time_spent(filtered_log_items))
+#        
+#        startEndStamp = filtered_log_items.aggregate(Max('timestamp'), Min('timestamp'))
+#        if startEndStamp.get('timestamp__max'):
+#            time_spent = startEndStamp['timestamp__max'] - startEndStamp['timestamp__min']
+#            userStats['readable_time_spent'] = str(time_spent)
+#            userStats['time_spent'] = (time_spent.microseconds + (time_spent.seconds + time_spent.days * 24 * 3600) * 10**6) / 10**6
+    #userStats['fields_logitems'] = LogItem.objects.filter(user=userObject, formImage=form_image).values('fieldName').annotate(modifications=Count('pk'), end=Max('timestamp'), start=Min('timestamp'))
+    fieldNames = filtered_log_items.values('fieldName').annotate()
+    backspaces = 0
+    chars_added = 0
+    total_lev_distance_traveled = 0
+    for fieldName in fieldNames:
+        previous = None
+        for log_item in filtered_log_items.filter(fieldName=fieldName['fieldName']).order_by('timestamp').all():
+            if previous:
+                cur = log_item.newValue if log_item.newValue else ''
+                difference = len(cur) - len(previous)
+                total_lev_distance_traveled += abs(levenshtein(cur, previous))
+                if difference > 0:
+                    chars_added += difference
+                else:
+                    backspaces -= difference
+            previous = log_item.newValue
+    userStats['backspaces'] = backspaces
+    userStats['chars_added'] = chars_added
+    userStats['total_lev_distance_traveled'] = total_lev_distance_traveled
+    return userStats
+
+def filter_fields(fields):
+    allowedProps = ['name', 'label', 'transcription', 'type', 'value']
+    for field in fields:
+        for prop in field.keys():
+            if prop not in allowedProps:
+                field.pop(prop)
+    return fields
+
+def analyse_user_form(request, userName=None, formName=None):
+    if not userName or not formName:
+        return HttpResponse("no user/form name", mimetype="application/json")
+    form_image = FormImage.objects.get(image__contains='/photo/'+formName)
+    userObject = User.objects.get(username=userName)
+    ground_truth = utils.load_json_to_pyobj(os.path.join(form_image.output_path, 'corrected.json'))
+    json_path = os.path.join(os.path.join(form_image.output_path, 'users'), userObject.username, 'output.json')
+    pyobj = utils.load_json_to_pyobj(json_path)
+    kwargs = {
+        'form_image' : form_image,
+        'userObject' : userObject,
+        'pyobj' : pyobj,
+        'ground_truth' : ground_truth
+    }
+    userFormStats = genStats(**kwargs)
+    filter_fields(pyobj['fields'])
+    t = loader.get_template('analyseUserForm.html')
+    c = RequestContext(request, {
+                                 "userFormStats" : userFormStats,
+                                 "ground_truth" : json.dumps(ground_truth, indent=4),
+                                 "transciption" : json.dumps(pyobj, indent=4),
+                                 })
+    return HttpResponse(t.render(c))
+
 def gen_analysis_dict():
     fi_dict = {}
     for form_image in FormImage.objects.all():
@@ -199,58 +284,64 @@ def gen_analysis_dict():
             for user in user_list:
                 if user in excluded_users:
                     continue
-                userStats = {}
                 userObject = User.objects.get(username=user)
-                #Filter by user properties here
-                json_path = os.path.join(user_dir, user, 'output.json')
-                pyobj = utils.load_json_to_pyobj(json_path)
-                filtered_log_items = LogItem.objects.filter(user=userObject, formImage=form_image)
-                condition = UserFormCondition.objects.get(user=userObject, formImage=form_image)
-                userStats.update(gen_form_stats(pyobj, ground_truth, filtered_log_items, condition))
-                if condition.tableView:
-                    #TODO: Parse the save times
-                    userStats['table_view'] = True
-                    #We need to group and average times in this case since it's not necessairily sequencial
-                    #formImages = FormImage.objects.filter(image__contains='/photo/'+str(form_image)[0])
-                    #This query has some added uglyness because in the practice runs the forms of the same name group (i.e. J) aren't all in the same condition
-                    #Perhaps I should just make an exception for them
-                    formImages = UserFormCondition.objects.filter(formImage__image__contains='/photo/'+str(form_image)[0],
-                                                                  user=userObject,
-                                                                  tableView=True).values('formImage').annotate()
-                    startEndStamp = LogItem.objects.filter(user=userObject, formImage__in=formImages).aggregate(Max('timestamp'), Min('timestamp'))
-                    if startEndStamp.get('timestamp__max'):
-                        time_spent = (startEndStamp['timestamp__max'] - startEndStamp['timestamp__min'])/4
-                        userStats['readable_time_spent'] = str(time_spent)
-                        userStats['time_spent'] = (time_spent.microseconds + (time_spent.seconds + time_spent.days * 24 * 3600) * 10**6) / 10**6
-                else:
-                    if condition.formView:
-                        userStats['form_view'] = True
-                    startEndStamp = filtered_log_items.aggregate(Max('timestamp'), Min('timestamp'))
-                    if startEndStamp.get('timestamp__max'):
-                        time_spent = startEndStamp['timestamp__max'] - startEndStamp['timestamp__min']
-                        userStats['readable_time_spent'] = str(time_spent)
-                        userStats['time_spent'] = (time_spent.microseconds + (time_spent.seconds + time_spent.days * 24 * 3600) * 10**6) / 10**6
-                #userStats['fields_logitems'] = LogItem.objects.filter(user=userObject, formImage=form_image).values('fieldName').annotate(modifications=Count('pk'), end=Max('timestamp'), start=Min('timestamp'))
-                fieldNames = filtered_log_items.values('fieldName').annotate()
-                backspaces = 0
-                chars_added = 0
-                total_lev_distance_traveled = 0
-                for fieldName in fieldNames:
-                    previous = None
-                    for log_item in filtered_log_items.filter(fieldName=fieldName['fieldName']).order_by('timestamp').all():
-                        if previous:
-                            cur = log_item.newValue if log_item.newValue else ''
-                            difference = len(cur) - len(previous)
-                            total_lev_distance_traveled += abs(levenshtein(cur, previous))
-                            if difference > 0:
-                                chars_added += difference
-                            else:
-                                backspaces -= difference
-                        previous = log_item.newValue
-                userStats['backspaces'] = backspaces
-                userStats['chars_added'] = chars_added
-                userStats['total_lev_distance_traveled'] = total_lev_distance_traveled
-                user_dict[str(form_image)] = userStats
+                kwargs = {
+                    'form_image' : form_image,
+                    'userObject' : userObject,
+                    'user_dir' : user_dir,
+                    'ground_truth' : ground_truth
+                }
+                
+#                #Filter by user properties here
+#                json_path = os.path.join(user_dir, user, 'output.json')
+#                pyobj = utils.load_json_to_pyobj(json_path)
+#                filtered_log_items = LogItem.objects.filter(user=userObject, formImage=form_image)
+#                condition = UserFormCondition.objects.get(user=userObject, formImage=form_image)
+#                userStats.update(gen_form_stats(pyobj, ground_truth, filtered_log_items, condition))
+#                if condition.tableView:
+#                    #TODO: Parse the save times
+#                    userStats['table_view'] = True
+#                    #We need to group and average times in this case since it's not necessairily sequencial
+#                    #formImages = FormImage.objects.filter(image__contains='/photo/'+str(form_image)[0])
+#                    #This query has some added uglyness because in the practice runs the forms of the same name group (i.e. J) aren't all in the same condition
+#                    #Perhaps I should just make an exception for them
+#                    formImages = UserFormCondition.objects.filter(formImage__image__contains='/photo/'+str(form_image)[0],
+#                                                                  user=userObject,
+#                                                                  tableView=True).values('formImage').annotate()
+#                    startEndStamp = LogItem.objects.filter(user=userObject, formImage__in=formImages).aggregate(Max('timestamp'), Min('timestamp'))
+#                    if startEndStamp.get('timestamp__max'):
+#                        time_spent = (startEndStamp['timestamp__max'] - startEndStamp['timestamp__min'])/4
+#                        userStats['readable_time_spent'] = str(time_spent)
+#                        userStats['time_spent'] = (time_spent.microseconds + (time_spent.seconds + time_spent.days * 24 * 3600) * 10**6) / 10**6
+#                else:
+#                    if condition.formView:
+#                        userStats['form_view'] = True
+#                    startEndStamp = filtered_log_items.aggregate(Max('timestamp'), Min('timestamp'))
+#                    if startEndStamp.get('timestamp__max'):
+#                        time_spent = startEndStamp['timestamp__max'] - startEndStamp['timestamp__min']
+#                        userStats['readable_time_spent'] = str(time_spent)
+#                        userStats['time_spent'] = (time_spent.microseconds + (time_spent.seconds + time_spent.days * 24 * 3600) * 10**6) / 10**6
+#                #userStats['fields_logitems'] = LogItem.objects.filter(user=userObject, formImage=form_image).values('fieldName').annotate(modifications=Count('pk'), end=Max('timestamp'), start=Min('timestamp'))
+#                fieldNames = filtered_log_items.values('fieldName').annotate()
+#                backspaces = 0
+#                chars_added = 0
+#                total_lev_distance_traveled = 0
+#                for fieldName in fieldNames:
+#                    previous = None
+#                    for log_item in filtered_log_items.filter(fieldName=fieldName['fieldName']).order_by('timestamp').all():
+#                        if previous:
+#                            cur = log_item.newValue if log_item.newValue else ''
+#                            difference = len(cur) - len(previous)
+#                            total_lev_distance_traveled += abs(levenshtein(cur, previous))
+#                            if difference > 0:
+#                                chars_added += difference
+#                            else:
+#                                backspaces -= difference
+#                        previous = log_item.newValue
+#                userStats['backspaces'] = backspaces
+#                userStats['chars_added'] = chars_added
+#                userStats['total_lev_distance_traveled'] = total_lev_distance_traveled
+                user_dict[str(form_image)] = genStats(**kwargs)
                 fi_dict[user] = fi_dict.get(user, {})
                 fi_dict[user].update(user_dict)
     return fi_dict
@@ -283,23 +374,6 @@ def to_pyobj(djm):
         fieldout['modifications'] = field['modifications']
         pyobj[field['fieldName']] = fieldout
     return pyobj
-
-#def analyse_group(request, username=None):
-#    fi_dict = {}
-#    for form_image in FormImage.objects.all():
-#        user_dir = os.path.join(form_image.output_path, 'users')
-#        user = username
-#        json_path = os.path.join(user_dir, user, 'output.json')
-#        if os.path.exists(json_path):
-#            pyobj = load_json_to_pyobj(json_path)
-#            userStats = gen_form_stats(pyobj)
-#            userObject = User.objects.get(username=user)
-#            startEndStamp = LogItem.objects.filter(user=userObject, formImage=form_image).aggregate(Max('timestamp'), Min('timestamp'))
-#            if startEndStamp.get('timestamp__max'):
-#                userStats['time_spent'] = str(startEndStamp['timestamp__max'] - startEndStamp['timestamp__min'])
-#            userStats['fields_logitems'] = to_pyobj(LogItem.objects.filter(user=userObject, formImage=form_image).values('fieldName').annotate(modifications=Count('pk'), end=Max('timestamp'), start=Min('timestamp')))
-#            fi_dict[str(form_image)] = userStats
-#    return HttpResponse(json.dumps(fi_dict), mimetype="application/json")
 
 def most_common_item(li):
     hist = {}
@@ -415,25 +489,28 @@ def importAndroidData(request):
         fp_parse = file_path_regex.search(instance_path)
         if fp_parse:
             fp_parse_dict = fp_parse.groupdict()
-            if action_type == 'text changed':
-                showSegs = fp_parse_dict['showSegs'] if fp_parse_dict['showSegs'] else ""
-                autofill = fp_parse_dict['autofill'] if fp_parse_dict['autofill'] else ""
+            if action_type == 'text changed' or action_type == 'answer selected':
                 user = fp_parse_dict['user']
-                form = fp_parse_dict['form']
                 if user in excluded_users:
                     continue
+                form = fp_parse_dict['form']
+                showSegs = fp_parse_dict['showSegs'] if fp_parse_dict['showSegs'] else ""
+                autofill = fp_parse_dict['autofill'] if fp_parse_dict['autofill'] else ""
+                #For answer select and text changed the value is recorded in different columns
+                previousValue = None if action_type == 'answer selected' else param1
+                newValue = param1 if action_type == 'answer selected' else param2
                 li_params = {
                             'user' : User.objects.get(username=user),
                             'url' : instance_path,
                             'formImage' : FormImage.objects.get(image__contains='/photo/'+form),
                             'view' : 'android-condition' + showSegs + autofill,
                             'fieldName' : os.path.split(question_path)[-1][:-3] if question_path else None,
-                            'previousValue' : param1,
-                            'newValue' : param2,
+                            'previousValue' : previousValue,
+                            'newValue' : newValue,
                             'activity' : 'android-' + action_type,
                             'timestamp' : datetime.datetime.fromtimestamp(int(timestamp)*1./1000, utc),
                           }
-                #print question_path
+                #output += str(li_params)
                 LogItem.objects.create(**li_params).save()
         else:
             raise Exception("Could not parse: " + str(instance_path))

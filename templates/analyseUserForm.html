@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Transcription view</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+	<link href="http://twitter.github.com/bootstrap/assets/css/bootstrap.css" rel="stylesheet">
+        
+<style media="screen" type="text/css">
+
+</style>
+
+  </head>
+
+  <body>
+  	<div class="main">
+	  	<div>
+		{% for key, value in userFormStats.items %}
+    		{% if key == "accuracy_matrix" %}
+    			<p>{{ key }}:</p>
+    			<table class="table table-striped table-bordered table-condensed">
+					<tr>
+						<th></th>
+    					{% for condition, value in value.items  %}
+    						{% if condition == "correct_transcription" %}
+		    					{% for condition, value in value.items %}
+		    						<th>{{condition}}</th>
+		    					{% endfor %}
+    						{% endif %}
+    					{% endfor %}
+					</tr>
+    				{% for condition, value in value.items %}
+    					<tr>
+    						<td>{{condition}}</td>
+	    					{% for condition, value in value.items %}
+	    						<td>{{value}}</td>
+	    					{% endfor %}
+    					</tr>
+    				{% endfor %}
+    			</table>
+    		{% else %}
+    			{% if key == "fieds_correctness_time" %}
+    			<p>{{ key }}:</p>
+    			<div style="margin-left:4em;">
+	    			{% for field, c_t in value.items  %}
+	    				<p>{{ field }} : {{ c_t }}</p>
+	    			{% endfor %}
+    			</div>
+    			{% else %}
+    				<p>{{ key }} : {{ value }}</p>
+    			{% endif %}
+    		{% endif %}
+    		
+		{% endfor %}
+		</div>
+  		<div style="float:left;">
+  			<h2>Ground Truth JSON</h2>
+  			<pre>{{ground_truth}}</pre></div>
+  		<div style="float:left;">
+  			<h2>Transcription JSON</h2>
+  			<pre>{{transciption}}</pre></div>
+	</div>
+	<script src="/static/transcription/assets/js/jquery.js"></script>
+    <script>
+
+    </script>
+  </body>
+</html>
