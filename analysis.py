@@ -377,14 +377,16 @@ def add_to_correct_transcription(correct_transcription, transcription):
         ct_field['needs_attention'] =  len(ct_field['unique_values']) > 2 or len(ct_field['unique_values']) == 0
     return correct_transcription
 
-def get_ground_truth_length(correct_transcription):
-    text_length = 0
+def add_ground_truth_length(correct_transcription):
+    total_text_length = 0
     ct_fields = correct_transcription.get('fields')
     for ct_field in ct_fields:
         if ct_field['type'].startswith('select'):
             continue
-        text_length += len(str(ct_field['value']))
-    return text_length
+        value_length = len(str(ct_field['value']))
+        ct_field['value_length'] = value_length
+        total_text_length += value_length
+    correct_transcription['ground_truth_length'] = total_text_length
 
 def correct_transcriptions(request):
     fi_dict = {}
@@ -403,7 +405,7 @@ def correct_transcriptions(request):
                 json_path = os.path.join(user_dir, user, 'output.json')
                 pyobj = utils.load_json_to_pyobj(json_path)
                 add_to_correct_transcription(correct_transcription, pyobj)
-        correct_transcription['ground_truth_length'] = get_ground_truth_length(correct_transcription)
+        add_ground_truth_length(correct_transcription)
         fi_dict[str(form_image)] = correct_transcription
         utils.print_pyobj_to_json(correct_transcription, os.path.join(form_image.output_path, 'corrected.json'))
     return HttpResponse("corrected", mimetype="application/json")
