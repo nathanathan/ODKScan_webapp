@@ -221,6 +221,9 @@ def genStats(userObject, form_image, pyobj, ground_truth):
     chars_added = 0
     total_lev_distance_traveled = 0
     for fieldName in fieldNames:
+        #TODO: I don't expect this code to ever be reused, but if it is, select1 fields for the specific form we are using in the study are hardcoded here:
+        if fieldName in ["gender", "writing", "reading", "mathematics", "science"]:
+            continue
         previous = None
         for log_item in filtered_log_items.filter(fieldName=fieldName['fieldName']).order_by('timestamp').all():
             if previous:
@@ -245,7 +248,7 @@ def filter_fields(fields):
                 field.pop(prop)
     return fields
 
-def analyse_user_form(request, userName=None, formName=None):
+def analyse_target(request, userName=None, formName=None):
     if not userName or not formName:
         return HttpResponse("no user/form name", mimetype="application/json")
     form_image = FormImage.objects.get(image__contains='/photo/'+formName)
@@ -269,7 +272,7 @@ def analyse_user_form(request, userName=None, formName=None):
                                  })
     return HttpResponse(t.render(c))
 
-def gen_analysis_dict():
+def gen_analysis_dict(userFilter=(lambda k:True)):
     fi_dict = {}
     for form_image in FormImage.objects.all():
         if str(form_image)[0] == 'J':
@@ -285,86 +288,50 @@ def gen_analysis_dict():
                 if user in excluded_users:
                     continue
                 userObject = User.objects.get(username=user)
+                if not userFilter(userObject):
+                    continue
+                json_path = os.path.join(os.path.join(form_image.output_path, 'users'), userObject.username, 'output.json')
+                pyobj = utils.load_json_to_pyobj(json_path)
                 kwargs = {
                     'form_image' : form_image,
                     'userObject' : userObject,
-                    'user_dir' : user_dir,
+                    'pyobj' : pyobj,
                     'ground_truth' : ground_truth
                 }
-                
-#                #Filter by user properties here
-#                json_path = os.path.join(user_dir, user, 'output.json')
-#                pyobj = utils.load_json_to_pyobj(json_path)
-#                filtered_log_items = LogItem.objects.filter(user=userObject, formImage=form_image)
-#                condition = UserFormCondition.objects.get(user=userObject, formImage=form_image)
-#                userStats.update(gen_form_stats(pyobj, ground_truth, filtered_log_items, condition))
-#                if condition.tableView:
-#                    #TODO: Parse the save times
-#                    userStats['table_view'] = True
-#                    #We need to group and average times in this case since it's not necessairily sequencial
-#                    #formImages = FormImage.objects.filter(image__contains='/photo/'+str(form_image)[0])
-#                    #This query has some added uglyness because in the practice runs the forms of the same name group (i.e. J) aren't all in the same condition
-#                    #Perhaps I should just make an exception for them
-#                    formImages = UserFormCondition.objects.filter(formImage__image__contains='/photo/'+str(form_image)[0],
-#                                                                  user=userObject,
-#                                                                  tableView=True).values('formImage').annotate()
-#                    startEndStamp = LogItem.objects.filter(user=userObject, formImage__in=formImages).aggregate(Max('timestamp'), Min('timestamp'))
-#                    if startEndStamp.get('timestamp__max'):
-#                        time_spent = (startEndStamp['timestamp__max'] - startEndStamp['timestamp__min'])/4
-#                        userStats['readable_time_spent'] = str(time_spent)
-#                        userStats['time_spent'] = (time_spent.microseconds + (time_spent.seconds + time_spent.days * 24 * 3600) * 10**6) / 10**6
-#                else:
-#                    if condition.formView:
-#                        userStats['form_view'] = True
-#                    startEndStamp = filtered_log_items.aggregate(Max('timestamp'), Min('timestamp'))
-#                    if startEndStamp.get('timestamp__max'):
-#                        time_spent = startEndStamp['timestamp__max'] - startEndStamp['timestamp__min']
-#                        userStats['readable_time_spent'] = str(time_spent)
-#                        userStats['time_spent'] = (time_spent.microseconds + (time_spent.seconds + time_spent.days * 24 * 3600) * 10**6) / 10**6
-#                #userStats['fields_logitems'] = LogItem.objects.filter(user=userObject, formImage=form_image).values('fieldName').annotate(modifications=Count('pk'), end=Max('timestamp'), start=Min('timestamp'))
-#                fieldNames = filtered_log_items.values('fieldName').annotate()
-#                backspaces = 0
-#                chars_added = 0
-#                total_lev_distance_traveled = 0
-#                for fieldName in fieldNames:
-#                    previous = None
-#                    for log_item in filtered_log_items.filter(fieldName=fieldName['fieldName']).order_by('timestamp').all():
-#                        if previous:
-#                            cur = log_item.newValue if log_item.newValue else ''
-#                            difference = len(cur) - len(previous)
-#                            total_lev_distance_traveled += abs(levenshtein(cur, previous))
-#                            if difference > 0:
-#                                chars_added += difference
-#                            else:
-#                                backspaces -= difference
-#                        previous = log_item.newValue
-#                userStats['backspaces'] = backspaces
-#                userStats['chars_added'] = chars_added
-#                userStats['total_lev_distance_traveled'] = total_lev_distance_traveled
                 user_dict[str(form_image)] = genStats(**kwargs)
                 fi_dict[user] = fi_dict.get(user, {})
                 fi_dict[user].update(user_dict)
     return fi_dict
     
-def analyse_transcriptions(request):
-    data_array = listify(gen_analysis_dict(), ['user', 'form_image'])
-    return HttpResponse(json.dumps(data_array, indent=4), mimetype="application/json")
-    t = loader.get_template('analyseTranscriptions.html')
-    c = RequestContext(request, {"formImages" : gen_analysis_dict()})
-    return HttpResponse(t.render(c))
+def analyse(request):
+    startswith = request.GET.get('startswith')
+    def userFilter(userObject):
+        if startswith:
+            return userObject.username.startswith(startswith)
+        return True
+    analysis_dict = gen_analysis_dict(userFilter)
+    format = request.GET.get('format', 'html')
+    if format == 'json':
+        data_array = listify(analysis_dict, ['user', 'form_image'])
+        return HttpResponse(json.dumps(data_array, indent=4), mimetype="application/json")
+    elif format == 'csv':
+        temp_file = tempfile.mktemp()
+        csvfile = open(temp_file, 'wb')
+        data_array = listify(analysis_dict, ['user', 'form_image'])
+        utils.dict_to_csv([flatten_dict(d) for d in data_array], csvfile)
+        csvfile.close()
+        response = HttpResponse(mimetype='application/octet-stream')
+        response['Content-Disposition'] = 'attachment; filename=output.csv'
+        fo = open(temp_file)
+        response.write(fo.read())
+        fo.close()
+        return response    
+    else:
+        t = loader.get_template('analyseTranscriptions.html')
+        c = RequestContext(request, {"formImages" : analysis_dict})
+        return HttpResponse(t.render(c))
 
-def generate_csv(request):
-    temp_file = tempfile.mktemp()
-    csvfile = open(temp_file, 'wb')
-    data_array = listify(gen_analysis_dict(), ['user', 'form_image'])
-    utils.dict_to_csv([flatten_dict(d) for d in data_array], csvfile)
-    csvfile.close()
-    response = HttpResponse(mimetype='application/octet-stream')
-    response['Content-Disposition'] = 'attachment; filename=output.csv'
-    fo = open(temp_file)
-    response.write(fo.read())
-    fo.close()
-    return response
+
 
 def to_pyobj(djm):
     pyobj = {}
@@ -394,6 +361,7 @@ def add_to_correct_transcription(correct_transcription, transcription):
         for field in transcription['fields']:
             ct_field = {}
             ct_field['name'] = field['name']
+            ct_field['type'] = field['type']
             ct_value = field.get('transcription', field.get('value'))
             ct_field['values'] = [str(ct_value)] if ct_value else []
             ct_fields.append(ct_field)
@@ -408,6 +376,14 @@ def add_to_correct_transcription(correct_transcription, transcription):
         ct_field['needs_attention'] =  len(ct_field['unique_values']) > 2 or len(ct_field['unique_values']) == 0
     return correct_transcription
 
+def get_ground_truth_length(correct_transcription):
+    text_length = 0
+    ct_fields = correct_transcription.get('fields')
+    for ct_field in ct_fields:
+        if ct_field['type'].startswith('select'):
+            continue
+        text_length += len(str(ct_field['value']))
+    return text_length
 
 def correct_transcriptions(request):
     fi_dict = {}
@@ -426,6 +402,7 @@ def correct_transcriptions(request):
                 json_path = os.path.join(user_dir, user, 'output.json')
                 pyobj = utils.load_json_to_pyobj(json_path)
                 add_to_correct_transcription(correct_transcription, pyobj)
+        correct_transcription['ground_truth_length'] = get_ground_truth_length(correct_transcription)
         fi_dict[str(form_image)] = correct_transcription
         utils.print_pyobj_to_json(correct_transcription, os.path.join(form_image.output_path, 'corrected.json'))
     return HttpResponse("corrected", mimetype="application/json")
@@ -527,7 +504,7 @@ def generateAndroidOutput(request):
         for user in User.objects.all():
             if user in excluded_users:
                 continue
-            filtered_li = LogItem.objects.filter(formImage=form_image, user=user,activity='android-text changed')
+            filtered_li = LogItem.objects.filter(formImage=form_image, user=user, activity__in=['android-text changed', 'android-answer selected'])
             if len(filtered_li) > 0:
                 path_to_initial_json = os.path.join(form_image.output_path, 'output.json')
                 initial_json = utils.load_json_to_pyobj(path_to_initial_json)
