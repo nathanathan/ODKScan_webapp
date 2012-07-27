@@ -8,7 +8,8 @@ import json
 import datetime
 import ODKScan_webapp.utils as utils
 
-ANDROID_LOG_PATH = '/home/nathan/Desktop/log26.sqlite'
+from django.conf import settings
+ANDROID_LOG_PATH = settings.ANDROID_LOG_PATH
 
 def levenshtein(s1, s2):
     if len(s1) < len(s2):
@@ -571,6 +572,6 @@ def full_pipeline(request):
     fillUserFormCondition(request)
     print >>sys.stderr, "correct_transcriptions"
     correct_transcriptions(request)
-    print >>sys.stderr, "analyse_transcriptions"
-    return analyse_transcriptions(request)
+    print >>sys.stderr, "analyse"
+    return analyse(request)
     
