@@ -30,7 +30,10 @@ def levenshtein(s1, s2):
     return previous_row[-1]
 
 android_excluded_users = ['t7']
-excluded_users = ['user', 'test1', 'test2', 'test_final', 'T1', 'T2'] + android_excluded_users
+excluded_users = ['user', 'test1', 'test2', 'test_final', 'T1', 'T2', 't98'] + android_excluded_users
+
+def timedelta_in_seconds(time_delta):
+    return (time_delta.microseconds + (time_delta.seconds + time_delta.days * 24 * 3600) * 10**6) * 1.0 / 10**6
 
 def get_time_spent(log_items):
     time_spent_dict = {}
@@ -56,6 +59,28 @@ def compare_fields(field, the_truth):
         return (field_value == the_truth['value']) * 1
     else:
         return abs(levenshtein(field_value, the_truth['value']))
+
+def remove_outliers(log_items, max_time_difference=60):
+    if len(log_items) < 2:
+        return log_items
+    groups = []
+    cur_group = []
+    groups.append(cur_group)
+    previous_li = None
+    #Segment the items by gaps of greater than max_time_difference
+    for log_item in log_items.order_by('timestamp').all():
+        if previous_li:
+            if(timedelta_in_seconds(log_item.timestamp - previous_li.timestamp) > max_time_difference):
+                cur_group = []
+                groups.append(cur_group)
+        cur_group.append(log_item)
+        previous_li = log_item
+    max_group = []
+    #return the largest segment
+    for group in groups:
+        if len(group) > len(max_group):
+            max_group = group
+    return log_items.filter(timestamp__gte=max_group[0].timestamp, timestamp__lte=max_group[-1].timestamp)
     
 def gen_form_stats(pyobj, ground_truth, filtered_log_items, condition):
     autofill = pyobj.get('autofill', True)
@@ -73,11 +98,16 @@ def gen_form_stats(pyobj, ground_truth, filtered_log_items, condition):
                }
     for field, gt_field in zip(pyobj['fields'], ground_truth['fields']):
         correctness = compare_fields(field, gt_field)
+        field_log_items = filtered_log_items.filter(fieldName=field['name'])
+        
         fieds_correctness_time[field['name']] = {
-                                  'time_spent' : get_time_spent(filtered_log_items.filter(fieldName=field['name'])),
+                                  'time_spent' : get_time_spent(remove_outliers(field_log_items)),
                                   'correctness' : correctness
                                   }
-        
+#        if fieds_correctness_time[field['name']]['time_spent']['seconds'] > 120:
+#            from django.core import serializers
+#            foobar = serializers.serialize('json', filtered_log_items.filter(fieldName=field['name']))
+#            raise Exception('time bug')
         if 'transcription' in field:
             if field['transcription'] == gt_field['value']:
                 if 'value' in field and autofill:
@@ -109,51 +139,6 @@ def gen_form_stats(pyobj, ground_truth, filtered_log_items, condition):
              'number_of_fields' : len(pyobj['fields']),
              }
     return stats
-
-#def gen_form_stats_orig(pyobj, ground_truth):
-#    accuracy_matrix = {
-#                     'correct_transcription' : None,
-#                     'incorrect_transcription' : None,
-#                     'no_transcription' : None,
-#                     }
-#    for key in accuracy_matrix.keys():
-#        accuracy_matrix[key] = {
-#               'correct_autofill' : 0,
-#               'incorrect_autofill' : 0,
-#               'no_autofill' : 0,
-#               }
-#    for field, gt_field in zip(pyobj['fields'], ground_truth['fields']):
-#        if 'transcription' in field:
-#            if field['transcription'] == gt_field['value']:
-#                if 'value' in field and pyobj.get('autofill', True):
-#                    if str(field['value']) == gt_field['value']:
-#                        accuracy_matrix['correct_transcription']['correct_autofill']+=1
-#                    else:
-#                        accuracy_matrix['correct_transcription']['incorrect_autofill']+=1
-#                else:
-#                    accuracy_matrix['correct_transcription']['no_autofill']+=1
-#            else:
-#                if 'value' in field and pyobj.get('autofill', True):
-#                    if str(field['value']) == gt_field['value']:
-#                        accuracy_matrix['incorrect_transcription']['correct_autofill']+=1
-#                    else:
-#                        accuracy_matrix['incorrect_transcription']['incorrect_autofill']+=1
-#                else:
-#                    accuracy_matrix['incorrect_transcription']['no_autofill']+=1
-#        else:
-#            if 'value' in field and pyobj.get('autofill', True):
-#                if str(field['value']) == gt_field['value']:
-#                    accuracy_matrix['no_transcription']['correct_autofill']+=1
-#                else:
-#                    accuracy_matrix['no_transcription']['incorrect_autofill']+=1
-#            else:
-#                accuracy_matrix['no_transcription']['no_autofill']+=1
-#    
-#    stats = {
-#             'accuracy_matrix' : accuracy_matrix,
-#             'number_of_fields' : len(pyobj['fields']),
-#             }
-#    return stats
 
 def listify(dicty, level_labels):
     """
@@ -191,6 +176,7 @@ def genStats(userObject, form_image, pyobj, ground_truth):
     filtered_log_items = LogItem.objects.filter(user=userObject, formImage=form_image)
     condition = UserFormCondition.objects.get(user=userObject, formImage=form_image)
     userStats.update(gen_form_stats(pyobj, ground_truth, filtered_log_items, condition))
+    autofill = pyobj.get('autofill', True)
     if condition.tableView:
         #TODO: Parse the save times
         userStats['table_view'] = True
@@ -210,31 +196,25 @@ def genStats(userObject, form_image, pyobj, ground_truth):
         if condition.formView:
             userStats['form_view'] = True
         userStats.update(get_time_spent(filtered_log_items))
-#        
-#        startEndStamp = filtered_log_items.aggregate(Max('timestamp'), Min('timestamp'))
-#        if startEndStamp.get('timestamp__max'):
-#            time_spent = startEndStamp['timestamp__max'] - startEndStamp['timestamp__min']
-#            userStats['readable_time_spent'] = str(time_spent)
-#            userStats['time_spent'] = (time_spent.microseconds + (time_spent.seconds + time_spent.days * 24 * 3600) * 10**6) / 10**6
-    #userStats['fields_logitems'] = LogItem.objects.filter(user=userObject, formImage=form_image).values('fieldName').annotate(modifications=Count('pk'), end=Max('timestamp'), start=Min('timestamp'))
-    fieldNames = filtered_log_items.values('fieldName').annotate()
+
     backspaces = 0
     chars_added = 0
     total_lev_distance_traveled = 0
-    for fieldName in fieldNames:
-        #TODO: I don't expect this code to ever be reused, but if it is, select1 fields for the specific form we are using in the study are hardcoded here:
-        if fieldName in ["gender", "writing", "reading", "mathematics", "science"]:
+    for jsonField in pyobj['fields']:
+        fieldName = jsonField['name']
+        if jsonField['type'].startswith('select'):
             continue
-        previous = None
-        for log_item in filtered_log_items.filter(fieldName=fieldName['fieldName']).order_by('timestamp').all():
-            if previous:
-                cur = log_item.newValue if log_item.newValue else ''
-                difference = len(cur) - len(previous)
-                total_lev_distance_traveled += abs(levenshtein(cur, previous))
-                if difference > 0:
-                    chars_added += difference
-                else:
-                    backspaces -= difference
+        previous = ''
+        if autofill:
+            previous = str(jsonField.get('value', ''))
+        for log_item in filtered_log_items.filter(fieldName=fieldName).order_by('timestamp').all():
+            cur = log_item.newValue if log_item.newValue else ''
+            difference = len(cur) - len(previous)
+            total_lev_distance_traveled += abs(levenshtein(cur, previous))
+            if difference > 0:
+                chars_added += difference
+            else:
+                backspaces -= difference
             previous = log_item.newValue
     userStats['backspaces'] = backspaces
     userStats['chars_added'] = chars_added
@@ -493,7 +473,8 @@ def importAndroidData(request):
                 #output += str(li_params)
                 LogItem.objects.create(**li_params).save()
         else:
-            raise Exception("Could not parse: " + str(instance_path))
+            continue
+            #raise Exception("Could not parse: " + str(instance_path))
     return HttpResponse(output, mimetype="application/json")
         
 def generateAndroidOutput(request):
