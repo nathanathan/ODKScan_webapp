@@ -60,7 +60,7 @@ def compare_fields(field, the_truth):
     else:
         return abs(levenshtein(field_value, the_truth['value']))
 
-def remove_outliers(log_items, max_time_difference=60):
+def remove_outliers(log_items, max_time_difference=30):
     if len(log_items) < 2:
         return log_items
     groups = []
