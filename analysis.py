@@ -208,14 +208,22 @@ def genStats(userObject, form_image, pyobj, ground_truth):
         if autofill:
             previous = str(jsonField.get('value', ''))
         for log_item in filtered_log_items.filter(fieldName=fieldName).order_by('timestamp').all():
-            cur = log_item.newValue if log_item.newValue else ''
+            if log_item.activity == 'table-view-click-segment':
+                #Don't want to include these clicks in our edit distance
+                #TODO: Add some code to track segment clicks in the table view.
+                continue
+            if log_item.activity is not None and log_item.activity != 'android-text changed':
+                from django.core import serializers
+                foobar = serializers.serialize('json', [log_item])
+                raise Exception(foobar)
+            cur = log_item.newValue #if log_item.newValue else ''
             difference = len(cur) - len(previous)
             total_lev_distance_traveled += abs(levenshtein(cur, previous))
             if difference > 0:
                 chars_added += difference
             else:
                 backspaces -= difference
-            previous = log_item.newValue
+            previous = cur
     userStats['backspaces'] = backspaces
     userStats['chars_added'] = chars_added
     userStats['total_lev_distance_traveled'] = total_lev_distance_traveled
