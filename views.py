@@ -87,3 +87,80 @@ def log(request):
         return HttpResponse("hi")
     else:
         return HttpResponseBadRequest("Only post requests please.")
+
+from django.views.decorators.csrf import csrf_exempt
+SERVER_TMP_DIR = '/tmp'
+#TODO: Delete temp directories.
+#TODO: Make user accounts to keep files separate.
+@csrf_exempt
+def upload_template(request):
+    """
+    Upload a template json and image file to the server
+    """
+    if request.method == 'POST':
+        username = request.POST.get("username", "test")
+        userdir = os.path.join(SERVER_TMP_DIR, username)
+        try:
+            os.makedirs(userdir)
+        except:
+            pass
+        filename, ext = os.path.splitext(request.FILES['templateImage'].name)
+        imagepath = os.path.join(userdir, 'form.jpg') #could be trouble if the image isn't a jpg
+        
+        fo = open(imagepath, "wb+")
+        fo.write(request.FILES['templateImage'].read())
+        fo.close()
+        
+        jsonpath = os.path.join(userdir, 'template.json')
+        fo = open(jsonpath, "wb+")
+        fo.write(request.POST['templateJson'])
+        fo.close()
+        return HttpResponse(str(request.POST['templateJson']))
+    
+@csrf_exempt
+def test_template(request):
+    """
+    Upload a image and process it with the given template.
+    """
+    if request.method == 'POST':
+        username = request.POST.get("username", "test")
+        userdir = os.path.join(SERVER_TMP_DIR, username)
+        try:
+            os.makedirs(userdir)
+        except:
+            pass
+        filename, ext = os.path.splitext(request.FILES['testImage'].name)
+        imagepath = os.path.join(userdir, 'testImage' + ext) #could be trouble if the image isn't a jpg
+        fo = open(imagepath, "wb+")
+        fo.write(request.FILES['testImage'].read())
+        fo.close()
+        #This is where we make the call to ODKScan core
+        output_path = os.path.join(userdir, 'output')
+        try:
+            os.makedirs(output_path)
+        except:
+            pass
+        import subprocess
+        #TODO: Move APP_ROOT?
+        APP_ROOT = os.path.dirname(__file__)
+        #TODO: Consider adding support for a run configuration JSON file that can be passed in instead of a bunch of parameters.
+        stdoutdata, stderrdata = subprocess.Popen(['./ODKScan.run',
+                          userdir + '/',
+                          imagepath,
+                          output_path
+                          ],
+            cwd=os.path.join(APP_ROOT,
+                             'ODKScan-core'),
+            env={'LD_LIBRARY_PATH':'/usr/local/lib'}, #TODO: This could cause problems on other systems, document or fix
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE).communicate()
+        print >>sys.stdout, stdoutdata
+        markedup_path = os.path.join(output_path, 'markedup.jpg')
+        if not os.path.exists(markedup_path):
+            return HttpResponse("No marked-up image")
+        fo = open(markedup_path)
+        response = HttpResponse(mimetype='image/jpg')
+        response['Content-Disposition'] = 'attachment; filename=output.jpg'
+        response.write(fo.read())
+        fo.close()
+        return response
