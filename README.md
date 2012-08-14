@@ -20,6 +20,8 @@ In settings.py:
 
 Paste this at the bottom of urls.py:
 
+	urlpatterns += [url(r'', include('ODKScan_webapp.urls'))]
+	
 	#This to serve static media. For production servers you aren't supposed to serve media with Django.
 	from django.conf import settings
 	if settings.DEBUG:
@@ -29,10 +31,8 @@ Paste this at the bottom of urls.py:
 	        }),
 	   )
 	
-	#This is for serving static files:
 	from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 	urlpatterns += staticfiles_urlpatterns()
-	urlpatterns += [url(r'^save_transcription', 'ODKScan_webapp.views.save_transcriptions')]
 
 Check to see if the ODKScan_webapp appears on your django admin page.
 

@@ -89,7 +89,8 @@ def log(request):
         return HttpResponseBadRequest("Only post requests please.")
 
 from django.views.decorators.csrf import csrf_exempt
-SERVER_TMP_DIR = '/tmp'
+from django.conf import settings
+SERVER_TMP_DIR = os.path.join(settings.MEDIA_ROOT, 'tmp')
 #TODO: Delete temp directories.
 #TODO: Make user accounts to keep files separate.
 @csrf_exempt
@@ -115,8 +116,12 @@ def upload_template(request):
         fo = open(jsonpath, "wb+")
         fo.write(request.POST['templateJson'])
         fo.close()
-        return HttpResponse(str(request.POST['templateJson']))
-    
+        return HttpResponse(json.dumps({
+                                        "username":username
+                                        }))
+
+from django.http import HttpResponseRedirect
+#TODO: Could use a token here
 @csrf_exempt
 def test_template(request):
     """
@@ -125,10 +130,6 @@ def test_template(request):
     if request.method == 'POST':
         username = request.POST.get("username", "test")
         userdir = os.path.join(SERVER_TMP_DIR, username)
-        try:
-            os.makedirs(userdir)
-        except:
-            pass
         filename, ext = os.path.splitext(request.FILES['testImage'].name)
         imagepath = os.path.join(userdir, 'testImage' + ext) #could be trouble if the image isn't a jpg
         fo = open(imagepath, "wb+")
@@ -158,9 +159,12 @@ def test_template(request):
         markedup_path = os.path.join(output_path, 'markedup.jpg')
         if not os.path.exists(markedup_path):
             return HttpResponse("No marked-up image")
-        fo = open(markedup_path)
-        response = HttpResponse(mimetype='image/jpg')
-        response['Content-Disposition'] = 'attachment; filename=output.jpg'
-        response.write(fo.read())
-        fo.close()
-        return response
+        import socket
+        hostname = socket.gethostbyname(request.META['SERVER_NAME'])
+        return HttpResponse(hostname + '/formView?formLocation=/media/tmp/'+username+'/output/') #+ urlencode(params))
+#        fo = open(markedup_path)
+#        response = HttpResponse(mimetype='image/jpg')
+#        #response['Content-Disposition'] = 'attachment; filename=output.jpg'
+#        response.write(fo.read())
+#        fo.close()
+#        return response
