@@ -91,6 +91,8 @@ def log(request):
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 SERVER_TMP_DIR = os.path.join(settings.MEDIA_ROOT, 'tmp')
+import socket
+HOSTNAME = socket.gethostbyname(request.META['SERVER_NAME'])
 #TODO: Delete temp directories.
 #TODO: Make user accounts to keep files separate.
 @csrf_exempt
@@ -117,7 +119,8 @@ def upload_template(request):
         fo.write(request.POST['templateJson'])
         fo.close()
         return HttpResponse(json.dumps({
-                                        "username":username
+                                        "username":username,
+                                        "imageUploadURL":HOSTNAME+'/upload_form?username='+username,
                                         }))
 
 from django.http import HttpResponseRedirect
@@ -159,12 +162,12 @@ def test_template(request):
         markedup_path = os.path.join(output_path, 'markedup.jpg')
         if not os.path.exists(markedup_path):
             return HttpResponse("No marked-up image")
-        import socket
-        hostname = socket.gethostbyname(request.META['SERVER_NAME'])
-        return HttpResponse(hostname + '/formView?formLocation=/media/tmp/'+username+'/output/') #+ urlencode(params))
+        
+        return HttpResponse(HOSTNAME + '/formView?formLocation=/media/tmp/'+username+'/output/') #+ urlencode(params))
 #        fo = open(markedup_path)
 #        response = HttpResponse(mimetype='image/jpg')
 #        #response['Content-Disposition'] = 'attachment; filename=output.jpg'
 #        response.write(fo.read())
 #        fo.close()
 #        return response
+
