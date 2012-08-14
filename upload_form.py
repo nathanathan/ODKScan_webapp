@@ -1,6 +1,7 @@
 from django.http import HttpResponse
 from django.shortcuts import render_to_response
 from django import forms
+from django.core.context_processors import csrf
 
 import datetime
 import tempfile

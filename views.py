@@ -121,7 +121,7 @@ def upload_template(request):
         fo.close()
         return HttpResponse(json.dumps({
                                         "username":username,
-                                        "imageUploadURL":HOSTNAME+'/upload_form?username='+username,
+                                        "imageUploadURL":'http://'+HOSTNAME+'/upload_form?username='+username,
                                         }))
 
 from django.http import HttpResponseRedirect
