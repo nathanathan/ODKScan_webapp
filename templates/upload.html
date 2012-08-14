@@ -18,7 +18,7 @@
 <body>
 
 {% block upload %}
-<form enctype="multipart/form-data" method="post" class="well" id="myForm">
+<form enctype="multipart/form-data" method="post" class="well" id="myForm">{% csrf_token %}
 	<table>
        {{form.as_table}}
     </table>
