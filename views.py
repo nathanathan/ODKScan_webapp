@@ -92,7 +92,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 SERVER_TMP_DIR = os.path.join(settings.MEDIA_ROOT, 'tmp')
 import socket
-HOSTNAME = socket.gethostbyname(request.META['SERVER_NAME'])
+
 #TODO: Delete temp directories.
 #TODO: Make user accounts to keep files separate.
 @csrf_exempt
@@ -100,6 +100,7 @@ def upload_template(request):
     """
     Upload a template json and image file to the server
     """
+    HOSTNAME = socket.gethostbyname(request.META['SERVER_NAME'])
     if request.method == 'POST':
         username = request.POST.get("username", "test")
         userdir = os.path.join(SERVER_TMP_DIR, username)
@@ -130,6 +131,7 @@ def test_template(request):
     """
     Upload a image and process it with the given template.
     """
+    HOSTNAME = socket.gethostbyname(request.META['SERVER_NAME'])
     if request.method == 'POST':
         username = request.POST.get("username", "test")
         userdir = os.path.join(SERVER_TMP_DIR, username)
