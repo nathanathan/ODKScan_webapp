@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from ODKScan_webapp.models import Template, FormImage, LogItem
 from django.http import HttpResponse, HttpResponseBadRequest
-import sys, os, tempfile
+import sys, os, tempfile, shutil
 import json, codecs
 from django.shortcuts import render_to_response, redirect
 from django.core.context_processors import csrf
@@ -121,7 +121,6 @@ def upload_template(request):
         fo.close()
         return HttpResponse(json.dumps({
                                         "sessionToken":sessionToken,
-                                        "imageUploadURL":'http://'+HOSTNAME+'/upload_form?username='+sessionToken,
                                         }))
 @csrf_exempt
 def upload_form(request):
@@ -143,9 +142,15 @@ def upload_form(request):
         fo.write(request.FILES['image'].read())
         fo.close()
         
+#        #Remove the output directory so the form will be reprocessed.
+#        output_path = os.path.join(sessionDir, 'output')
+#        try:
+#            shutil.rmtree(output_path)
+#        except:
+#            pass
+        
         return HttpResponse(json.dumps({
                                         "sessionToken":sessionToken,
-                                        "imageUploadURL":'http://'+HOSTNAME+'/upload_form?username='+sessionToken,
                                         }))
         
 from django.http import HttpResponseRedirect
@@ -155,18 +160,16 @@ def test_template(request):
     """
     Upload a image and process it with the given template.
     """
-    HOSTNAME = socket.gethostbyname(request.META['SERVER_NAME'])
     if request.method == 'POST':
         sessionToken = request.POST.get("sessionToken", "test")
-        userdir = os.path.join(SERVER_TMP_DIR, sessionToken)
-        imagepath = os.path.join(userdir, 'testImage.jpg') #could be trouble if the image isn't a jpg
-        #filename, ext = os.path.splitext(request.FILES['testImage'].name)
-#        imagepath = os.path.join(userdir, 'testImage' + ext) #could be trouble if the image isn't a jpg
-#        fo = open(imagepath, "wb+")
-#        fo.write(request.FILES['testImage'].read())
-#        fo.close()
-        #This is where we make the call to ODKScan core
-        output_path = os.path.join(userdir, 'output')
+        sessionDir = os.path.join(SERVER_TMP_DIR, sessionToken)
+        imagepath = os.path.join(sessionDir, 'testImage.jpg') #could be trouble if the image isn't a jpg
+        if not os.path.exists(os.path.join(output_path, 'form.jpg')):
+            return HttpResponse("No template image")
+        if not os.path.exists(imagepath):
+            return HttpResponse("No test image.")
+        
+        output_path = os.path.join(sessionDir, 'output')
         try:
             os.makedirs(output_path)
         except:
@@ -175,8 +178,12 @@ def test_template(request):
         #TODO: Move APP_ROOT?
         APP_ROOT = os.path.dirname(__file__)
         #TODO: Consider adding support for a run configuration JSON file that can be passed in instead of a bunch of parameters.
+        
+        #TODO: Make ODKScan core overwirte the features if the image/template file is newer.
+        os.remove(os.path.join(sessionDir, "cached_features.yml"))
+        
         stdoutdata, stderrdata = subprocess.Popen(['./ODKScan.run',
-                          userdir + '/',
+                          sessionDir + '/',
                           imagepath,
                           output_path
                           ],
@@ -186,15 +193,8 @@ def test_template(request):
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE).communicate()
         print >>sys.stdout, stdoutdata
-        markedup_path = os.path.join(output_path, 'markedup.jpg')
-        if not os.path.exists(markedup_path):
-            return HttpResponse("No marked-up image")
-        #HOSTNAME + 
+        if not os.path.exists(os.path.join(output_path, 'aligned.jpg')):
+            return HttpResponse("Could not align")
+        if not os.path.exists(os.path.join(output_path, 'markedup.jpg')):
+            return HttpResponse("Could not process")
         return HttpResponseRedirect('/formView?formLocation=/media/tmp/'+sessionToken+'/output/') #+ urlencode(params))
-#        fo = open(markedup_path)
-#        response = HttpResponse(mimetype='image/jpg')
-#        #response['Content-Disposition'] = 'attachment; filename=output.jpg'
-#        response.write(fo.read())
-#        fo.close()
-#        return response
-
