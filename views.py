@@ -102,28 +102,52 @@ def upload_template(request):
     """
     HOSTNAME = socket.gethostbyname(request.META['SERVER_NAME'])
     if request.method == 'POST':
-        username = request.POST.get("username", "test")
-        userdir = os.path.join(SERVER_TMP_DIR, username)
+        sessionToken = request.POST.get("sessionToken", "test")
+        sessionDir = os.path.join(SERVER_TMP_DIR, sessionToken)
         try:
-            os.makedirs(userdir)
+            os.makedirs(sessionDir)
         except:
             pass
         filename, ext = os.path.splitext(request.FILES['templateImage'].name)
-        imagepath = os.path.join(userdir, 'form.jpg') #could be trouble if the image isn't a jpg
+        imagepath = os.path.join(sessionDir, 'form.jpg') #could be trouble if the image isn't a jpg
         
         fo = open(imagepath, "wb+")
-        fo.write(request.FILES['templateImage'].read())
+        fo.write(request.FILES['image'].read())
         fo.close()
         
-        jsonpath = os.path.join(userdir, 'template.json')
+        jsonpath = os.path.join(sessionDir, 'template.json')
         fo = open(jsonpath, "wb+")
         fo.write(request.POST['templateJson'])
         fo.close()
         return HttpResponse(json.dumps({
-                                        "username":username,
-                                        "imageUploadURL":'http://'+HOSTNAME+'/upload_form?username='+username,
+                                        "sessionToken":sessionToken,
+                                        "imageUploadURL":'http://'+HOSTNAME+'/upload_form?username='+sessionToken,
                                         }))
-
+@csrf_exempt
+def upload_form(request):
+    """
+    Upload a template json and image file to the server
+    """
+    HOSTNAME = socket.gethostbyname(request.META['SERVER_NAME'])
+    if request.method == 'POST':
+        sessionToken = request.POST.get("sessionToken", "test")
+        sessionDir = os.path.join(SERVER_TMP_DIR, sessionToken)
+        try:
+            os.makedirs(sessionDir)
+        except:
+            pass
+        filename, ext = os.path.splitext(request.FILES['image'].name)
+        imagepath = os.path.join(sessionDir, 'testImage.jpg') #could be trouble if the image isn't a jpg
+        
+        fo = open(imagepath, "wb+")
+        fo.write(request.FILES['image'].read())
+        fo.close()
+        
+        return HttpResponse(json.dumps({
+                                        "sessionToken":sessionToken,
+                                        "imageUploadURL":'http://'+HOSTNAME+'/upload_form?username='+sessionToken,
+                                        }))
+        
 from django.http import HttpResponseRedirect
 #TODO: Could use a token here
 @csrf_exempt
@@ -133,13 +157,14 @@ def test_template(request):
     """
     HOSTNAME = socket.gethostbyname(request.META['SERVER_NAME'])
     if request.method == 'POST':
-        username = request.POST.get("username", "test")
-        userdir = os.path.join(SERVER_TMP_DIR, username)
-        filename, ext = os.path.splitext(request.FILES['testImage'].name)
-        imagepath = os.path.join(userdir, 'testImage' + ext) #could be trouble if the image isn't a jpg
-        fo = open(imagepath, "wb+")
-        fo.write(request.FILES['testImage'].read())
-        fo.close()
+        sessionToken = request.POST.get("sessionToken", "test")
+        userdir = os.path.join(SERVER_TMP_DIR, sessionToken)
+        imagepath = os.path.join(userdir, 'testImage.jpg') #could be trouble if the image isn't a jpg
+        #filename, ext = os.path.splitext(request.FILES['testImage'].name)
+#        imagepath = os.path.join(userdir, 'testImage' + ext) #could be trouble if the image isn't a jpg
+#        fo = open(imagepath, "wb+")
+#        fo.write(request.FILES['testImage'].read())
+#        fo.close()
         #This is where we make the call to ODKScan core
         output_path = os.path.join(userdir, 'output')
         try:
@@ -164,8 +189,8 @@ def test_template(request):
         markedup_path = os.path.join(output_path, 'markedup.jpg')
         if not os.path.exists(markedup_path):
             return HttpResponse("No marked-up image")
-        
-        return HttpResponse(HOSTNAME + '/formView?formLocation=/media/tmp/'+username+'/output/') #+ urlencode(params))
+        #HOSTNAME + 
+        return HttpResponseRedirect('/formView?formLocation=/media/tmp/'+sessionToken+'/output/') #+ urlencode(params))
 #        fo = open(markedup_path)
 #        response = HttpResponse(mimetype='image/jpg')
 #        #response['Content-Disposition'] = 'attachment; filename=output.jpg'

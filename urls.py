@@ -10,8 +10,8 @@ urlpatterns = patterns(APP_NAME,
     url(r'^fieldView', 'views.field_view'),
     
     url(r'^upload_template', 'views.upload_template'),
+    url(r'^upload_form', 'views.upload_form'),
     url(r'^test_template', 'views.test_template'),
-    url(r'^upload_form', 'upload_form.index'),
     
     url(r'^log', 'views.log'),
     
