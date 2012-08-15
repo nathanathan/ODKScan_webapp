@@ -108,7 +108,7 @@ def upload_template(request):
             os.makedirs(sessionDir)
         except:
             pass
-        filename, ext = os.path.splitext(request.FILES['templateImage'].name)
+        filename, ext = os.path.splitext(request.FILES['image'].name)
         imagepath = os.path.join(sessionDir, 'form.jpg') #could be trouble if the image isn't a jpg
         
         fo = open(imagepath, "wb+")
