@@ -180,7 +180,10 @@ def test_template(request):
         #TODO: Consider adding support for a run configuration JSON file that can be passed in instead of a bunch of parameters.
         
         #TODO: Make ODKScan core overwirte the features if the image/template file is newer.
-        os.remove(os.path.join(sessionDir, "cached_features.yml"))
+        try:
+            os.remove(os.path.join(sessionDir, "cached_features.yml"))
+        except:
+            pass
         
         stdoutdata, stderrdata = subprocess.Popen(['./ODKScan.run',
                           sessionDir + '/',
