@@ -164,7 +164,7 @@ def test_template(request):
         sessionToken = request.POST.get("sessionToken", "test")
         sessionDir = os.path.join(SERVER_TMP_DIR, sessionToken)
         imagepath = os.path.join(sessionDir, 'testImage.jpg') #could be trouble if the image isn't a jpg
-        if not os.path.exists(os.path.join(output_path, 'form.jpg')):
+        if not os.path.exists(os.path.join(sessionDir, 'form.jpg')):
             return HttpResponse("No template image")
         if not os.path.exists(imagepath):
             return HttpResponse("No test image.")
