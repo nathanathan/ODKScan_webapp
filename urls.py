@@ -13,17 +13,24 @@ urlpatterns = patterns(APP_NAME,
     url(r'^upload_form', 'views.upload_form'),
     url(r'^test_template', 'views.test_template'),
     
+    #Log usage data
+    #TODO: Disable logging in javascript
     url(r'^log', 'views.log'),
     
-    #Functions for importing android data and doing some preprocessing
-    url(r'^parseSaveLogItems', 'analysis.parseSaveLogItems'),
-    url(r'^importAndroidData', 'analysis.importAndroidData'),
-    url(r'^generateAndroidOutput', 'analysis.generateAndroidOutput'),
-    url(r'^correct_transcriptions', 'analysis.correct_transcriptions'),
-    url(r'^fillUserFormCondition', 'analysis.fillUserFormCondition'),
-    url(r'^full_pipeline', 'analysis.full_pipeline'),
+    #Functions for importing android data
+    #url(r'^parseSaveLogItems', 'analysis.parseSaveLogItems'),
+    #url(r'^importAndroidData', 'analysis.importAndroidData'),
+    #url(r'^generateAndroidOutput', 'analysis.generateAndroidOutput'),
+    #Functions for data cleaning/preprocessing
+    #url(r'^correct_transcriptions', 'analysis.correct_transcriptions'),
+    #url(r'^fillUserFormCondition', 'analysis.fillUserFormCondition'),
+    #Import android data and clean all the data
+    #url(r'^full_pipeline', 'analysis.full_pipeline'),
     
-    #Data views
-    url(r'^analyseTarget/(?P<userName>\w*)/(?P<formName>\w*)', 'analysis.analyse_target'),
-    url(r'^analyse', 'analysis.analyse'),
+    #Data views from transcription study.
+    #url(r'^analyseTarget/(?P<userName>\w*)/(?P<formName>\w*)', 'analysis.analyse_target'),
+    #analyse will return reports on everyone can take a few optional parameters
+    #startswith - filter only the usernames that start with the given string
+    #format - sets the output format to csv, html or json (default is html)
+    #url(r'^analyse', 'analysis.analyse'),
 )
