@@ -9,6 +9,7 @@ urlpatterns = patterns(APP_NAME,
     url(r'^formView', 'views.form_view'),
     url(r'^fieldView', 'views.field_view'),
     
+    #Handlers for testing templates in the template maker.
     url(r'^upload_template', 'views.upload_template'),
     url(r'^upload_form', 'views.upload_form'),
     url(r'^test_template', 'views.test_template'),
@@ -24,7 +25,7 @@ urlpatterns = patterns(APP_NAME,
     #Functions for data cleaning/preprocessing
     #url(r'^correct_transcriptions', 'analysis.correct_transcriptions'),
     #url(r'^fillUserFormCondition', 'analysis.fillUserFormCondition'),
-    #Import android data and clean all the data
+    #Full pipeline will import and clean all android data
     #url(r'^full_pipeline', 'analysis.full_pipeline'),
     
     #Data views from transcription study.
