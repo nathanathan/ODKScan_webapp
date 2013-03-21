@@ -10,8 +10,10 @@ Installation
 
 Now in your django app directory run:
 
-	git clone git://github.com/nathanathan/ODKScan_webapp.git --recursive
-	#If this was forked you might need to alter the nathanathan part.
+```bash
+git clone git://github.com/UW-ICTD/ODKScan_webapp.git --recursive
+#If this was forked you might need to alter the UW-ICTD part.
+```
 
 In settings.py:
 
@@ -20,31 +22,29 @@ In settings.py:
 
 Paste this at the bottom of urls.py:
 
-	urlpatterns += [url(r'', include('ODKScan_webapp.urls'))]
-	
-	#This to serve static media. For production servers you aren't supposed to serve media with Django.
-	from django.conf import settings
-	if settings.DEBUG:
-	    urlpatterns += patterns('',
-	        url(r'^media/(?P<path>.*)$', 'django.views.static.serve', {
-	            'document_root': settings.MEDIA_ROOT,
-	        }),
-	   )
-	
-	from django.contrib.staticfiles.urls import staticfiles_urlpatterns
-	urlpatterns += staticfiles_urlpatterns()
+```python
+urlpatterns += [url(r'', include('ODKScan_webapp.urls'))]
+
+#This to serve static media. For production servers you aren't supposed to serve media with Django.
+from django.conf import settings
+if settings.DEBUG:
+    urlpatterns += patterns('',
+        url(r'^media/(?P<path>.*)$', 'django.views.static.serve', {
+            'document_root': settings.MEDIA_ROOT,
+        }),
+   )
+
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+urlpatterns += staticfiles_urlpatterns()
+```
 
 Check to see if the ODKScan_webapp appears on your django admin page.
 
-If that worked, go through [the ODKScan-core readme](https://github.com/nathanathan/ODKScan-core/blob/master/README.md) to get the image processing working.
+If that worked, go through [the ODKScan-core readme](https://github.com/UW-ICTD/ODKScan-core/blob/master/README.md) to get the image processing working.
 
 Architecture
 ============
 
-Most of the relevant django code is in admin.py and models.py
-
-There are a few idiosyncratic parts:
-
+* Most of the django code is in admin.py and models.py
 * When images are uploaded they are processed by ODKScan-core.
-* The transcription interface.
-* The template editor.
+* The transcription interface is mainly static content. views.save_transcriptions handles the data it submits.
