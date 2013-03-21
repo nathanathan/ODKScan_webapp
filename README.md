@@ -45,6 +45,6 @@ If that worked, go through [the ODKScan-core readme](https://github.com/UW-ICTD/
 Architecture
 ============
 
-* Most of the django code is in admin.py and models.py
-* When images are uploaded they are processed by ODKScan-core.
-* The transcription interface is mainly static content. views.save_transcriptions handles the data it submits.
+* The django code in admin.py and models.py configures what's in the admin interface.
+* actions.py contains code for processing forms with ODK Scan, rendering transcription pages and generating csvs.
+
