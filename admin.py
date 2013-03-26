@@ -4,11 +4,6 @@ from django.contrib import admin
 from django.conf import settings
 import os, sys
 
-#from django.db import models
-#from form_utils.widgets import ImageWidget
-#from ODKScan_webapp.widgets import AdminImageWidget
-
-
 
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.admin import SimpleListFilter
@@ -86,19 +81,3 @@ class LogItemAdmin(admin.ModelAdmin):
 admin.site.register(LogItem, LogItemAdmin)
 
 
-
-#For user extensions
-from ODKScan_webapp.models import UserProfile
-from django.contrib.auth.admin import UserAdmin
-from django.contrib.auth.models import User
-class ProfileInline(admin.ModelAdmin):#admin.StackedInline):
-    model = UserProfile
-    fk_name = 'user'
-    #max_num = 1
-admin.site.register(UserProfile, ProfileInline)
-
-#class CustomUserAdmin(UserAdmin):
-#    inlines = [ProfileInline,]
-#
-#admin.site.unregister(User)
-#admin.site.register(User, CustomUserAdmin)
