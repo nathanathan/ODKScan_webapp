@@ -1,0 +1,709 @@
+
+{
+	"fields" : 
+	[
+		
+		{
+			"classifier" : 
+			{
+				"classification_map" : 
+				{
+					"empty" : false
+				},
+				"classifier_height" : 24,
+				"classifier_width" : 24,
+				"default_classification" : true,
+				"training_data_uri" : "checkboxes"
+			},
+			"fields" : 
+			[
+				
+				{
+					"classifier" : 
+					{
+						"classification_map" : 
+						{
+							"empty" : false
+						},
+						"classifier_height" : 24,
+						"classifier_width" : 24,
+						"default_classification" : true,
+						"training_data_uri" : "checkboxes"
+					},
+					"items" : 
+					[
+						
+						{
+							"item_x" : 50,
+							"item_y" : 20
+						},
+						
+						{
+							"item_x" : 50,
+							"item_y" : 50
+						},
+						
+						{
+							"item_x" : 50,
+							"item_y" : 80
+						}
+					],
+					"label" : "square checkboxes",
+					"name" : "square_checkboxes",
+					"segments" : 
+					[
+						
+						{
+							"segment_height" : 100,
+							"segment_width" : 100,
+							"segment_x" : 100,
+							"segment_y" : 200
+						},
+						
+						{
+							"segment_height" : 100,
+							"segment_width" : 100,
+							"segment_x" : 200,
+							"segment_y" : 200
+						},
+						
+						{
+							"segment_height" : 100,
+							"segment_width" : 100,
+							"segment_x" : 300,
+							"segment_y" : 200
+						},
+						
+						{
+							"segment_height" : 100,
+							"segment_width" : 100,
+							"segment_x" : 400,
+							"segment_y" : 200
+						},
+						
+						{
+							"segment_height" : 100,
+							"segment_width" : 100,
+							"segment_x" : 500,
+							"segment_y" : 200
+						},
+						
+						{
+							"segment_height" : 100,
+							"segment_width" : 100,
+							"segment_x" : 600,
+							"segment_y" : 200
+						}
+					]
+				},
+				
+				{
+					"classifier" : 
+					{
+						"classification_map" : 
+						{
+							"empty" : false
+						},
+						"classifier_height" : 14,
+						"classifier_width" : 16,
+						"default_classification" : true,
+						"training_data_uri" : "bubbles"
+					},
+					"items" : 
+					[
+						
+						{
+							"item_x" : 20,
+							"item_y" : 25,
+							"label" : "A",
+							"value" : "A"
+						},
+						
+						{
+							"item_x" : 60,
+							"item_y" : 25,
+							"label" : "B",
+							"value" : "B"
+						},
+						
+						{
+							"item_x" : 20,
+							"item_y" : 50,
+							"label" : "C",
+							"value" : "C"
+						},
+						
+						{
+							"item_x" : 60,
+							"item_y" : 50,
+							"label" : "D",
+							"value" : "D"
+						},
+						
+						{
+							"item_x" : 20,
+							"item_y" : 75,
+							"label" : "E",
+							"value" : "E"
+						},
+						
+						{
+							"item_x" : 60,
+							"item_y" : 75,
+							"label" : "F",
+							"value" : "F"
+						}
+					],
+					"label" : "bubbles",
+					"name" : "bubbles",
+					"segment_height" : 100,
+					"segment_width" : 80,
+					"segments" : 
+					[
+						
+						{
+							"segment_x" : 300,
+							"segment_y" : 900
+						}
+					],
+					"type" : "select"
+				}
+			],
+			"height" : 1169,
+			"imageFilename" : "example.jpg",
+			"items" : 
+			[
+				
+				{
+					"item_x" : 50,
+					"item_y" : 20
+				},
+				
+				{
+					"item_x" : 50,
+					"item_y" : 50
+				},
+				
+				{
+					"item_x" : 50,
+					"item_y" : 80
+				}
+			],
+			"label" : "square checkboxes",
+			"name" : "square_checkboxes",
+			"outputPath" : "/sdcard/mScan/output/img0/",
+			"segments" : 
+			[
+				
+				{
+					"imagePath" : "/sdcard/mScan/output/img0/segments/square_checkboxes_image_0.jpg",
+					"items" : 
+					[
+						
+						{
+							"absolute_location" : [ 150, 220 ],
+							"classification" : false,
+							"item_x" : 50,
+							"item_y" : 20
+						},
+						
+						{
+							"absolute_location" : [ 150, 250 ],
+							"classification" : false,
+							"item_x" : 50,
+							"item_y" : 50
+						},
+						
+						{
+							"absolute_location" : [ 150, 280 ],
+							"classification" : false,
+							"item_x" : 50,
+							"item_y" : 80
+						}
+					],
+					"quad" : 
+					[
+						[ 100, 200 ],
+						[ 200, 201 ],
+						[ 200, 300 ],
+						[ 101, 300 ]
+					]
+				},
+				
+				{
+					"imagePath" : "/sdcard/mScan/output/img0/segments/square_checkboxes_image_1.jpg",
+					"items" : 
+					[
+						
+						{
+							"absolute_location" : [ 250, 221 ],
+							"classification" : true,
+							"item_x" : 50,
+							"item_y" : 20
+						},
+						
+						{
+							"absolute_location" : [ 250, 251 ],
+							"classification" : false,
+							"item_x" : 50,
+							"item_y" : 50
+						},
+						
+						{
+							"absolute_location" : [ 250, 281 ],
+							"classification" : false,
+							"item_x" : 50,
+							"item_y" : 80
+						}
+					],
+					"quad" : 
+					[
+						[ 201, 201 ],
+						[ 301, 202 ],
+						[ 301, 302 ],
+						[ 201, 300 ]
+					]
+				},
+				
+				{
+					"imagePath" : "/sdcard/mScan/output/img0/segments/square_checkboxes_image_2.jpg",
+					"items" : 
+					[
+						
+						{
+							"absolute_location" : [ 350, 222 ],
+							"classification" : false,
+							"item_x" : 50,
+							"item_y" : 20
+						},
+						
+						{
+							"absolute_location" : [ 350, 252 ],
+							"classification" : true,
+							"item_x" : 50,
+							"item_y" : 50
+						},
+						
+						{
+							"absolute_location" : [ 350, 282 ],
+							"classification" : true,
+							"item_x" : 50,
+							"item_y" : 80
+						}
+					],
+					"quad" : 
+					[
+						[ 301, 202 ],
+						[ 400, 202 ],
+						[ 400, 302 ],
+						[ 301, 302 ]
+					]
+				},
+				
+				{
+					"imagePath" : "/sdcard/mScan/output/img0/segments/square_checkboxes_image_3.jpg",
+					"items" : 
+					[
+						
+						{
+							"absolute_location" : [ 450, 222 ],
+							"classification" : false,
+							"item_x" : 50,
+							"item_y" : 20
+						},
+						
+						{
+							"absolute_location" : [ 449, 252 ],
+							"classification" : true,
+							"item_x" : 50,
+							"item_y" : 50
+						},
+						
+						{
+							"absolute_location" : [ 449, 282 ],
+							"classification" : true,
+							"item_x" : 50,
+							"item_y" : 80
+						}
+					],
+					"quad" : 
+					[
+						[ 401, 202 ],
+						[ 500, 202 ],
+						[ 499, 302 ],
+						[ 400, 302 ]
+					]
+				},
+				
+				{
+					"imagePath" : "/sdcard/mScan/output/img0/segments/square_checkboxes_image_4.jpg",
+					"items" : 
+					[
+						
+						{
+							"absolute_location" : [ 549, 222 ],
+							"classification" : false,
+							"item_x" : 50,
+							"item_y" : 20
+						},
+						
+						{
+							"absolute_location" : [ 549, 251 ],
+							"classification" : true,
+							"item_x" : 50,
+							"item_y" : 50
+						},
+						
+						{
+							"absolute_location" : [ 549, 281 ],
+							"classification" : true,
+							"item_x" : 50,
+							"item_y" : 80
+						}
+					],
+					"quad" : 
+					[
+						[ 501, 202 ],
+						[ 599, 202 ],
+						[ 598, 302 ],
+						[ 500, 302 ]
+					]
+				},
+				
+				{
+					"imagePath" : "/sdcard/mScan/output/img0/segments/square_checkboxes_image_5.jpg",
+					"items" : 
+					[
+						
+						{
+							"absolute_location" : [ 651, 220 ],
+							"classification" : false,
+							"item_x" : 50,
+							"item_y" : 20
+						},
+						
+						{
+							"absolute_location" : [ 651, 249 ],
+							"classification" : false,
+							"item_x" : 50,
+							"item_y" : 50
+						},
+						
+						{
+							"absolute_location" : [ 651, 280 ],
+							"classification" : true,
+							"item_x" : 50,
+							"item_y" : 80
+						}
+					],
+					"quad" : 
+					[
+						[ 608, 202 ],
+						[ 693, 203 ],
+						[ 698, 301 ],
+						[ 604, 302 ]
+					]
+				}
+			],
+			"type" : "input",
+			"value" : 8,
+			"width" : 827
+		},
+		
+		{
+			"classifier" : 
+			{
+				"classification_map" : 
+				{
+					"empty" : false
+				},
+				"classifier_height" : 14,
+				"classifier_width" : 16,
+				"default_classification" : true,
+				"training_data_uri" : "bubbles"
+			},
+			"fields" : 
+			[
+				
+				{
+					"classifier" : 
+					{
+						"classification_map" : 
+						{
+							"empty" : false
+						},
+						"classifier_height" : 24,
+						"classifier_width" : 24,
+						"default_classification" : true,
+						"training_data_uri" : "checkboxes"
+					},
+					"items" : 
+					[
+						
+						{
+							"item_x" : 50,
+							"item_y" : 20
+						},
+						
+						{
+							"item_x" : 50,
+							"item_y" : 50
+						},
+						
+						{
+							"item_x" : 50,
+							"item_y" : 80
+						}
+					],
+					"label" : "square checkboxes",
+					"name" : "square_checkboxes",
+					"segments" : 
+					[
+						
+						{
+							"segment_height" : 100,
+							"segment_width" : 100,
+							"segment_x" : 100,
+							"segment_y" : 200
+						},
+						
+						{
+							"segment_height" : 100,
+							"segment_width" : 100,
+							"segment_x" : 200,
+							"segment_y" : 200
+						},
+						
+						{
+							"segment_height" : 100,
+							"segment_width" : 100,
+							"segment_x" : 300,
+							"segment_y" : 200
+						},
+						
+						{
+							"segment_height" : 100,
+							"segment_width" : 100,
+							"segment_x" : 400,
+							"segment_y" : 200
+						},
+						
+						{
+							"segment_height" : 100,
+							"segment_width" : 100,
+							"segment_x" : 500,
+							"segment_y" : 200
+						},
+						
+						{
+							"segment_height" : 100,
+							"segment_width" : 100,
+							"segment_x" : 600,
+							"segment_y" : 200
+						}
+					]
+				},
+				
+				{
+					"classifier" : 
+					{
+						"classification_map" : 
+						{
+							"empty" : false
+						},
+						"classifier_height" : 14,
+						"classifier_width" : 16,
+						"default_classification" : true,
+						"training_data_uri" : "bubbles"
+					},
+					"items" : 
+					[
+						
+						{
+							"item_x" : 20,
+							"item_y" : 25,
+							"label" : "A",
+							"value" : "A"
+						},
+						
+						{
+							"item_x" : 60,
+							"item_y" : 25,
+							"label" : "B",
+							"value" : "B"
+						},
+						
+						{
+							"item_x" : 20,
+							"item_y" : 50,
+							"label" : "C",
+							"value" : "C"
+						},
+						
+						{
+							"item_x" : 60,
+							"item_y" : 50,
+							"label" : "D",
+							"value" : "D"
+						},
+						
+						{
+							"item_x" : 20,
+							"item_y" : 75,
+							"label" : "E",
+							"value" : "E"
+						},
+						
+						{
+							"item_x" : 60,
+							"item_y" : 75,
+							"label" : "F",
+							"value" : "F"
+						}
+					],
+					"label" : "bubbles",
+					"name" : "bubbles",
+					"segment_height" : 100,
+					"segment_width" : 80,
+					"segments" : 
+					[
+						
+						{
+							"segment_x" : 300,
+							"segment_y" : 900
+						}
+					],
+					"type" : "select"
+				}
+			],
+			"height" : 1169,
+			"imageFilename" : "example.jpg",
+			"items" : 
+			[
+				
+				{
+					"item_x" : 20,
+					"item_y" : 25,
+					"label" : "A",
+					"value" : "A"
+				},
+				
+				{
+					"item_x" : 60,
+					"item_y" : 25,
+					"label" : "B",
+					"value" : "B"
+				},
+				
+				{
+					"item_x" : 20,
+					"item_y" : 50,
+					"label" : "C",
+					"value" : "C"
+				},
+				
+				{
+					"item_x" : 60,
+					"item_y" : 50,
+					"label" : "D",
+					"value" : "D"
+				},
+				
+				{
+					"item_x" : 20,
+					"item_y" : 75,
+					"label" : "E",
+					"value" : "E"
+				},
+				
+				{
+					"item_x" : 60,
+					"item_y" : 75,
+					"label" : "F",
+					"value" : "F"
+				}
+			],
+			"label" : "bubbles",
+			"name" : "bubbles",
+			"outputPath" : "/sdcard/mScan/output/img0/",
+			"segment_height" : 100,
+			"segment_width" : 80,
+			"segments" : 
+			[
+				
+				{
+					"imagePath" : "/sdcard/mScan/output/img0/segments/bubbles_image_0.jpg",
+					"items" : 
+					[
+						
+						{
+							"absolute_location" : [ 320, 923 ],
+							"classification" : false,
+							"item_x" : 20,
+							"item_y" : 25,
+							"label" : "A",
+							"value" : "A"
+						},
+						
+						{
+							"absolute_location" : [ 360, 923 ],
+							"classification" : false,
+							"item_x" : 60,
+							"item_y" : 25,
+							"label" : "B",
+							"value" : "B"
+						},
+						
+						{
+							"absolute_location" : [ 320, 948 ],
+							"classification" : false,
+							"item_x" : 20,
+							"item_y" : 50,
+							"label" : "C",
+							"value" : "C"
+						},
+						
+						{
+							"absolute_location" : [ 360, 948 ],
+							"classification" : true,
+							"item_x" : 60,
+							"item_y" : 50,
+							"label" : "D",
+							"value" : "D"
+						},
+						
+						{
+							"absolute_location" : [ 320, 973 ],
+							"classification" : false,
+							"item_x" : 20,
+							"item_y" : 75,
+							"label" : "E",
+							"value" : "E"
+						},
+						
+						{
+							"absolute_location" : [ 360, 973 ],
+							"classification" : false,
+							"item_x" : 60,
+							"item_y" : 75,
+							"label" : "F",
+							"value" : "F"
+						}
+					],
+					"quad" : 
+					[
+						[ 301, 899 ],
+						[ 380, 899 ],
+						[ 380, 998 ],
+						[ 301, 998 ]
+					]
+				}
+			],
+			"type" : "select",
+			"value" : "D",
+			"width" : 827
+		}
+	],
+	"form_scale" : 1.0,
+	"templatePath" : "/sdcard/mScan/form_templates/example"
+}

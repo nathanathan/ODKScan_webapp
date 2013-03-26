@@ -1,0 +1,14 @@
+.segment-container {
+    position: relative;
+	display: inline;
+}
+.item {
+    position: absolute;
+    outline-style: solid;
+    outline-color: blue;
+    outline-width: 1px;
+}
+.segments {
+    max-width: 4in;
+    display: inline-block;
+}
