@@ -47,4 +47,5 @@ Architecture
 
 * The django code in admin.py and models.py configures what's in the admin interface.
 * actions.py contains code for processing forms with ODK Scan, rendering transcription pages and generating csvs.
-
+* The ODKScan-core contains the image processing code.
+* The UI for the transcription interfaces is contained in static/transcription and in the templates directory.
