@@ -68,9 +68,6 @@ class FormImageAdmin(admin.ModelAdmin):
     #formfield_overrides = { models.ImageField: {'widget': AdminImageWidget}}
     actions = [actions.process_forms,
                actions.transcribe,
-               actions.transcribeNoImages,
-               actions.transcribeNoAutofill,
-               actions.transcribeNoEverything,
                actions.transcribeFormView,
                actions.finalize,
                actions.generate_csv]
