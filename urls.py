@@ -10,9 +10,9 @@ urlpatterns = patterns(APP_NAME,
     url(r'^fieldView', 'views.field_view'),
     
     #Handlers for testing templates in the template maker.
-    url(r'^upload_template', 'views.upload_template'),
-    url(r'^upload_form', 'views.upload_form'),
-    url(r'^test_template', 'views.test_template'),
+    url(r'^upload_template', 'template_testing.upload_template'),
+    url(r'^upload_form', 'template_testing.upload_form'),
+    url(r'^test_template', 'template_testing.test_template'),
     
     #Log usage data
     #TODO: Disable logging in javascript
