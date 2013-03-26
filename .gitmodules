@@ -1,9 +1,0 @@
-[submodule "ODKScan-core"]
-	path = ODKScan-core
-	url = git://github.com/nathanathan/ODKScan-core.git
-[submodule "static/TemplateMaker"]
-	path = static/TemplateMaker
-	url = git://github.com/nathanathan/TemplateMaker.git
-[submodule "static/transcription"]
-	path = static/transcription
-	url = git://github.com/nathanathan/transcription.git
