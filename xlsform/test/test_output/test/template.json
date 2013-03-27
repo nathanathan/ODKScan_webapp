@@ -1,0 +1,1363 @@
+{
+    "fields": [], 
+    "markup": [
+        {
+            "segments": [
+                {
+                    "segment_y": 100, 
+                    "segment_x": 40, 
+                    "segment_height": 160, 
+                    "segment_width": 251
+                }
+            ], 
+            "type": "note", 
+            "name": "a_note", 
+            "param": null, 
+            "label": "This is an\nexample form\nfor ODK Scan"
+        }, 
+        {
+            "min_height": 80, 
+            "name": "name", 
+            "segments": [
+                {
+                    "segment_width": 251, 
+                    "segment_y": 100, 
+                    "segment_x": 291, 
+                    "segment_height": 80
+                }
+            ], 
+            "type": "string", 
+            "param": null, 
+            "label": "Health center name:"
+        }, 
+        {
+            "min_height": 80, 
+            "name": "address", 
+            "segments": [
+                {
+                    "segment_width": 251, 
+                    "segment_y": 180, 
+                    "segment_x": 291, 
+                    "segment_height": 80
+                }
+            ], 
+            "type": "string", 
+            "param": null, 
+            "label": "Health center address:"
+        }, 
+        {
+            "segments": [
+                {
+                    "segment_width": 251, 
+                    "segment_y": 100, 
+                    "segment_x": 541, 
+                    "segment_height": 30
+                }
+            ], 
+            "type": "string", 
+            "name": "month", 
+            "param": null, 
+            "label": "Month:"
+        }, 
+        {
+            "segments": [
+                {
+                    "segment_width": 251, 
+                    "segment_y": 130, 
+                    "segment_x": 541, 
+                    "segment_height": 30
+                }
+            ], 
+            "type": "int", 
+            "name": "day", 
+            "param": null, 
+            "label": "Day:"
+        }, 
+        {
+            "segments": [
+                {
+                    "segment_width": 251, 
+                    "segment_y": 160, 
+                    "segment_x": 541, 
+                    "segment_height": 100
+                }
+            ], 
+            "type": "int", 
+            "name": "year", 
+            "param": null, 
+            "label": "Year:"
+        }, 
+        {
+            "min_height": 50, 
+            "name": "immunizations_section", 
+            "segments": [
+                {
+                    "segment_y": 260, 
+                    "segment_x": 40, 
+                    "segment_height": 50, 
+                    "segment_width": 752
+                }
+            ], 
+            "type": "note", 
+            "param": null, 
+            "label": "In the last 30 days, how many of the following immunizations have been given?\n(Fill in a bubble for each.)"
+        }, 
+        {
+            "name": "Tetanus", 
+            "items": [
+                {
+                    "item_x": 23, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 41, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 59, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 77, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 95, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 113, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 131, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 149, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 167, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 185, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 203, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 221, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 239, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 257, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 275, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 293, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 311, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 329, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 347, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 365, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 383, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 401, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 419, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 437, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 455, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 473, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 491, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 509, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 527, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 545, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 563, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 581, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 599, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 617, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 635, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 653, 
+                    "item_y": 36
+                }
+            ], 
+            "segments": [
+                {
+                    "segment_y": 310, 
+                    "segment_x": 40, 
+                    "segment_height": 54, 
+                    "segment_width": 752
+                }
+            ], 
+            "param": "36", 
+            "label": "Tetanus", 
+            "type": "int"
+        }, 
+        {
+            "name": "Measles", 
+            "items": [
+                {
+                    "item_x": 23, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 41, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 59, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 77, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 95, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 113, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 131, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 149, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 167, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 185, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 203, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 221, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 239, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 257, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 275, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 293, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 311, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 329, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 347, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 365, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 383, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 401, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 419, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 437, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 455, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 473, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 491, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 509, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 527, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 545, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 563, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 581, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 599, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 617, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 635, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 653, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 671, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 689, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 707, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 725, 
+                    "item_y": 36
+                }
+            ], 
+            "segments": [
+                {
+                    "segment_y": 364, 
+                    "segment_x": 40, 
+                    "segment_height": 54, 
+                    "segment_width": 752
+                }
+            ], 
+            "param": "40", 
+            "label": "Measles", 
+            "type": "int"
+        }, 
+        {
+            "name": "Polio", 
+            "items": [
+                {
+                    "item_x": 23, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 41, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 59, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 77, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 95, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 113, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 131, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 149, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 167, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 185, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 203, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 221, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 239, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 257, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 275, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 293, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 311, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 329, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 347, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 365, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 383, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 401, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 419, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 437, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 455, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 473, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 491, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 509, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 527, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 545, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 563, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 581, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 599, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 617, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 635, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 653, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 671, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 689, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 707, 
+                    "item_y": 36
+                }
+            ], 
+            "segments": [
+                {
+                    "segment_y": 418, 
+                    "segment_x": 40, 
+                    "segment_height": 54, 
+                    "segment_width": 752
+                }
+            ], 
+            "param": "39", 
+            "label": "Polio", 
+            "type": "int"
+        }, 
+        {
+            "name": "DPT", 
+            "items": [
+                {
+                    "item_x": 23, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 41, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 59, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 77, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 95, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 113, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 131, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 149, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 167, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 185, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 203, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 221, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 239, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 257, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 275, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 293, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 311, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 329, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 347, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 365, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 383, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 401, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 419, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 437, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 455, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 473, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 491, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 509, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 527, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 545, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 563, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 581, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 599, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 617, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 635, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 653, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 671, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 689, 
+                    "item_y": 36
+                }
+            ], 
+            "segments": [
+                {
+                    "segment_y": 472, 
+                    "segment_x": 40, 
+                    "segment_height": 54, 
+                    "segment_width": 752
+                }
+            ], 
+            "param": "38", 
+            "label": "DPT", 
+            "type": "int"
+        }, 
+        {
+            "name": "MMR", 
+            "items": [
+                {
+                    "item_x": 23, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 41, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 59, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 77, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 95, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 113, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 131, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 149, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 167, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 185, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 203, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 221, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 239, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 257, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 275, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 293, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 311, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 329, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 347, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 365, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 383, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 401, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 419, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 437, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 455, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 473, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 491, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 509, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 527, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 545, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 563, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 581, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 599, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 617, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 635, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 653, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 671, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 689, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 707, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 725, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 23, 
+                    "item_y": 54
+                }
+            ], 
+            "segments": [
+                {
+                    "segment_y": 526, 
+                    "segment_x": 40, 
+                    "segment_height": 72, 
+                    "segment_width": 752
+                }
+            ], 
+            "param": "41", 
+            "label": "MMR", 
+            "type": "int"
+        }, 
+        {
+            "name": "Hepatitis_A", 
+            "items": [
+                {
+                    "item_x": 23, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 41, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 59, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 77, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 95, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 113, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 131, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 149, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 167, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 185, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 203, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 221, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 239, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 257, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 275, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 293, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 311, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 329, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 347, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 365, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 383, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 401, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 419, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 437, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 455, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 473, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 491, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 509, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 527, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 545, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 563, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 581, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 599, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 617, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 635, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 653, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 671, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 689, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 707, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 725, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 23, 
+                    "item_y": 54
+                }, 
+                {
+                    "item_x": 41, 
+                    "item_y": 54
+                }
+            ], 
+            "segments": [
+                {
+                    "segment_y": 598, 
+                    "segment_x": 40, 
+                    "segment_height": 72, 
+                    "segment_width": 752
+                }
+            ], 
+            "param": "42", 
+            "label": "Hepatitis A", 
+            "type": "int"
+        }, 
+        {
+            "name": "Hepatitis_B", 
+            "items": [
+                {
+                    "item_x": 23, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 41, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 59, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 77, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 95, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 113, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 131, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 149, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 167, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 185, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 203, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 221, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 239, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 257, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 275, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 293, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 311, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 329, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 347, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 365, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 383, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 401, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 419, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 437, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 455, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 473, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 491, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 509, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 527, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 545, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 563, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 581, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 599, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 617, 
+                    "item_y": 36
+                }, 
+                {
+                    "item_x": 635, 
+                    "item_y": 36
+                }
+            ], 
+            "segments": [
+                {
+                    "segment_y": 670, 
+                    "segment_x": 40, 
+                    "segment_height": 54, 
+                    "segment_width": 752
+                }
+            ], 
+            "param": "35", 
+            "label": "Hepatitis B", 
+            "type": "int"
+        }, 
+        {
+            "name": "other_immunizations_given", 
+            "items": [
+                {
+                    "item_y": 36, 
+                    "item_x": 93, 
+                    "value": "Yes", 
+                    "label": "Yes"
+                }, 
+                {
+                    "item_y": 36, 
+                    "item_x": 181, 
+                    "value": "No", 
+                    "label": "No"
+                }
+            ], 
+            "segments": [
+                {
+                    "segment_y": 724, 
+                    "segment_x": 40, 
+                    "segment_height": 200, 
+                    "segment_width": 376
+                }
+            ], 
+            "param": "yes_no", 
+            "label": "Have any other immunizations been given?", 
+            "type": "select1"
+        }, 
+        {
+            "min_height": 200, 
+            "name": "other_immunizations", 
+            "segments": [
+                {
+                    "segment_y": 724, 
+                    "segment_x": 416, 
+                    "segment_height": 200, 
+                    "segment_width": 376
+                }
+            ], 
+            "type": "string", 
+            "param": null, 
+            "label": "If so please list them:"
+        }
+    ], 
+    "height": 1076, 
+    "width": 832, 
+    "form_title": "Example Form", 
+    "page_number": 1, 
+    "font": "9pt Verdana, sans-serif", 
+    "classifier": {
+        "training_data_uri": "bubbles", 
+        "classifier_height": 18, 
+        "classifier_width": 18, 
+        "default_classification": true, 
+        "classification_map": {
+            "empty": false
+        }, 
+        "advanced": {
+            "alignment_radius": 4.0, 
+            "flip_training_data": true
+        }
+    }
+}

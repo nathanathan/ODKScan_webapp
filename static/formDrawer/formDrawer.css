@@ -1,0 +1,26 @@
+canvas {
+	position: absolute;
+	z-index: 400;
+}
+.image-container {
+	margin-left: auto;
+	margin-right: auto;
+	padding: 0;
+	width: 832px;
+}
+body {
+	padding-top: 0;
+	min-width: 832px;
+}
+.modal-gallery {
+	width: auto;
+	max-height: none;
+	margin: 2em;
+	top: 0;
+	left: 0;
+	position: relative;
+	float: left;
+}
+.modal-gallery .modal-body {
+	max-height: none;
+}

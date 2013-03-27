@@ -42,6 +42,15 @@ Check to see if the ODKScan_webapp appears on your django admin page.
 
 If that worked, go through [the ODKScan-core readme](https://github.com/UW-ICTD/ODKScan-core/blob/master/README.md) to get the image processing working.
 
+### For the form generator
+
+This repository also includes a form generator.
+For it to work xlrd must be installed:
+
+```bash
+sudo pip install -r requirements.pip
+```
+
 Architecture
 ============
 
@@ -49,3 +58,4 @@ Architecture
 * actions.py contains code for processing forms with ODK Scan, rendering transcription pages and generating csvs.
 * The ODKScan-core contains the image processing code.
 * The UI for the transcription interfaces is contained in static/transcription and in the templates directory.
+

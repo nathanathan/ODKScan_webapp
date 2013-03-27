@@ -34,4 +34,8 @@ urlpatterns = patterns(APP_NAME,
     #startswith - filter only the usernames that start with the given string
     #format - sets the output format to csv, html or json (default is html)
     #url(r'^analyse', 'analysis.analyse'),
+    
+    url(r'^xlsform$', 'xlsform.views.index'),
+    (r'^xlsform/download/(?P<path>.*)$', 'xlsform.views.download'),
+    (r'^xlsform/serve_json/(?P<path>.*)$', 'xlsform.views.serve_json'),
 )
