@@ -12,3 +12,8 @@ body {
     padding-top: 0;
     min-width:832px;
 }
+.finBtn{
+    position:fixed;
+    top:50px;
+	left:15px;
+}

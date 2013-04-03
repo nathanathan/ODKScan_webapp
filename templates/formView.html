@@ -79,10 +79,12 @@
 	    var formLocation = getParameter('formLocation', "");
 		var user = getParameter("user");
 		var jsonOutputUrl = formLocation;
+        /*
 		if(user){
 			jsonOutputUrl += "users/" + user + '/';
 		}
-		jsonOutputUrl += "output.json";
+        */
+		jsonOutputUrl += "transcription.json";
 		jQuery(function($) {
 	        $.getJSON(jsonOutputUrl, renderMarkedupForm);
 	    });

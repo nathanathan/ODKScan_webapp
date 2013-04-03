@@ -17,34 +17,41 @@ jQuery(function($) {
     });
     //Saving behavior
     $('.save').attr("disabled", true).text('saved');
-    window.onbeforeunload = function(){ 
-	  if ($('.modified').length > 0) {
-	    return "If you navigate away from this page you will loose unsaved changes.";
-	  }
-	};
+    window.onbeforeunload = function() {
+        if ($('.modified').length > 0) {
+            return "If you navigate away from this page you will loose unsaved changes.";
+        }
+    };
     $('input').keydown(modified);
     $('select').change(modified);
-	//$('select').chosen();
+
 	$('.segment').click(function(e){
-		//e.preventDefault();
-		var win = window.open($(this).attr('href'), "Field View", 'width=900,scrollbars=yes');
-		//Logging:
-	    var params = {
-	    	url : String(window.location),
-	    	activity : "table-view-click-segment",
-	    	formImage : $(this).attr('formid'),
-	    	fieldName : $(this).attr('fieldname'),
-	    	segment : $(this).find('img').attr('src')//TODO
-	    };
-        /*
-	    $.ajax({
-		  url: "/log/",
-		  type: "POST",
-		  data: params,
-		  cache: false
-		}).fail(function( xhr ) {
-			$('body').replaceWith($('<pre>').text(xhr.responseText));
-		});
-        */
+		window.open($(this).attr('href'), "Field View", 'width=900,scrollbars=yes');
 	});
+    function saveModified(callback){
+        $.ajax({
+            type: 'POST',
+            url: "/save_transcription/",
+            data: $('.modified').serialize(),
+            success: function() {
+                console.log('saved');
+                $('.modified').removeClass('modified');
+                callback();
+            }
+        }).fail(function(xhr) {
+            $('body').replaceWith($('<pre>').text(xhr.responseText));
+        });
+    }
+    function modified(e){
+        $(this).addClass('modified');
+        $('.save').attr("disabled", false).text('save');
+    }
+
+	$("form").submit(function(e) {
+        e.preventDefault();
+        console.log('submit');
+        $('.save').attr("disabled", true).text('saving...');
+        saveModified(function(){$('.save').attr("disabled", true).text('saved');});
+	});
+    
 });

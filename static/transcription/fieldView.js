@@ -14,15 +14,6 @@ function getParameter(paramName, defaultValue) {
 jQuery(function($) {
     //Saving behavior
     $('.save').attr("disabled", true).text('saved');
-    $("form").submit(function(e) {
-        e.preventDefault();
-        $('.save').text('saving...');
-        console.log($('.modified').serialize());
-        $.post("/save_transcription/", $('.modified').serialize(), function() {
-            $('.save').attr("disabled", true).text('saved');
-            $('.modified').removeClass('modified');
-        });
-    });
     var formLocation = getParameter('formLocation', "");
     var jsonOutputUrl = formLocation + "output.json";
     $.getJSON(jsonOutputUrl, function(form) {
@@ -52,28 +43,37 @@ jQuery(function($) {
 
     //Saving behavior
     $('.save').attr("disabled", true).text('saved');
-    $("form").submit(function(e) {
-        e.preventDefault();
-        console.log(window.opener.document);//getParameter('fieldIdx')
-        window.opener.document.getElementById("updater").value = "HI";
-    	$('.save').text('saving...');
-    	console.log($('.modified').serialize());
-        /*
-    	$.post("/save_transcription/", $('.modified').serialize(),
-    		function(){
-    			$('.save').attr("disabled", true).text('saved');
-    			$('.modified').removeClass('modified');
-    		});
-        */
-        //window.close();
-    });
+
     $('input').keydown(function(){
 		$(this).addClass('modified');
 		$('.save').attr("disabled", false).text('save');
     });
     $('select').onchange(function(){
-    	$(this).addClass('modified');
-		$('.save').attr("disabled", false).text('save');
+        $(this).addClass('modified');
+        $('.save').attr("disabled", false).text('save');
+    });
+    function saveModified(callback) {
+        $.ajax({
+            type: 'POST',
+            url: "/save_transcription/",
+            data: $('.modified').serialize(),
+            success: function() {
+                console.log('saved');
+                $('.modified').removeClass('modified');
+                callback();
+            }
+        }).fail(function(xhr) {
+            $('body').replaceWith($('<pre>').text(xhr.responseText));
+        });
+    }
+    
+    $("form").submit(function(e) {
+        e.preventDefault();
+        console.log('submit');
+        $('.save').attr("disabled", true).text('saving...');
+        saveModified(function() {
+            $('.save').attr("disabled", true).text('saved');
+        });
     });
 
 });
