@@ -46,12 +46,10 @@ jQuery(function($) {
         $(this).addClass('modified');
         $('.save').attr("disabled", false).text('save');
     }
-
 	$("form").submit(function(e) {
         e.preventDefault();
         console.log('submit');
         $('.save').attr("disabled", true).text('saving...');
         saveModified(function(){$('.save').attr("disabled", true).text('saved');});
 	});
-    
 });

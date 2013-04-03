@@ -45,7 +45,7 @@ def save_transcriptions(request):
         row_dict = group_by_prefix(query_dict_to_dict(request.POST))
         for formImageId, transcription in row_dict.items():
             form_image = FormImage.objects.get(id=formImageId)
-            json_path = os.path.join(form_image.output_path, 'users', str(request.user), 'output.json')#TODO
+            json_path = os.path.join(form_image.output_path, 'transcription.json')
             if not os.path.exists(json_path):
                 raise Exception('No json for form image')
             fp = codecs.open(json_path, mode="r", encoding="utf-8")

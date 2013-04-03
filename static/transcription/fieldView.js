@@ -10,7 +10,24 @@ function getParameter(paramName, defaultValue) {
     }
     return defaultValue;
 }
-
+function saveModified(callback) {
+    $.ajax({
+        type: 'POST',
+        url: "/save_transcription/",
+        data: $('.modified').serialize(),
+        success: function() {
+            console.log('saved');
+            $('.modified').removeClass('modified');
+            callback();
+        }
+    }).fail(function(xhr) {
+        $('body').replaceWith($('<pre>').text(xhr.responseText));
+    });
+}
+function modified(){
+    $(this).addClass('modified');
+    $('.save').attr("disabled", false).text('save');
+}
 jQuery(function($) {
     //Saving behavior
     $('.save').attr("disabled", true).text('saved');
@@ -44,28 +61,8 @@ jQuery(function($) {
     //Saving behavior
     $('.save').attr("disabled", true).text('saved');
 
-    $('input').keydown(function(){
-		$(this).addClass('modified');
-		$('.save').attr("disabled", false).text('save');
-    });
-    $('select').onchange(function(){
-        $(this).addClass('modified');
-        $('.save').attr("disabled", false).text('save');
-    });
-    function saveModified(callback) {
-        $.ajax({
-            type: 'POST',
-            url: "/save_transcription/",
-            data: $('.modified').serialize(),
-            success: function() {
-                console.log('saved');
-                $('.modified').removeClass('modified');
-                callback();
-            }
-        }).fail(function(xhr) {
-            $('body').replaceWith($('<pre>').text(xhr.responseText));
-        });
-    }
+    $('input').keydown(modified);
+    $('select').onchange(modified);
     
     $("form").submit(function(e) {
         e.preventDefault();
@@ -75,5 +72,4 @@ jQuery(function($) {
             $('.save').attr("disabled", true).text('saved');
         });
     });
-
 });
