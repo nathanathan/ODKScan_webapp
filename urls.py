@@ -15,8 +15,7 @@ urlpatterns = patterns(APP_NAME,
     url(r'^test_template', 'template_testing.test_template'),
     
     #Log usage data
-    #TODO: Disable logging in javascript
-    url(r'^log', 'views.log'),
+    #url(r'^log', 'views.log'),
     
     #Functions for importing android data
     #url(r'^parseSaveLogItems', 'analysis.parseSaveLogItems'),
@@ -35,6 +34,7 @@ urlpatterns = patterns(APP_NAME,
     #format - sets the output format to csv, html or json (default is html)
     #url(r'^analyse', 'analysis.analyse'),
     
+    #XLSForm scannable paper form generator
     url(r'^xlsform$', 'xlsform.views.index'),
     (r'^xlsform/download/(?P<path>.*)$', 'xlsform.views.download'),
     (r'^xlsform/serve_json/(?P<path>.*)$', 'xlsform.views.serve_json'),
