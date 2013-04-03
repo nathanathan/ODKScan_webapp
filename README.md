@@ -11,8 +11,8 @@ Starting from the VM Image:
 3. On the next screen give yourself superuser and staff status.
 4. Now delete the default "user" and log in with your new account.
 
-Full Installation
-=================
+Full setup directions:
+======================
 
 Start with 32bit ubuntu 12.04 LTS
 
@@ -58,7 +58,7 @@ cd ODKScan_webapp
 sudo pip install -r requirements.pip
 ```
 
-### [Get the django admin site running.](https://docs.djangoproject.com/en/1.4/intro/tutorial01/)
+### [Get the django admin site running.](https://docs.djangoproject.com/en/1.4/intro/tutorial01/):
 
 In the scan_admin project's settings.py:
 
@@ -87,7 +87,7 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 urlpatterns += staticfiles_urlpatterns()
 ```
 
-### [Use gunicorn to start the server](http://adrian.org.ar/django-nginx-green-unicorn-in-an-ubuntu-11-10-ec2-instance/)
+### [Use gunicorn to start the server](http://adrian.org.ar/django-nginx-green-unicorn-in-an-ubuntu-11-10-ec2-instance/):
 
 ```bash
 cd scan_admin
@@ -95,7 +95,6 @@ sudo gunicorn_django -b 0.0.0.0:80
 ```
 
 Check to see if the ODKScan_webapp appears on your django admin page.
-
 
 
 Architecture

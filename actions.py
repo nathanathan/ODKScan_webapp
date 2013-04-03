@@ -5,6 +5,8 @@ import json, codecs
 import sys, os, tempfile
 import ODKScan_webapp.utils as utils
 
+APP_ROOT = os.path.dirname(__file__)
+
 ##Deprecated
 #def process_json_output(pyobj):
 #    """
@@ -53,12 +55,8 @@ def process_json_output(filepath):
 def process_forms(modeladmin, request, queryset):
         #This is where we make the call to ODKScan core
         import subprocess
-        #TODO: Move APP_ROOT?
-        APP_ROOT = os.path.dirname(__file__)
-        
+
         for obj in queryset:
-            #if not obj.status or obj.status == 'e':
-            #print >>sys.stderr, obj.output_path
             #This blocks, for scaling we should add a "processing" status and do it asyncronously.
             stdoutdata, stderrdata = subprocess.Popen(['./ODKScan.run',
                               os.path.dirname(obj.template.image.path) + '/',
@@ -81,24 +79,27 @@ def process_forms(modeladmin, request, queryset):
             obj.save()
 process_forms.short_description = "Process selected forms."
 
-def renderTableView(modeladmin, request, queryset, autofill, showSegs):
+def transcription_context(modeladmin, request, queryset, autofill=None, showSegs=None, formView=None):
     form_template = None
     json_outputs = []
     for formImage in queryset:
         if formImage.status == 'f':
+            #TODO: Handle this without an exception.
             raise Exception("You cannot transcribe a finalized from.")
         if form_template is None:
+            #Set the template to the template the first image is set to.
             form_template = formImage.template
         elif form_template.name != formImage.template.name:
             raise Exception("Mixed templates: " + form_template.name + " and " + formImage.template.name)
         
         json_path = os.path.join(formImage.output_path, 'output.json')
         if not os.path.exists(json_path):
+            #i.e. skip unprocessed images
             continue
-        user_json_path = os.path.join(formImage.output_path, 'users', str(request.user), 'output.json')
-        if not os.path.exists(user_json_path):
+        transcribed_json_path = os.path.join(formImage.output_path, 'transcription.json')
+        if not os.path.exists(transcribed_json_path):
             try:
-                os.makedirs(os.path.dirname(user_json_path))
+                os.makedirs(os.path.dirname(transcribed_json_path))
             except:
                 pass
             fp = codecs.open(json_path, mode="r", encoding="utf-8")
@@ -111,11 +112,11 @@ def renderTableView(modeladmin, request, queryset, autofill, showSegs):
             pyobj['userName'] = str(request.user)
             pyobj['autofill'] = autofill
             pyobj['showSegs'] = showSegs
-            utils.print_pyobj_to_json(pyobj, user_json_path)
-        json_path = user_json_path
+            pyobj['formView'] = formView
+            utils.print_pyobj_to_json(pyobj, transcribed_json_path)
 
-        fp = codecs.open(json_path, mode="r", encoding="utf-8")
-        pyobj = json.load(fp, encoding='utf-8')#This is where we load the json output
+        fp = codecs.open(transcribed_json_path, mode="r", encoding="utf-8")
+        pyobj = json.load(fp, encoding='utf-8')
         fp.close()
         json_outputs.append(pyobj)
         #print >>sys.stderr, json.dumps(pyobj, ensure_ascii=False, indent=4)
@@ -123,8 +124,7 @@ def renderTableView(modeladmin, request, queryset, autofill, showSegs):
         raise Exception("no template")
     form_template_fp = codecs.open(form_template.json.path, mode="r", encoding="utf-8")
     json_template = json.load(form_template_fp, encoding='utf-8')
-    t = loader.get_template('transcribe.html')
-    c = RequestContext(request, {
+    return RequestContext(request, {
                  'template_name':form_template.name,
                  'json_template':json_template,
                  'json_outputs':json_outputs,
@@ -132,100 +132,18 @@ def renderTableView(modeladmin, request, queryset, autofill, showSegs):
                  'autofill':autofill,
                  'showSegs':showSegs,
                  })
-    return t.render(c)
 
 def transcribe(modeladmin, request, queryset):
-    return HttpResponse(renderTableView(modeladmin, request, queryset, True, True))
-transcribe.short_description = "Transcribe selected forms."
-
-def transcribeNoImages(modeladmin, request, queryset):
-    return HttpResponse(renderTableView(modeladmin, request, queryset, True, False))
-transcribeNoImages.short_description = "Transcribe (no images)"
-
-def transcribeNoAutofill(modeladmin, request, queryset):
-    return HttpResponse(renderTableView(modeladmin, request, queryset, False, True))
-transcribeNoAutofill.short_description = "Transcribe (no autofill)"
-
-def transcribeNoEverything(modeladmin, request, queryset):
-    return HttpResponse(renderTableView(modeladmin, request, queryset, False, False))
-transcribeNoEverything.short_description = "Transcribe (no images, no autofill)"
-
-#TODO: Pass it getparams
-#def transcribeFormView(modeladmin, request, queryset):
-#    form_template = None
-#    json_outputs = []
-#    formImage = queryset[0]
-#    params = {
-#              'formId': formImage.id,
-#              'formLocation': '/media/' + os.path.basename(formImage.output_path) + '/',
-#              'user':request.user,
-#              }
-#    from urllib import urlencode
-#    return HttpResponseRedirect('/formView/?' + urlencode(params))
-
-
-#def transcribeFormView(modeladmin, request, queryset):
-#    for formImage in queryset:
-#        pass
-#    t = loader.get_template('formViewSet.html')
-#    c = RequestContext(request, {
-#                 'formset':queryset,
-#                 'formLocation': '/media/' + os.path.basename(formImage.output_path) + '/',
-#                 'user':request.user,
-#                 })
-#    return HttpResponse(t.render(c))
-
+    t = loader.get_template('transcribe.html')
+    c = transcription_context(modeladmin, request, queryset, autofill=True, showSegs=True)
+    return HttpResponse(t.render(c))
+transcribe.short_description = "Transcribe (table view)"
 
 def transcribeFormView(modeladmin, request, queryset):
-    form_template = None
-    json_outputs = []
-    for formImage in queryset:
-        if formImage.status == 'f':
-            raise Exception("You cannot transcribe a finalized from.")
-        if form_template is None:
-            form_template = formImage.template
-        elif form_template.name != formImage.template.name:
-            raise Exception("Mixed templates: " + form_template.name + " and " + formImage.template.name)
-        
-        json_path = os.path.join(formImage.output_path, 'output.json')
-        if not os.path.exists(json_path):
-            continue
-        user_json_path = os.path.join(formImage.output_path, 'users', str(request.user), 'output.json')
-        if not os.path.exists(user_json_path):
-            try:
-                os.makedirs(os.path.dirname(user_json_path))
-            except:
-                pass
-            fp = codecs.open(json_path, mode="r", encoding="utf-8")
-            pyobj = json.load(fp, encoding='utf-8')#This is where we load the json output
-            fp.close()
-            pyobj['form_id'] = int(formImage.id)
-            pyobj['outputDir'] = os.path.basename(formImage.output_path)
-            pyobj['imageName'] = str(formImage)
-            pyobj['templateName'] = form_template.name
-            pyobj['userName'] = str(request.user)
-            pyobj['formView'] = True
-            utils.print_pyobj_to_json(pyobj, user_json_path)
-        json_path = user_json_path
-
-        fp = codecs.open(json_path, mode="r", encoding="utf-8")
-        pyobj = json.load(fp, encoding='utf-8')#This is where we load the json output
-        fp.close()
-        json_outputs.append(pyobj)
-        #print >>sys.stderr, json.dumps(pyobj, ensure_ascii=False, indent=4)
-    if form_template is None:
-        raise Exception("no template")
-    form_template_fp = codecs.open(form_template.json.path, mode="r", encoding="utf-8")
-    json_template = json.load(form_template_fp, encoding='utf-8')
     t = loader.get_template('formViewSet.html')
-    c = RequestContext(request, {
-                 'template_name':form_template.name,
-                 'json_template':json_template,
-                 'json_outputs':json_outputs,
-                 'user':request.user,
-                 })
+    c = transcription_context(modeladmin, request, queryset, formView=True)
     return HttpResponse(t.render(c))
-transcribeFormView.short_description = "Transcribe (formView)"
+transcribeFormView.short_description = "Transcribe (form view)"
 
 def finalize(modeladmin, request, queryset):
     """
@@ -246,7 +164,10 @@ def generate_csv(modeladmin, request, queryset):
     dict_array = []
     form_template = None
     for formImage in queryset:
-        json_path = os.path.join(formImage.output_path, 'output.json')
+        json_path = os.path.join(formImage.output_path, 'transcription.json')
+        if not os.path.exists(json_path):
+            #No transcription.
+            json_path = os.path.join(formImage.output_path, 'output.json')
         if not os.path.exists(json_path):
             raise Exception('No json for form image')
         if form_template is None:
