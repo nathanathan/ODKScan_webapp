@@ -60,41 +60,42 @@ function renderMarkedupForm(form){
                 progress += 90 / numFields;
                 $bar.css('width', progress + '%');
 				
-				if(selectedSegment){
-					$(field.segments).each(
-	                function(segment_idx) {
-	                    var segment = this;
-	                    if (segment.quad) {
-	                        var quad = segment.quad;
-	                        var isSelected = (selectedSegment == field.name + '_image_' + segment_idx);
-	                        if(isSelected){
-								$canvas.addLayer({
-			                            method: 'drawLine',
-			                            strokeStyle: "#00ff09",
-			                            strokeWidth: 4,
-			                            x1: quad[0][0],
-			                            y1: quad[0][1],
-			                            x2: quad[1][0],
-			                            y2: quad[1][1],
-			                            x3: quad[2][0],
-			                            y3: quad[2][1],
-			                            x4: quad[3][0],
-			                            y4: quad[3][1],
-			                            closed: true,
-			                            radius: 100,
-			                            click: function(){}
-			                     });
-			                   }
-		                  	}
-		                });
+                if (selectedSegment) {
+                    $(field.segments).each(
+                
+                    function(segment_idx) {
+                        var segment = this;
+                        if (segment.quad) {
+                            var quad = segment.quad;
+                            var isSelected = (selectedSegment == field.name + '_image_' + segment_idx);
+                            if (isSelected) {
+                                $canvas.addLayer({
+                                    method: 'drawLine',
+                                    strokeStyle: "#00ff09",
+                                    strokeWidth: 4,
+                                    x1: quad[0][0],
+                                    y1: quad[0][1],
+                                    x2: quad[1][0],
+                                    y2: quad[1][1],
+                                    x3: quad[2][0],
+                                    y3: quad[2][1],
+                                    x4: quad[3][0],
+                                    y4: quad[3][1],
+                                    closed: true,
+                                    radius: 100,
+                                    click: function() {}
+                                });
+                            }
+                        }
+                    });
                     return;
-				}
+                }
 				
                 var textLocation, textLayerParams, textLayer;
                 if(typeof field.markup_location === 'undefined'){
-                	textLocation = computeTextLocation(field);
+                    textLocation = computeTextLocation(field);
                 } else {
-                	textLocation = field.markup_location;
+                    textLocation = field.markup_location;
                 }
                 
                 textLayerParams = {
@@ -152,6 +153,7 @@ function renderMarkedupForm(form){
 								    	formImage : formId,
 								    	segment : field.name + '_image_' + segment_idx
 								    };
+                                    /*
 								    $.ajax({
 									  url: "/log/",
 									  type: "POST",
@@ -160,6 +162,7 @@ function renderMarkedupForm(form){
 									}).fail(function( xhr ) {
 										$('body').replaceWith($('<pre>').text(xhr.responseText));
 									});
+                                    */
                                 	
                                     /*
                                     if (typeof Android !== 'undefined') {

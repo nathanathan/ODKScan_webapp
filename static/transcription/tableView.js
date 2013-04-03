@@ -36,6 +36,7 @@ jQuery(function($) {
 	    	fieldName : $(this).attr('fieldname'),
 	    	segment : $(this).find('img').attr('src')//TODO
 	    };
+        /*
 	    $.ajax({
 		  url: "/log/",
 		  type: "POST",
@@ -44,5 +45,6 @@ jQuery(function($) {
 		}).fail(function( xhr ) {
 			$('body').replaceWith($('<pre>').text(xhr.responseText));
 		});
+        */
 	});
 });

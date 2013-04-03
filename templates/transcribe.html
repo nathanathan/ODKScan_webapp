@@ -11,26 +11,11 @@
     <link href="/static/transcription/assets/css/bootstrap.css" rel="stylesheet">
     <link href="/static/transcription/tableView.css" rel="stylesheet">
     
-    <link href="/static/transcription/chosen/chosen/chosen.css" rel="stylesheet">
-    
-<style media="screen" type="text/css">
-.finBtn{
-	width:100%;
-}
-.item-overlay{
-	opacity:0.0;
-}
-.item-overlay:hover{
-	opacity:1.0;
-	background-color:blue;
-}
-</style>
-
   </head>
 
   <body>
   	<form action="/save_transcription/" method="post">{% csrf_token %}
-  		<div style="position:fixed;background-color:white;width:100%;">
+  		<div class="header">
 			<h1 style="float:left;">{{template_name}}</h1>
 			<button class="btn save" type="submit" style="float:right;">
 				Save
