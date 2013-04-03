@@ -34,7 +34,7 @@ def index(request):
                 except Exception as e:
                     error = 'Error: ' + str(e)
             
-            return render_to_response('upload.html', {
+            return render_to_response('xlsform.html', {
                 'form': UploadFileForm(),
                 'paths': [os.path.relpath(path, SERVER_TMP_DIR) for path in paths],
                 'error': error,
