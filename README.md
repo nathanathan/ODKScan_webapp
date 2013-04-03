@@ -39,7 +39,6 @@ sudo easy_install pip
 #Don't try to user a version earlier than 1.4.0
 sudo pip install django
 sudo pip install docutils
-
 ```
 
 ### Create the project:
@@ -58,15 +57,16 @@ cd ODKScan_webapp
 sudo pip install -r requirements.pip
 ```
 
-### [Get the django admin site running.](https://docs.djangoproject.com/en/1.4/intro/tutorial01/):
+### Configure the scan_admin project's settings.py:
 
-In the scan_admin project's settings.py:
-
-* Give values to MEDIA_ROOT and MEDIA_URL (e.g. "media/")
+* Set MEDIA_ROOT to an absolute path, e.g.:
+`/home/ubuntu/scan_admin/media/`
+* Set MEDIA_URL to a path beginning with a slash, e.g.: `/media/`
+* set database engine to sqlite3 and name it with an _absolute_ path, e.g.:
+`/home/ubuntu/scan_admin/scan.db`
 * Add "ODKScan_webapp" to INSTALLED_APPS and uncomment the admin entries.
-* set database engine to sqlite3 and name it with an _absolute_ path (e.g. /home/ubuntu/scan_admin/scan.db)
 
-In the scan_admin project's urls.py:
+### Configure the scan_admin project's urls.py:
 
 * Uncomment all the admin stuff.
 * Paste the following at the bottom of the file:
@@ -87,15 +87,23 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 urlpatterns += staticfiles_urlpatterns()
 ```
 
+### Initialize the database:
+
+This command will also prompt you to set up a super user account.
+
+```bash
+python manage.py syncdb
+```
+
 ### [Use gunicorn to start the server](http://adrian.org.ar/django-nginx-green-unicorn-in-an-ubuntu-11-10-ec2-instance/):
 
 ```bash
 cd scan_admin
+#Put an & at the end to run the server in the background.
 sudo gunicorn_django -b 0.0.0.0:80
 ```
 
 Check to see if the ODKScan_webapp appears on your django admin page.
-
 
 Architecture
 ============

@@ -1,7 +1,7 @@
 from django.http import HttpResponse
 from django.shortcuts import render_to_response
 from django import forms
-
+from django.views.decorators.csrf import csrf_exempt
 import datetime
 import tempfile
 import os
@@ -14,6 +14,7 @@ SERVER_TMP_DIR = '/tmp'
 class UploadFileForm(forms.Form):
     file  = forms.FileField()
 
+@csrf_exempt
 def index(request):
     if request.method == 'POST':
         form = UploadFileForm(request.POST, request.FILES)
@@ -49,6 +50,7 @@ def index(request):
         'form': form,
     })
 
+@csrf_exempt
 def download(request, path):
     import StringIO
     import zipfile
@@ -71,6 +73,7 @@ def download(request, path):
     response['Content-Disposition'] = 'attachment; filename=%s' % zip_filename
     return response
 
+@csrf_exempt
 def serve_json(request, path):
     """
     Serve a downloadable file
