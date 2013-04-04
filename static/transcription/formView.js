@@ -1,15 +1,3 @@
-function getParameter(paramName, defaultValue) {
-    var searchString = window.location.search.substring(1);
-    searchString = searchString ? searchString : window.location.hash.substring(2);
-    var params = searchString.split('&');
-    for (var i = 0; i < params.length; i++) {
-        var val = params[i].split('=');
-        if (val[0] === paramName) {
-            return decodeURIComponent(val[1]);
-        }
-    }
-    return defaultValue;
-}
 function computeTextLocation(field) {
     var minX = 999999;
     var avgY = 0;

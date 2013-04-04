@@ -33,6 +33,7 @@
 	</iframe>
 	<script src="/static/transcription/assets/js/jquery.js"></script>
     <script src="/static/djangoCSRF.js" type="text/javascript"></script>
+    <script src="/static/transcription/shared.js" type="text/javascript"></script>
     <script>
     $('iframe').hide();
     $('a').click(function(e){
@@ -80,11 +81,8 @@
     	});
     	$('.finBtn').replaceWith($finBtn);
     	var src = $(this).attr('href');
-    	//$('.main').hide();
     	$('iframe').attr('src', src);
     	$('iframe').show();
-    	//$(this).append($('<iframe>').attr('src', src));
-    	//$('.main').hide();
     });
     </script>
   </body>

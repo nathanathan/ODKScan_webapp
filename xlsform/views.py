@@ -46,7 +46,7 @@ def index(request):
     else:
         form = UploadFileForm() #Create a new empty form
         
-    return render_to_response('xlsform/upload.html', {
+    return render_to_response('xlsform.html', {
         'form': form,
     })
 

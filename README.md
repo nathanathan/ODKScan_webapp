@@ -1,10 +1,10 @@
 ODKScan_webapp
-==============
+--------------------------------------------------------------------------------
 
 A Django app interface for ODK Scan
 
 Starting from the VM Image:
-===========================
+--------------------------------------------------------------------------------
 
 1. Log in with username "user" and password "password"
 2. Go to the users view and create a new users with your desired username and password.
@@ -12,7 +12,7 @@ Starting from the VM Image:
 4. Now delete the default "user" and log in with your new account.
 
 Full setup directions:
-======================
+--------------------------------------------------------------------------------
 
 Start with 32bit ubuntu 12.04 LTS
 
@@ -106,7 +106,7 @@ sudo gunicorn_django -b 0.0.0.0:80
 Check to see if the ODKScan_webapp appears on your django admin page.
 
 Architecture
-============
+--------------------------------------------------------------------------------
 
 * The django code in admin.py and models.py configures what's in the admin interface.
 * actions.py contains code for processing forms with ODK Scan, rendering transcription pages and generating csvs.
