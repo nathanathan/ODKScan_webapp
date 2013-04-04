@@ -95,9 +95,8 @@ def transcription_context(modeladmin, request, queryset, autofill=None, showSegs
             pyobj['formView'] = formView
             utils.print_pyobj_to_json(pyobj, transcribed_json_path)
 
-        fp = codecs.open(transcribed_json_path, mode="r", encoding="utf-8")
-        pyobj = json.load(fp, encoding='utf-8')
-        fp.close()
+        with codecs.open(transcribed_json_path, mode="r", encoding="utf-8") as fp:
+            pyobj = json.load(fp, encoding='utf-8')
         json_outputs.append(pyobj)
         #print >>sys.stderr, json.dumps(pyobj, ensure_ascii=False, indent=4)
     if form_template is None:
@@ -166,9 +165,8 @@ def generate_csv(modeladmin, request, queryset):
         fp.close()
         dict_array.append(json_output_to_field_dict(pyobj))
     temp_file = tempfile.mktemp()
-    csvfile = open(temp_file, 'wb')
-    utils.dict_to_csv(dict_array, csvfile)
-    csvfile.close()
+    with open(temp_file, 'wb') as csvfile:
+        utils.dict_to_csv(dict_array, csvfile)
     response = HttpResponse(mimetype='application/octet-stream')
     response['Content-Disposition'] = 'attachment; filename=output.csv'
     fo = open(temp_file)

@@ -4,22 +4,13 @@
 	<meta charset="utf-8">
 	<title>Form Converter</title>
 	<!-- Bootstrap CSS Toolkit styles -->
-	<link rel="stylesheet" href="static/css/bootstrap.min.css">
+	<link rel="stylesheet" href="../static/css/bootstrap.min.css">
     <style type="text/css">
 	.keepformatting {
 		white-space: pre-wrap;
 		white-space: -moz-pre-wrap;
 	}
 	</style>
-	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
-	<script type="text/javascript">
-	//Javascript for the loading bar
-	$(document).ready(function() {
-		$('#myForm').submit(function() {
-			$('#submitBtn').replaceWith('<div class="progress progress-striped active"><div class="bar" style="width: 100%;"></div></div>');
-		});
-	});
-	</script>
 </head>
 <body>
 	
@@ -56,5 +47,14 @@
 {% endif %}
 
 <div id="output"></div>
+<script src="../static/transcription/assets/js/jquery.js"></script>
+<script type="text/javascript">
+//Javascript for the loading bar
+$(document).ready(function() {
+	$('#myForm').submit(function() {
+		$('#submitBtn').replaceWith('<div class="progress progress-striped active"><div class="bar" style="width: 100%;"></div></div>');
+	});
+});
+</script>
 </body>
 </html> 

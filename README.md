@@ -99,7 +99,8 @@ python manage.py syncdb
 
 ```bash
 cd scan_admin
-#Put an & at the end to run the server in the background.
+#Put an & at the end to run the server in the background, 
+#and use killall gunicorn_django to stop it.
 sudo gunicorn_django -b 0.0.0.0:80
 ```
 
