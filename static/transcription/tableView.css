@@ -28,3 +28,7 @@
     width:100%;
     z-index: 10;
 }
+.img-size-ctrl {
+    float: left;
+    margin-left: 40px;
+}

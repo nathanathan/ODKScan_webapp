@@ -10,16 +10,15 @@
     <!-- Le styles -->
     <link href="/static/transcription/assets/css/bootstrap.css" rel="stylesheet">
     <link href="/static/transcription/tableView.css" rel="stylesheet">
-    
   </head>
 
   <body>
   	<form action="/save_transcription/" method="post">{% csrf_token %}
   		<div class="header">
 			<h1 style="float:left;">{{template_name}}</h1>
-            <div style="float:left;margin-left: 40px;" class="btn-group">
-                <button class="btn"><i class="icon-plus"></i> Zoom images</button>
-                <button class="btn">Shrink images <i class="icon-minus"></i></button>
+            <div class="btn-group img-size-ctrl">
+                <button class="btn zoom"><i class="icon-plus"></i> Zoom images</button>
+                <button class="btn shrink">Shrink images <i class="icon-minus"></i></button>
             </div>
 			<button class="btn save" type="submit" style="float:right;">
 				Save
@@ -85,8 +84,6 @@
 								fieldName="{{field.name}}"
 								href="/formView?segment={{field.name}}_image_{{forloop.counter0}}&formLocation=/media/{{json_output.outputDir}}/&formId={{json_output.form_id}}&user={{user}}"
 								src="/media/{{json_output.outputDir}}/segments/{{field.name}}_image_{{forloop.counter0}}.jpg"
-                                height="{{segment.segment_height}}px"
-                                width="{{segment.segment_width}}px"
 								/>
 							{% for item in field.segments.0.items %}
 								<div class='label item-overlay' style="position:absolute;left:{{item.item_x}}px;top:{{item.item_y}}px;">{% firstof item.label item.value %}</div>

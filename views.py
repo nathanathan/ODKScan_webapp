@@ -68,15 +68,15 @@ def save_transcriptions(request):
     else:
         return HttpResponseBadRequest("Only post requests please.")
     
-def form_view(request):
-    t = loader.get_template('formView.html')
-    c = RequestContext(request, {})
-    return HttpResponse(t.render(c))
-
-def field_view(request):
-    t = loader.get_template('fieldView.html')
-    c = RequestContext(request, {})
-    return HttpResponse(t.render(c))
+# def form_view(request):
+#     t = loader.get_template('formView.html')
+#     c = RequestContext(request, {})
+#     return HttpResponse(t.render(c))
+# 
+# def field_view(request):
+#     t = loader.get_template('fieldView.html')
+#     c = RequestContext(request, {})
+#     return HttpResponse(t.render(c))
 
 # def log(request):
 #     c = {}

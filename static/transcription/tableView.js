@@ -1,4 +1,14 @@
 jQuery(function($) {
+    
+    $('.zoom').click(function(evt){
+        var $el = $(evt.target).closest('.zoom');
+        $el.width($el.width() * 4 / 5 );
+    });
+    $('.shrink').click(function(evt){
+        var $el = $(evt.target).closest('.zoom');
+        $el.width($el.width() * 5 / 4);
+    });
+    
     //Does hiding and showing of columns
 	$('.icon-eye-open').hide();
     $('th').click(function(){

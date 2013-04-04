@@ -11,8 +11,8 @@ urlpatterns = patterns(APP_NAME,
     (r'^$', login_required(TemplateView.as_view(template_name='index.html'))),
     
     url(r'^save_transcription', 'views.save_transcriptions'),
-    url(r'^formView', 'views.form_view'),
-    url(r'^fieldView', 'views.field_view'),
+    (r'^fieldView', login_required(TemplateView.as_view(template_name='fieldView.html'))),
+    (r'^formView', login_required(TemplateView.as_view(template_name='formView.html'))),
     
     #Handlers for testing templates in the template maker.
     url(r'^upload_template', 'template_testing.upload_template'),
