@@ -7,7 +7,9 @@ import os
 APP_NAME = os.path.split(os.path.dirname(__file__))[-1]
 #Try __package__
 urlpatterns = patterns(APP_NAME,
+    url(r'^login/$', 'django.contrib.auth.views.login', name='login'),
     (r'^$', login_required(TemplateView.as_view(template_name='index.html'))),
+    
     url(r'^save_transcription', 'views.save_transcriptions'),
     url(r'^formView', 'views.form_view'),
     url(r'^fieldView', 'views.field_view'),
