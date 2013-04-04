@@ -18,24 +18,24 @@
     <div class="navbar header">
       <div class="navbar-inner">
         <div class="container">
-        <a class='btn' onclick="window.history.back();">
-            Go Back
-        </a>
-          <!-- Be sure to leave the brand out there if you want it shown -->
-          <a class="brand" href="#">{{template_name}}</a>
-     
-
-        <button class="btn save" type="submit" style="float:right;">
-			Save
+        <button class="btn save" type="submit">
+    		Save
 		</button>
-        <div class="btn-group btn-size-ctrl">
-            <a class="btn zoom"><i class="icon-plus"></i> Zoom images</a>
-            <a class="btn shrink">Shrink images <i class="icon-minus"></i></a>
-        </div>
+
+        <a class="brand" href="#">{{template_name}}</a>
+     
+        <div class="btn-toolbar">
+            <a class='btn' onclick="window.history.back();">
+                Go Back
+            </a>
+            <div class="btn-group">
+                <a class="btn zoom"><i class="icon-plus"></i> Zoom images</a>
+                <a class="btn shrink">Shrink images <i class="icon-minus"></i></a>
+            </div>
         </div>
       </div>
     </div>
-    <div style="height: 2em;"></div>
+    <div style="height: 40px;"></div>
 
 	<table class="table table-striped table-bordered">
 		<tr>

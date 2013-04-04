@@ -17,10 +17,12 @@
 	
   	<div class="main">
 	  	<ul class="nav nav-tabs">
-          <a class='btn btn-large' href="/admin/ODKScan_webapp/formimage/">Go Back</a>
+            <a class='btn' onclick="window.history.back();">
+                Go Back
+            </a>
 		    {% for json_output in json_outputs %}
 		    	<li>
-					<a href="/formView?formLocation=/media/{{json_output.outputDir}}/&formId={{json_output.form_id}}&user={{user}}">
+					<a class="tab" href="/formView?formLocation=/media/{{json_output.outputDir}}/&formId={{json_output.form_id}}&user={{user}}">
 						{{json_output.outputDir}}
 					</a>
 				</li>
@@ -37,30 +39,30 @@
     <script src="/static/transcription/shared.js" type="text/javascript"></script>
     <script>
     $('iframe').hide();
-    $('a').click(function(e){
-    	e.preventDefault();
-		/*
+    $('.tab').click(function(e){
+        e.preventDefault();
+        /*
         //For logging
-	    var params = {
-	    	activity : "form-view-start",
-	    	url : $(this).attr('href')
-	    };
-	    $.ajax({
-		  url: "/log/",
-		  type: "POST",
-		  data: params,
-		  cache: false
-		}).fail(function( xhr ) {
-			$('body').replaceWith($('<pre>').text(xhr.responseText));
-		});
-    	*/
-    	var $li = $(this).parent();
-    	$('.active').removeClass('active');
-    	$li.addClass('active');
+        var params = {
+        	activity : "form-view-start",
+        	url : $(this).attr('href')
+        };
+        $.ajax({
+          url: "/log/",
+          type: "POST",
+          data: params,
+          cache: false
+        }).fail(function( xhr ) {
+        	$('body').replaceWith($('<pre>').text(xhr.responseText));
+        });
+        */
+        var $li = $(this).parent();
+        $('.active').removeClass('active');
+        $li.addClass('active');
         
-    	var src = $(this).attr('href');
-    	$('iframe').attr('src', src);
-    	$('iframe').show();
+        var src = $(this).attr('href');
+        $('iframe').attr('src', src);
+        $('iframe').show();
     });
     </script>
   </body>
