@@ -8,6 +8,11 @@ from django.core.context_processors import csrf
 from django.template import RequestContext, loader
 import ODKScan_webapp.utils as utils
 
+# def index(request):
+#     template = loader.get_template('index.html')
+#     context = Context({})
+#     return HttpResponse(template.render(context))
+
 def group_by_prefix(dict):
     """
     Creates a new dictionary that groups the entries in the given dictionary by
