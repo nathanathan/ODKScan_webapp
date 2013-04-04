@@ -45,9 +45,10 @@ def get_form_image_path(instance, filename):
     return os.path.join(output_dir, 'photo', filename)
 class FormImage(models.Model):
     template = models.ForeignKey(Template, blank=True, null=True)
+    batch = models.CharField(max_length=255)
     image = models.ImageField(upload_to=get_form_image_path)
     status = models.CharField(max_length=1, choices=STATUSES)
-    error_message = models.TextField(blank=True, null=True)
+    processing_log = models.TextField(blank=True, null=True)
     upload_time = models.DateTimeField(auto_now=True)
     def _get_output_path(self):
         return os.path.dirname(os.path.dirname(self.image.path))

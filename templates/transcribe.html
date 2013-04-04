@@ -17,6 +17,10 @@
   	<form action="/save_transcription/" method="post">{% csrf_token %}
   		<div class="header">
 			<h1 style="float:left;">{{template_name}}</h1>
+            <div style="float:left;margin-left: 40px;" class="btn-group">
+                <button class="btn"><i class="icon-plus"></i> Zoom images</button>
+                <button class="btn">Shrink images <i class="icon-minus"></i></button>
+            </div>
 			<button class="btn save" type="submit" style="float:right;">
 				Save
 			</button>

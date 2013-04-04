@@ -45,11 +45,11 @@ def process_forms(modeladmin, request, queryset):
                               ],
                 cwd=os.path.join(APP_ROOT,
                                  'ODKScan-core'),
-                env={'LD_LIBRARY_PATH':'/usr/local/lib'}, #TODO: This could cause problems on other systems, document or fix
+                #env={'LD_LIBRARY_PATH':'/usr/local/lib'}, #TODO: This could cause problems on other systems, document or fix
                 stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE).communicate()
+                stderr=subprocess.STDOUT).communicate()
             print >>sys.stdout, stdoutdata
-            obj.error_message = stderrdata
+            obj.processing_log = stdoutdata
             json_path = os.path.join(obj.output_path, 'output.json')
             if os.path.exists(json_path):
                 #process_json_output(json_path)#Not sure I need this.
@@ -132,15 +132,21 @@ def finalize(modeladmin, request, queryset):
     queryset.update(status='f')
 finalize.short_description = "Finalize selected forms."
 
-def json_output_to_field_dict(json_output):
-    field_dict = {}
-    for field in json_output.get('fields'):
-        field_value = field.get('transcription', field.get('value'))
-        if field_value:
-            field_dict[field['name']] = field_value
-    return field_dict
 
 def generate_csv(modeladmin, request, queryset):
+    """
+    Outputs a csv where the columns are the fields in the selected group of forms.
+    """
+    def json_output_to_field_dict(json_output):
+        field_dict = {
+            '__formName__': json_output.get('name'),
+            '__imageName__': json_output.get('imageName'),
+        }
+        for field in json_output.get('fields'):
+            field_value = field.get('transcription', field.get('value'))
+            if field_value:
+                field_dict[field['name']] = field_value
+        return field_dict
     dict_array = []
     form_template = None
     for formImage in queryset:
@@ -153,7 +159,8 @@ def generate_csv(modeladmin, request, queryset):
         if form_template is None:
             form_template = formImage.template
         elif form_template.name != formImage.template.name:
-            raise Exception("Mixed templates: " + form_template.name + " and " + formImage.template.name)
+            raise Exception("Mixed templates: " + form_template.name +
+                             " and " + formImage.template.name)
         fp = codecs.open(json_path, mode="r", encoding="utf-8")
         pyobj = json.load(fp, encoding='utf-8')#This is where we load the json output
         fp.close()
@@ -170,27 +177,3 @@ def generate_csv(modeladmin, request, queryset):
     return response
 generate_csv.short_description = "Generate CSV from selected forms."
 
-
-#def save_transcriptions(request):
-#    c = {}
-#    c.update(csrf(request))
-#    if request.method == 'POST': # If the form has been submitted...
-#        row_dict = group_by_prefix(request.POST)
-#        for formImageId, transcription in row_dict.items():
-#            form_image = FormImage.objects.get(id=formImageId)
-#            json_path = os.path.join(form_image.output_path, 'output.json')
-#            if not os.path.exists(json_path):
-#                raise Exception('No json for form image')
-#            fp = codecs.open(json_path, mode="r", encoding="utf-8")
-#            pyobj = json.load(fp, encoding='utf-8')#This is where we load the json output
-#            fp.close()
-#            for field in pyobj.get('fields'):
-#                field_transcription = transcription.get(field['name'])
-#                if field_transcription:
-#                    field['transcription'] = field_transcription
-#            print_pyobj_to_json(pyobj, json_path)
-#            form_image.status = 'm'
-#            form_image.save()
-#            return HttpResponse("hello")
-#    else:
-#        return HttpResponseBadRequest("Only post requests please.")
