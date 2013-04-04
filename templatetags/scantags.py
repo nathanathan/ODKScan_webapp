@@ -11,5 +11,5 @@ def display_markedup_image(formImageId):
         return ''
     #import sys
     #print >>sys.stderr, dir(form_image.image)
-    markedup_image_url = form_image.image.url.rpartition("photo")[0] + "markedup.jpg"
+    markedup_image_url = form_image.image.url.partition("photo/")[0] + "markedup.jpg"
     return '<img src="%s"></img>' % markedup_image_url

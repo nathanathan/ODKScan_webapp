@@ -17,7 +17,7 @@
 	
   	<div class="main">
 	  	<ul class="nav nav-tabs">
-          <button class='btn btn-large' onclick="window.history.back();">Go Back</button>
+          <a class='btn btn-large' href="/admin/ODKScan_webapp/formimage/">Go Back</a>
 		    {% for json_output in json_outputs %}
 		    	<li>
 					<a href="/formView?formLocation=/media/{{json_output.outputDir}}/&formId={{json_output.form_id}}&user={{user}}">

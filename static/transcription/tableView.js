@@ -1,5 +1,10 @@
 jQuery(function($) {
     $('.zoom').click(function(evt){
+        //Zoom is limited to the column width.
+        //The columns have a max-width css property
+        //which keeps it pretty small,
+        //However, it useful to have the max-width property
+        //so that multi-segment fiels wrap nicely.
         $('.segment').each(function(idx, seg){
             var $seg = $(seg);
             $seg.width($seg.width() * 5 / 4 );
