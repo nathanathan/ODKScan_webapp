@@ -35,7 +35,7 @@ STATUSES = (
 )
 def get_form_image_path(instance, filename):
     import uuid
-    output_dir = uuid.uuid1()
+    output_dir = str(uuid.uuid1())
     root, ext = os.path.splitext(filename)
     return os.path.join(output_dir, 'photo', filename)
 class FormImage(models.Model):
