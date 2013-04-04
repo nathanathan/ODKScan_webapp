@@ -48,7 +48,7 @@
     <p>Form images must be present or Scan will not work.</p>
     {% for path in paths %}
         <div style="margin:1em;">
-            <iframe src="static/formDrawer/index.html?jsonUrl=../../serve_json/{{ path }}/template.json" width="100%" height="1100px"></iframe>
+            <iframe src="static/formDrawer/index.html?jsonUrl=../../xlsform/serve_json/{{ path }}/template.json" width="100%" height="1100px"></iframe>
             <a href="serve_json/{{ path }}/template.json" class="btn btn-info" target="_blank">View JSON</a>
         </div>
     {% endfor %}
