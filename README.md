@@ -86,7 +86,7 @@ if settings.DEBUG:
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 urlpatterns += staticfiles_urlpatterns()
 
-urlpatterns += [url(r'^login/$', 'django.contrib.auth.views.login', name='login')]
+urlpatterns += [url(r'^accounts/', include('django.contrib.auth.urls'))]
 ```
 
 ### Initialize the database:
