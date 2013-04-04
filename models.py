@@ -35,6 +35,11 @@ STATUSES = (
 )
 def get_form_image_path(instance, filename):
     import uuid
+    #uuid1 documentation:
+    #Generate a UUID from a host ID, sequence number, and the current time.
+    #If node is not given, getnode() is used to obtain the hardware address.
+    #If clock_seq is given, it is used as the sequence number;
+    #otherwise a random 14-bit sequence number is chosen.
     output_dir = str(uuid.uuid1())
     root, ext = os.path.splitext(filename)
     return os.path.join(output_dir, 'photo', filename)
@@ -51,7 +56,9 @@ class FormImage(models.Model):
         return self.__unicode__()
     def __unicode__(self):
         return os.path.splitext(os.path.basename(self.image.name))[0]
-    
+
+#Models below here are not needed:
+
 #For logging:
 class LogItem(models.Model):
     user = models.ForeignKey(User, blank=True, null=True)

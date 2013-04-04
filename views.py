@@ -10,7 +10,8 @@ import ODKScan_webapp.utils as utils
 
 def group_by_prefix(dict):
     """
-    Creates a new dictionary that groups the entries in the given dictionary by the prefix of its keys before the first '-'
+    Creates a new dictionary that groups the entries in the given dictionary by
+    the prefix of its keys before the first '-'
     Ex:
     {"1-a":1, "2-a":1, "2-b":2} -> {"1":{"a":1}, "2":{"a":1, "b":2}}
     Items without a prefix are thown out.
@@ -72,18 +73,18 @@ def field_view(request):
     c = RequestContext(request, {})
     return HttpResponse(t.render(c))
 
-def log(request):
-    c = {}
-    c.update(csrf(request))
-    if request.method == 'POST': # If the form has been submitted...
-        li_params = query_dict_to_dict(request.POST)
-        
-        #print >>sys.stderr, li_params
-        li_params['user'] = request.user
-        if 'formImage' in li_params:
-            li_params['formImage'] = FormImage.objects.get(id=li_params['formImage'])
-        log_item = LogItem(**li_params)
-        log_item.save()
-        return HttpResponse("hi")
-    else:
-        return HttpResponseBadRequest("Only post requests please.")
+# def log(request):
+#     c = {}
+#     c.update(csrf(request))
+#     if request.method == 'POST': # If the form has been submitted...
+#         li_params = query_dict_to_dict(request.POST)
+#         
+#         #print >>sys.stderr, li_params
+#         li_params['user'] = request.user
+#         if 'formImage' in li_params:
+#             li_params['formImage'] = FormImage.objects.get(id=li_params['formImage'])
+#         log_item = LogItem(**li_params)
+#         log_item.save()
+#         return HttpResponse("hi")
+#     else:
+#         return HttpResponseBadRequest("Only post requests please.")

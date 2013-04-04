@@ -7,50 +7,30 @@ import ODKScan_webapp.utils as utils
 
 APP_ROOT = os.path.dirname(__file__)
 
-##Deprecated
-#def process_json_output(pyobj):
-#    """
-#    Modifies segment image paths and sizes so it is easy to use them in the transcribe.html template.
-#    """
-#    for field in pyobj['fields']:
-#        for segment in field['segments']:
-#            #Modify path
-#            image_path = segment.get('image_path')
-#            if not image_path: continue
-#            segment['name'] = os.path.basename(image_path.split("media")[1]).split(".jpg")[0]
-#            #Modify image size
-#            dpi = 100.0 #A guess for dots per inch
-#            segment_width = segment.get("segment_width", field.get("segment_width", pyobj.get("segment_width")))
-#            segment_height = segment.get("segment_height", field.get("segment_height", pyobj.get("segment_height")))
-#            if not segment_width or not segment_height: continue
-#            #segment['width_inches'] = float(segment_width) / dpi
-#            #segment['height_inches'] = float(segment_height) / dpi
-#    return pyobj
-
-def process_json_output(filepath):
-    """
-    Modifies segment image paths and sizes so it is easy to use them in the transcribe.html template.
-    """
-    import json, codecs
-    fp = codecs.open(filepath, mode="r", encoding="utf-8")
-    pyobj = json.load(fp, encoding='utf-8')#This is where we load the json output
-    for field in pyobj['fields']:
-        if field['type'] is 'select':
-            #This is because xforms use space to delimit options while the jquery val function uses commas
-            field['value'] = field['value'].replace(' ', ',')
-        for segment in field['segments']:
-            #Modify path
-            image_path = segment.get('image_path')
-            if not image_path: continue
-            segment['name'] = os.path.basename(image_path.split("media")[1]).split(".jpg")[0]
-            #Modify image size
-            #dpi = 100.0 #A guess for dots per inch
-            #segment_width = segment.get("segment_width", field.get("segment_width", pyobj.get("segment_width")))
-            #segment_height = segment.get("segment_height", field.get("segment_height", pyobj.get("segment_height")))
-            #if not segment_width or not segment_height: continue
-            #segment['width_inches'] = float(segment_width) / dpi
-            #segment['height_inches'] = float(segment_height) / dpi
-    return pyobj
+# def process_json_output(filepath):
+#     """
+#     Modifies segment image paths and sizes so it is easy to use them in the transcribe.html template.
+#     """
+#     import json, codecs
+#     fp = codecs.open(filepath, mode="r", encoding="utf-8")
+#     pyobj = json.load(fp, encoding='utf-8')
+#     for field in pyobj['fields']:
+#         if field['type'] is 'select':
+#             #This is because xforms use space to delimit options while the jquery val function uses commas
+#             field['value'] = field['value'].replace(' ', ',')
+#         for segment in field['segments']:
+#             #Modify path
+#             image_path = segment.get('image_path')
+#             if not image_path: continue
+#             segment['name'] = os.path.basename(image_path.split("media")[1]).split(".jpg")[0]
+#             #Modify image size
+#             dpi = 100.0 #A guess for dots per inch
+#             segment_width = segment.get("segment_width", field.get("segment_width", pyobj.get("segment_width")))
+#             segment_height = segment.get("segment_height", field.get("segment_height", pyobj.get("segment_height")))
+#             if not segment_width or not segment_height: continue
+#             segment['width_inches'] = float(segment_width) / dpi
+#             segment['height_inches'] = float(segment_height) / dpi
+#     return pyobj
 
 def process_forms(modeladmin, request, queryset):
         #This is where we make the call to ODKScan core
@@ -72,7 +52,7 @@ def process_forms(modeladmin, request, queryset):
             obj.error_message = stderrdata
             json_path = os.path.join(obj.output_path, 'output.json')
             if os.path.exists(json_path):
-                process_json_output(json_path)#Not sure I need this.
+                #process_json_output(json_path)#Not sure I need this.
                 obj.status = 'p'
             else:
                 obj.status = 'e'

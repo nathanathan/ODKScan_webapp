@@ -59,8 +59,7 @@ class FormImageAdmin(admin.ModelAdmin):
     list_display = ['filename', 'upload_time', 'status',]
     list_filter = (CompleteFilter, 'status', 'template', )#'upload_time', 
     fields = ('image', 'template', 'error_message',)
-    readonly_fields = ('error_message',) #TODO: Only display error if it exists
-    #formfield_overrides = { models.ImageField: {'widget': AdminImageWidget}}
+    readonly_fields = ('error_message',)
     actions = [actions.process_forms,
                actions.transcribe,
                actions.transcribeFormView,
