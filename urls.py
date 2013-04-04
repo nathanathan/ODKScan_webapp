@@ -7,8 +7,7 @@ import os
 APP_NAME = os.path.split(os.path.dirname(__file__))[-1]
 #Try __package__
 urlpatterns = patterns(APP_NAME,
-    (r'^$', login_required(TemplateView.as_view(template_name='index.html'))),
-    
+    (r'^$', TemplateView.as_view(template_name='index.html')),
     url(r'^save_transcription', 'views.save_transcriptions'),
     (r'^fieldView', login_required(TemplateView.as_view(template_name='fieldView.html'))),
     (r'^formView', login_required(TemplateView.as_view(template_name='formView.html'))),

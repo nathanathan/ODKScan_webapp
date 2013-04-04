@@ -1,13 +1,17 @@
 jQuery(function($) {
-    
     $('.zoom').click(function(evt){
-        var $el = $(evt.target).closest('.zoom');
-        $el.width($el.width() * 4 / 5 );
+        $('.segment').each(function(idx, seg){
+            var $seg = $(seg);
+            $seg.width($seg.width() * 5 / 4 );
+        });
     });
     $('.shrink').click(function(evt){
-        var $el = $(evt.target).closest('.zoom');
-        $el.width($el.width() * 5 / 4);
+        $('.segment').each(function(idx, seg){
+            var $seg = $(seg);
+            $seg.width($seg.width() * 4 / 5 );
+        });
     });
+    
     
     //Does hiding and showing of columns
 	$('.icon-eye-open').hide();
