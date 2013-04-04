@@ -219,7 +219,7 @@ def spreadsheet_to_json(path_or_file, output_path):
 if __name__ == "__main__":
     """
     This code is for running XLSForm as a command line script.
-    """import uuid
+    """
     argv = sys.argv
     #For debugging
     argv = [
