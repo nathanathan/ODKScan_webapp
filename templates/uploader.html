@@ -88,8 +88,19 @@
 <script src="../static/jQuery-File-Upload/js/jquery.fileupload.js"></script>
 <script>
 $(function () {
-    $('#fileupload').fileupload({
+    $('#fileupload').fileupload('option', {
+        url: '../uploadForms',
         dataType: 'json',
+        process: [
+            {
+                action: 'load',
+                fileTypes: /^.*$/,//   /^image\/(gif|jpeg|png)$/,
+                maxFileSize: 20000000 // 20MB
+            },
+            {
+                action: 'save'
+            }
+        ],
         done: function (e, data) {
             console.log(data);
             $.each(data.result.files, function (index, file) {
