@@ -23,20 +23,20 @@
     </blockquote>
     <br>
     <!-- Template chooser -->
-      <div id="myCarousel" class="carousel slide">
+      <div id="myCarousel" class="carousel slide" data-interval="false">
         <ol class="carousel-indicators">
           <li data-target="#myCarousel" data-slide-to="0" class="active"></li>
           <li data-target="#myCarousel" data-slide-to="1"></li>
           <li data-target="#myCarousel" data-slide-to="2"></li>
         </ol>
         <div class="carousel-inner">
-          <div class="item active">
+          <div class="item active" data-name="blah">
             <img src="http://photography.naturestocklibrary.com/orca-stock-photo.jpg" alt="">
             <div class="carousel-caption">
               <h4>Template One</h4>
             </div>
           </div>
-          <div class="item">
+          <div class="item" data-name="blue">
             <img src="http://www.deviantart.com/download/55000908/Stock_032__by_enchanted_stock.jpg" alt="">
             <div class="carousel-caption">
               <h4>Second Thumbnail label</h4>
@@ -84,8 +84,18 @@
 </div>
 
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-<script src="../static/transcription/assets/js/bootstrap-transition.js"></script>
-<script src="../static/transcription/assets/js/bootstrap-carousel.js"></script>
+    	<script src="../static/transcription/assets/js/bootstrap-transition.js"></script>
+		<script src="../static/transcription/assets/js/bootstrap-alert.js"></script>
+		<script src="../static/transcription/assets/js/bootstrap-modal.js"></script>
+		<script src="../static/transcription/assets/js/bootstrap-dropdown.js"></script>
+		<script src="../static/transcription/assets/js/bootstrap-scrollspy.js"></script>
+		<script src="../static/transcription/assets/js/bootstrap-tab.js"></script>
+		<script src="../static/transcription/assets/js/bootstrap-tooltip.js"></script>
+		<script src="../static/transcription/assets/js/bootstrap-popover.js"></script>
+		<script src="../static/transcription/assets/js/bootstrap-button.js"></script>
+		<script src="../static/transcription/assets/js/bootstrap-collapse.js"></script>
+		<script src="../static/transcription/assets/js/bootstrap-carousel.js"></script>
+		<script src="../static/transcription/assets/js/bootstrap-typeahead.js"></script>
 <script src="../static/jQuery-File-Upload/js/vendor/jquery.ui.widget.js"></script>
 <script src="../static/jQuery-File-Upload/js/jquery.iframe-transport.js"></script>
 <script src="../static/jQuery-File-Upload/js/jquery.fileupload.js"></script>
@@ -102,6 +112,7 @@ $(function () {
             var $row = $('<tr>');
             var uploadFunction = function() {
                 data.context.text('Uploading...');
+                data.formData = {example: $('.item.active').data('name')};
                 data.submit();
                 $('body').off('click', '.upload-everything', uploadFunction);
             };
