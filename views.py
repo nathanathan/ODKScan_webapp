@@ -80,7 +80,7 @@ def handle_upload(request):
         result = {}
         result['name'] = re.sub(r'^.*\\', '',
             fieldStorage.name)
-        result['type'] = fieldStorage.type
+        result['type'] = fieldStorage.content_type
         props = {
             'template' : None,
             'image' : fieldStorage
