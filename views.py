@@ -78,9 +78,9 @@ def handle_upload(request):
         if type(fieldStorage) is unicode:
             continue
         result = {}
-        result['name'] = re.sub(r'^.*\\', '',
-            fieldStorage.filename)
-        result['type'] = fieldStorage.type
+        # result['name'] = re.sub(r'^.*\\', '',
+        #     fieldStorage.name)
+        # result['type'] = fieldStorage.type
         props = {
             'template' : None,
             'image' : fieldStorage
