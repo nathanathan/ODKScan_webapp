@@ -70,15 +70,13 @@
 
 </div>
 
-
-<input id="fileuploadinput" type="file" name="files[]" data-url="../uploadForms" multiple>
-
-
 <!-- The template to display files available for upload -->
-<script id="template-upload" type="text/x-tmpl">upload
+<script id="template-upload" type="text/x-tmpl">
+    <div class="uploadt"></div>
 </script>
 <!-- The template to display files available for download -->
-<script id="template-download" type="text/x-tmpl">download
+<script id="template-download" type="text/x-tmpl">
+    <div class="downloadt"></div>
 </script>
 
 
@@ -86,6 +84,7 @@
 <script src="../static/jQuery-File-Upload/js/vendor/jquery.ui.widget.js"></script>
 <script src="../static/jQuery-File-Upload/js/jquery.iframe-transport.js"></script>
 <script src="../static/jQuery-File-Upload/js/jquery.fileupload.js"></script>
+<script src="../static/jQuery-File-Upload/js/jquery.fileupload-fp.js"></script>
 <script src="../static/jQuery-File-Upload/js/jquery.fileupload-ui.js"></script>
 <script>
 $(function () {
@@ -101,14 +100,13 @@ $(function () {
             {
                 action: 'save'
             }
-        ]
-        /*,
+        ],
         done: function (e, data) {
             console.log(data);
             $.each(data.result.files, function (index, file) {
                 $('<p/>').text(file.name).appendTo(document.body);
             });
-        }*/
+        }
     });
 });
 </script>
