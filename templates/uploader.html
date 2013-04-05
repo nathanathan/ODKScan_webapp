@@ -22,6 +22,34 @@
         <p>Only image files (<strong>JPG, GIF, PNG</strong>) are allowed.</p>
     </blockquote>
     <br>
+    <!-- Template chooser -->
+      <div id="myCarousel" class="carousel slide">
+        <ol class="carousel-indicators">
+          <li data-target="#myCarousel" data-slide-to="0" class="active"></li>
+          <li data-target="#myCarousel" data-slide-to="1"></li>
+          <li data-target="#myCarousel" data-slide-to="2"></li>
+        </ol>
+        <div class="carousel-inner">
+          <div class="item active">
+            <img src="http://photography.naturestocklibrary.com/orca-stock-photo.jpg" alt="">
+            <div class="carousel-caption">
+              <h4>Template One</h4>
+            </div>
+          </div>
+          <div class="item">
+            <img src="http://www.deviantart.com/download/55000908/Stock_032__by_enchanted_stock.jpg" alt="">
+            <div class="carousel-caption">
+              <h4>Second Thumbnail label</h4>
+              <p>Cras justo odio, dapibus ac facilisis in, egestas eget quam. Donec id elit non mi porta gravida at eget metus. Nullam id dolor id nibh ultricies vehicula ut id elit.</p>
+            </div>
+          </div>
+        </div>
+        <a class="left carousel-control" href="#myCarousel" data-slide="prev">&lsaquo;</a>
+        <a class="right carousel-control" href="#myCarousel" data-slide="next">&rsaquo;</a>
+      </div>
+    
+    
+    
     <!-- The file upload form used as target for the file upload widget -->
     <form id="fileupload">
         <!-- The fileupload-buttonbar contains buttons to add/delete files and start/cancel the upload -->
@@ -39,13 +67,11 @@
                     <span>Add files...</span>
                     <input type="file" name="files[]" multiple>
                 </span>
-                <button class="btn btn-primary upload-everything">
+                <a class="btn btn-primary upload-everything">
                     <i class="icon-upload icon-white"></i>
                     <span>Start upload</span>
-                </button>
+                </a>
                 
-
-
             </div>
         </div>
         <!-- The loading indicator is shown during file processing -->
@@ -58,6 +84,8 @@
 </div>
 
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script src="../static/transcription/assets/js/bootstrap-transition.js"></script>
+<script src="../static/transcription/assets/js/bootstrap-carousel.js"></script>
 <script src="../static/jQuery-File-Upload/js/vendor/jquery.ui.widget.js"></script>
 <script src="../static/jQuery-File-Upload/js/jquery.iframe-transport.js"></script>
 <script src="../static/jQuery-File-Upload/js/jquery.fileupload.js"></script>
