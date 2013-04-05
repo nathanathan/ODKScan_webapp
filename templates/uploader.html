@@ -10,8 +10,6 @@
 <link rel="stylesheet" href="../static/jQuery-File-Upload/css/style.css">
 <!-- CSS to style the file input field as button and adjust the Bootstrap progress bars -->
 <link rel="stylesheet" href="../static/jQuery-File-Upload/css/jquery.fileupload-ui.css">
-<!-- CSS adjustments for browsers with JavaScript disabled -->
-<noscript><link rel="stylesheet" href="../static/jQuery-File-Upload/css/jquery.fileupload-ui-noscript.css"></noscript>
 
 </head>
 <body>
@@ -70,38 +68,25 @@
 
 </div>
 
-<!-- The template to display files available for upload -->
-<script id="template-upload" type="text/x-tmpl">
-    <div class="uploadt"></div>
-</script>
-<!-- The template to display files available for download -->
-<script id="template-download" type="text/x-tmpl">
-    <div class="downloadt"></div>
-</script>
-
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 <script src="../static/jQuery-File-Upload/js/vendor/jquery.ui.widget.js"></script>
-<!-- The Templates plugin is included to render the upload/download listings -->
-<script src="http://blueimp.github.com/JavaScript-Templates/tmpl.min.js"></script>
 <script src="../static/jQuery-File-Upload/js/jquery.iframe-transport.js"></script>
 <script src="../static/jQuery-File-Upload/js/jquery.fileupload.js"></script>
-<script src="../static/jQuery-File-Upload/js/jquery.fileupload-fp.js"></script>
-<script src="../static/jQuery-File-Upload/js/jquery.fileupload-ui.js"></script>
 <script>
 $(function () {
     $('#fileupload').fileupload({
         url: '../uploadForms',
         dataType: 'json',
-        process: [
-            {
-                action: 'load',
-                fileTypes: /^.*$/,//   /^image\/(gif|jpeg|png)$/,
-                maxFileSize: 20000000 // 20MB
-            },
-            {
-                action: 'save'
-            }
-        ],
+        fileTypes: /^.*$/,//   /^image\/(gif|jpeg|png)$/,
+        maxFileSize: 20000000, // 20MB
+        add: function (e, data) {
+            data.context = $('<button/>').text('Upload')
+            .appendTo(document.body)
+            .click(function () {
+                data.context = $('<p/>').text('Uploading...').replaceAll($(this));
+                data.submit();
+            });
+        },
         done: function (e, data) {
             console.log(data);
             $.each(data.result.files, function (index, file) {
