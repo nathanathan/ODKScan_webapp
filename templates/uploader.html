@@ -39,7 +39,7 @@
                     <span>Add files...</span>
                     <input type="file" name="files[]" multiple>
                 </span>
-                <button type="submit" class="btn btn-primary start">
+                <button type="submit" class="btn btn-primary upload-everything">
                     <i class="icon-upload icon-white"></i>
                     <span>Start upload</span>
                 </button>
@@ -58,7 +58,7 @@
 </div>
 
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-<!-- <script src="../static/jQuery-File-Upload/js/vendor/jquery.ui.widget.js"></script> -->
+<script src="../static/jQuery-File-Upload/js/vendor/jquery.ui.widget.js"></script>
 <script src="../static/jQuery-File-Upload/js/jquery.iframe-transport.js"></script>
 <script src="../static/jQuery-File-Upload/js/jquery.fileupload.js"></script>
 <script>
@@ -75,18 +75,18 @@ $(function () {
             var uploadFunction = function() {
                 data.context.text('Uploading...');
                 data.submit();
-                $('body').off('click', '.start', uploadFunction);
+                $('body').off('click', '.upload-everything', uploadFunction);
             };
             data.context = $('<td>');
             data.context.append($upload).append($cancel);
             $row.append($('<td>').text(data.files[0].name));
             $row.append(data.context);
             $('.files').append($row);
-            $('body').off('click', '.start', uploadFunction);
+            $('body').off('click', '.upload-everything', uploadFunction);
             $upload.click(uploadFunction);
             $cancel.click(function(){
                 $row.remove();
-                $('body').off('click', '.start', uploadFunction);
+                $('body').off('click', '.upload-everything', uploadFunction);
             });
         },
         done: function (e, data) {
