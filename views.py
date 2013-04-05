@@ -1,4 +1,5 @@
 from django.contrib.auth.models import User
+from django.views.decorators.csrf import csrf_exempt
 from ODKScan_webapp.models import Template, FormImage, LogItem
 from django.http import HttpResponse, HttpResponseBadRequest
 import sys, os, tempfile, shutil
@@ -68,7 +69,8 @@ def save_transcriptions(request):
         return HttpResponse()
     else:
         return HttpResponseBadRequest("Only post requests please.")
-    
+
+@csrf_exempt
 def handle_upload(request):
     results = []
     blob_keys = []
