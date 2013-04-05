@@ -58,7 +58,7 @@
 </div>
 
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-<script src="../static/jQuery-File-Upload/js/vendor/jquery.ui.widget.js"></script>
+<!-- <script src="../static/jQuery-File-Upload/js/vendor/jquery.ui.widget.js"></script> -->
 <script src="../static/jQuery-File-Upload/js/jquery.iframe-transport.js"></script>
 <script src="../static/jQuery-File-Upload/js/jquery.fileupload.js"></script>
 <script>
@@ -75,7 +75,8 @@ $(function () {
             var uploadFunction = function() {
                 data.context.text('Uploading...');
                 data.submit();
-            }
+                $('body').off('click', '.start', uploadFunction);
+            };
             data.context = $('<td>');
             data.context.append($upload).append($cancel);
             $row.append($('<td>').text(data.files[0].name));
