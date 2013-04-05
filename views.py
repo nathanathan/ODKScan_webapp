@@ -114,7 +114,7 @@ def handle_upload(request):
     #     blob_keys,
     #     _countdown=EXPIRATION_TIME
     # )
-    return HttpResponse(json.dumps(results, indent=4), mimetype="application/json")
+    return HttpResponse(json.dumps({'files' : results}, indent=4), mimetype="application/json")
     
     
 # def form_view(request):
