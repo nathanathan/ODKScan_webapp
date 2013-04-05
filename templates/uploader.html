@@ -35,15 +35,16 @@
                     <span>Add files...</span>
                     <input type="file" name="files[]" multiple>
                 </span>
-                <div class="input-prepend">
-                  <span class="add-on">>Batch Name:</span>
-                  <input class="span2" id="batchName" type="text" value="{{ request.user.name }}">
-                </div>
-                
                 <button type="submit" class="btn btn-primary start">
                     <i class="icon-upload icon-white"></i>
                     <span>Start upload</span>
                 </button>
+                
+                <div class="input-prepend">
+                  <span class="add-on">Batch Name:</span><!--
+                  --><input class="span2" id="batchName" type="text" value="{{ user.username }}">
+                </div>
+
             </div>
         </div>
         <!-- The loading indicator is shown during file processing -->
@@ -67,18 +68,27 @@ $(function () {
         fileTypes: /^.*$/,//   /^image\/(gif|jpeg|png)$/,
         maxFileSize: 20000000, // 20MB
         add: function (e, data) {
+            var $upload = $('<button lass="btn btn-success">Upload</button>');
             var $cancel = $('<button type="button" class="btn btn-danger delete"><i class="icon-ban-circle icon-white"></i><span>Cancel</span></button>');
-            data.context = $('<button/>').text('Upload')
-            .appendTo(document.body)
-            .click(function () {
-                data.context = $('<p/>').text('Uploading...').replaceAll($(this));
+            var $row = $('<tr>');
+            data.context = $('<td>');
+            data.context.append($upload).append($cancel);
+            console.log(data);
+            $row.append($('<td>').text("test"));
+            $row.append(data.context);
+            $('.files').append($row);
+            $upload.click(function () {
+                data.context.text('Uploading...').replaceAll($(this));
                 data.submit();
+            });
+            $cancel.click(function(){
+                $row.remove();
             });
         },
         done: function (e, data) {
             console.log(data);
             $.each(data.result.files, function (index, file) {
-                $('<p/>').text(file.name).appendTo(document.body);
+                data.context.text("Uploaded");
             });
         }
     });
