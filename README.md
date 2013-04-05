@@ -20,7 +20,7 @@ Start with 32bit ubuntu 12.04 LTS
 
 ```bash
 sudo apt-get update 
-sudo apt-get install git gunicorn python-imaging
+sudo apt-get install git python-imaging
 ```
 
 ### Install OpenCV:
@@ -97,16 +97,64 @@ This command will also prompt you to set up a super user account.
 python manage.py syncdb
 ```
 
-### [Use gunicorn to start the server](http://adrian.org.ar/django-nginx-green-unicorn-in-an-ubuntu-11-10-ec2-instance/):
+## Run the app using a apache mod-wsgi server
+
+Install the necessairy packages:
 
 ```bash
-cd scan_admin
-#Put an & at the end to run the server in the background, 
-#and use killall gunicorn_django to stop it.
-sudo gunicorn_django -b 0.0.0.0:80
+sudo apt-get install apache2 libapache2-mod-wsgi
 ```
 
-Check to see if the ODKScan_webapp appears on your django admin page.
+Edit your httpd.conf file like so:
+
+```bash
+sudo pico /etc/apache2/httpd.conf
+```
+so that it contains this:
+
+```xml
+#Need to set the apache user so we have permissions to write/access files.
+User ubuntu
+Group ubuntu
+
+WSGIScriptAlias / /home/ubuntu/scan_admin/scan_admin/wsgi.py
+WSGIPythonPath /home/ubuntu/scan_admin
+#A bunch of stuff to make the server run in daemon mode, which is better.
+WSGIApplicationGroup scan_admin
+WSGIDaemonProcess scan_admin user=ubuntu group=ubuntu threads=10 maximum-requests=100 python-path=/home/ubuntu/scan_admin shutdown-timeout=100
+WSGIProcessGroup scan_admin
+WSGIRestrictEmbedded On
+
+<Directory /home/ubuntu/scan_admin/scan_admin>
+#if enabled allows cors requests from github hosted apps.
+#SetEnvIf Origin "^(.*[(github\.com)(c9\.io)])$" ORIGIN_SUB_DOMAIN=$1
+#Header set Access-Control-Allow-Origin "%{ORIGIN_SUB_DOMAIN}e" env=ORIGIN_SUB_DOMAIN
+<Files wsgi.py>
+Order deny,allow
+Allow from all
+</Files>
+</Directory>
+```
+
+Now restart the server for changes to take effect.
+
+```bash
+sudo /etc/init.d/apache2 restart
+```
+
+### Alternative way to run the server:
+
+It might be easier to [use gunicorn to run the server](http://adrian.org.ar/django-nginx-green-unicorn-in-an-ubuntu-11-10-ec2-instance/):
+
+```bash
+sudo apt-get install gunicorn
+cd scan_admin
+#Use killall gunicorn_django to stop the server
+sudo gunicorn_django -b 0.0.0.0:80 --daemon -w 4
+```
+
+The reason I prefer the apache setup I documented is that I have some experience
+using it in the past and the server automatically starts when the machine reboots.
 
 Architecture
 --------------------------------------------------------------------------------
