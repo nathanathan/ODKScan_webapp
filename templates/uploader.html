@@ -35,28 +35,15 @@
                     <span>Add files...</span>
                     <input type="file" name="files[]" multiple>
                 </span>
+                <div class="input-prepend">
+                  <span class="add-on">>Batch Name:</span>
+                  <input class="span2" id="batchName" type="text" value="{{ request.user.name }}">
+                </div>
+                
                 <button type="submit" class="btn btn-primary start">
                     <i class="icon-upload icon-white"></i>
                     <span>Start upload</span>
                 </button>
-                <button type="reset" class="btn btn-warning cancel">
-                    <i class="icon-ban-circle icon-white"></i>
-                    <span>Cancel upload</span>
-                </button>
-                <button type="button" class="btn btn-danger delete">
-                    <i class="icon-trash icon-white"></i>
-                    <span>Delete</span>
-                </button>
-                <input type="checkbox" class="toggle">
-            </div>
-            <!-- The global progress information -->
-            <div class="span5 fileupload-progress fade">
-                <!-- The global progress bar -->
-                <div class="progress progress-success progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100">
-                    <div class="bar" style="width:0%;"></div>
-                </div>
-                <!-- The extended global progress information -->
-                <div class="progress-extended">&nbsp;</div>
             </div>
         </div>
         <!-- The loading indicator is shown during file processing -->
@@ -80,6 +67,7 @@ $(function () {
         fileTypes: /^.*$/,//   /^image\/(gif|jpeg|png)$/,
         maxFileSize: 20000000, // 20MB
         add: function (e, data) {
+            var $cancel = $('<button type="button" class="btn btn-danger delete"><i class="icon-ban-circle icon-white"></i><span>Cancel</span></button>');
             data.context = $('<button/>').text('Upload')
             .appendTo(document.body)
             .click(function () {
