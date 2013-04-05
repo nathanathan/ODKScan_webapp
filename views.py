@@ -78,9 +78,9 @@ def handle_upload(request):
         if type(fieldStorage) is unicode:
             continue
         result = {}
-        # result['name'] = re.sub(r'^.*\\', '',
-        #     fieldStorage.name)
-        # result['type'] = fieldStorage.type
+        result['name'] = re.sub(r'^.*\\', '',
+            fieldStorage.name)
+        result['type'] = fieldStorage.type
         props = {
             'template' : None,
             'image' : fieldStorage
@@ -114,7 +114,7 @@ def handle_upload(request):
     #     blob_keys,
     #     _countdown=EXPIRATION_TIME
     # )
-    return results
+    return HttpResponse(json.dumps(results, indent=4), mimetype="application/json")
     
     
 # def form_view(request):
