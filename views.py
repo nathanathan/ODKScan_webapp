@@ -3,6 +3,7 @@ from ODKScan_webapp.models import Template, FormImage, LogItem
 from django.http import HttpResponse, HttpResponseBadRequest
 import sys, os, tempfile, shutil
 import json, codecs
+import re
 from django.shortcuts import render_to_response, redirect
 from django.core.context_processors import csrf
 from django.template import RequestContext, loader
@@ -68,46 +69,49 @@ def save_transcriptions(request):
     else:
         return HttpResponseBadRequest("Only post requests please.")
     
-def handle_upload(self):
+def handle_upload(request):
     results = []
     blob_keys = []
-    for name, fieldStorage in self.request.POST.items():
+    for name, fieldStorage in request.FILES.items():
         if type(fieldStorage) is unicode:
             continue
         result = {}
         result['name'] = re.sub(r'^.*\\', '',
             fieldStorage.filename)
         result['type'] = fieldStorage.type
-        result['size'] = self.get_file_size(fieldStorage.file)
-        if self.validate(result):
-            blob_key = str(
-                self.write_blob(fieldStorage.value, result)
-            )
-            blob_keys.append(blob_key)
-            result['delete_type'] = 'DELETE'
-            result['delete_url'] = self.request.host_url +\
-                '/?key=' + urllib.quote(blob_key, '')
-            if (IMAGE_TYPES.match(result['type'])):
-                try:
-                    result['url'] = images.get_serving_url(
-                        blob_key,
-                        secure_url=self.request.host_url\
-                            .startswith('https')
-                    )
-                    result['thumbnail_url'] = result['url'] +\
-                        THUMBNAIL_MODIFICATOR
-                except: # Could not get an image serving url
-                    pass
-            if not 'url' in result:
-                result['url'] = self.request.host_url +\
-                    '/' + blob_key + '/' + urllib.quote(
-                        result['name'].encode('utf-8'), '')
-        results.append(result)
-    deferred.defer(
-        cleanup,
-        blob_keys,
-        _countdown=EXPIRATION_TIME
-    )
+        props = {
+            'template' : None,
+            'image' : fieldStorage
+        }    
+        instance = FormImage(**props)
+        instance.save()
+        #result['size'] = get_file_size(fieldStorage.file)
+    #     if validate(result):
+    #         blob_keys.append(blob_key)
+    #         result['delete_type'] = 'DELETE'
+    #         result['delete_url'] = request.host_url +\
+    #             '/?key=' + urllib.quote(blob_key, '')
+    #         if (IMAGE_TYPES.match(result['type'])):
+    #             try:
+    #                 result['url'] = images.get_serving_url(
+    #                     blob_key,
+    #                     secure_url=request.host_url\
+    #                         .startswith('https')
+    #                 )
+    #                 result['thumbnail_url'] = result['url'] +\
+    #                     THUMBNAIL_MODIFICATOR
+    #             except: # Could not get an image serving url
+    #                 pass
+    #         if not 'url' in result:
+    #             result['url'] = request.host_url +\
+    #                 '/' + blob_key + '/' + urllib.quote(
+    #                     result['name'].encode('utf-8'), '')
+    #     results.append(result)
+    # deferred.defer(
+    #     cleanup,
+    #     blob_keys,
+    #     _countdown=EXPIRATION_TIME
+    # )
     return results
     
     
