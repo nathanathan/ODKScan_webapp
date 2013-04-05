@@ -97,7 +97,7 @@ This command will also prompt you to set up a super user account.
 python manage.py syncdb
 ```
 
-## Run the app using a apache mod-wsgi server
+### Run the app using a apache mod-wsgi server
 
 Install the necessairy packages:
 
@@ -142,7 +142,7 @@ Now restart the server for changes to take effect.
 sudo /etc/init.d/apache2 restart
 ```
 
-### Alternative way to run the server:
+#### Alternative way to run the server:
 
 It might be easier to [use gunicorn to run the server](http://adrian.org.ar/django-nginx-green-unicorn-in-an-ubuntu-11-10-ec2-instance/):
 
@@ -159,7 +159,41 @@ using it in the past and the server automatically starts when the machine reboot
 Architecture
 --------------------------------------------------------------------------------
 
-* The django code in admin.py and models.py configures what's in the admin interface.
+For the most part this application follows the structure of an ordinary Django app.
+Here's some links to documentation on the primary Django components in use:
+
+* [URL Dispatcher](https://docs.djangoproject.com/en/dev/topics/http/urls/)
+* [Views](https://docs.djangoproject.com/en/dev/topics/http/views/)
+* [Templates](https://docs.djangoproject.com/en/dev/ref/templates/api/)
+* [The Django Admin](https://docs.djangoproject.com/en/dev/ref/contrib/admin/)
+* [Admin Actions](https://docs.djangoproject.com/en/dev/ref/contrib/admin/actions/)
+
+Additional notes:
+
 * actions.py contains code for processing forms with ODK Scan, rendering transcription pages and generating csvs.
-* The ODKScan-core contains the image processing code.
+* The ODKScan-core directory contains the image processing code which is also used in the android app.
 * The UI for the transcription interfaces is contained in static/transcription and in the templates directory.
+
+## Media
+
+Most of the application data is stored in the MEDIA_ROOT directory. It is structured as follows:
+
+Templates:
+```
+[template name]/form.jpg
+[template name]/template.json
+[template name]/cached_features.yml
+```
+Form Images:
+```
+[uuid]/photo/[photo name]
+
+If scanned:
+[uuid]/aligned.jpg
+[uuid]/markedup.jpg
+[uuid]/output.json
+[uuid]/segments/[field name]_[segment index].jpg
+
+If transcribed:
+[uuid]/transcription.json
+```

@@ -41,4 +41,9 @@ urlpatterns = patterns(APP_NAME,
     url(r'^xlsform/$', 'xlsform.views.index'),
     (r'^xlsform/download/(?P<path>.*)$', 'xlsform.views.download'),
     (r'^xlsform/serve_json/(?P<path>.*)$', 'xlsform.views.serve_json'),
+    
+    
+    
+    url(r'^uploadForms', 'views.handle_upload'),
+    (r'^uploader', login_required(TemplateView.as_view(template_name='uploader.html'))),
 )

@@ -68,6 +68,49 @@ def save_transcriptions(request):
     else:
         return HttpResponseBadRequest("Only post requests please.")
     
+def handle_upload(self):
+    results = []
+    blob_keys = []
+    for name, fieldStorage in self.request.POST.items():
+        if type(fieldStorage) is unicode:
+            continue
+        result = {}
+        result['name'] = re.sub(r'^.*\\', '',
+            fieldStorage.filename)
+        result['type'] = fieldStorage.type
+        result['size'] = self.get_file_size(fieldStorage.file)
+        if self.validate(result):
+            blob_key = str(
+                self.write_blob(fieldStorage.value, result)
+            )
+            blob_keys.append(blob_key)
+            result['delete_type'] = 'DELETE'
+            result['delete_url'] = self.request.host_url +\
+                '/?key=' + urllib.quote(blob_key, '')
+            if (IMAGE_TYPES.match(result['type'])):
+                try:
+                    result['url'] = images.get_serving_url(
+                        blob_key,
+                        secure_url=self.request.host_url\
+                            .startswith('https')
+                    )
+                    result['thumbnail_url'] = result['url'] +\
+                        THUMBNAIL_MODIFICATOR
+                except: # Could not get an image serving url
+                    pass
+            if not 'url' in result:
+                result['url'] = self.request.host_url +\
+                    '/' + blob_key + '/' + urllib.quote(
+                        result['name'].encode('utf-8'), '')
+        results.append(result)
+    deferred.defer(
+        cleanup,
+        blob_keys,
+        _countdown=EXPIRATION_TIME
+    )
+    return results
+    
+    
 # def form_view(request):
 #     t = loader.get_template('formView.html')
 #     c = RequestContext(request, {})
