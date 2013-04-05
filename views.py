@@ -87,6 +87,7 @@ def handle_upload(request):
         }    
         instance = FormImage(**props)
         instance.save()
+        results.append(result)
         #result['size'] = get_file_size(fieldStorage.file)
     #     if validate(result):
     #         blob_keys.append(blob_key)
