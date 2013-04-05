@@ -45,5 +45,5 @@ urlpatterns = patterns(APP_NAME,
     
     
     url(r'^uploadForms', 'views.handle_upload'),
-    (r'^uploader', login_required(TemplateView.as_view(template_name='uploader.html'))),
+    (r'^uploader/', login_required(TemplateView.as_view(template_name='uploader.html'))),
 )
