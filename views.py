@@ -70,6 +70,15 @@ def save_transcriptions(request):
     else:
         return HttpResponseBadRequest("Only post requests please.")
 
+
+#Add login requirement
+def uploader(request):
+    t = loader.get_template('uploader.html')
+    c = RequestContext(request, {
+        'templates' : Template.objects
+    })
+    return HttpResponse(t.render(c))
+
 @csrf_exempt
 def handle_upload(request):
     results = []

@@ -22,31 +22,22 @@
         <p>Only image files (<strong>JPG, GIF, PNG</strong>) are allowed.</p>
     </blockquote>
     <br>
-    <!-- Template chooser -->
-      <div id="myCarousel" class="carousel slide" data-interval="false">
-        <ol class="carousel-indicators">
-          <li data-target="#myCarousel" data-slide-to="0" class="active"></li>
-          <li data-target="#myCarousel" data-slide-to="1"></li>
-          <li data-target="#myCarousel" data-slide-to="2"></li>
-        </ol>
-        <div class="carousel-inner">
-          <div class="item active" data-name="blah">
-            <img src="http://photography.naturestocklibrary.com/orca-stock-photo.jpg" alt="">
-            <div class="carousel-caption">
-              <h4>Template One</h4>
-            </div>
-          </div>
-          <div class="item" data-name="blue">
-            <img src="http://www.deviantart.com/download/55000908/Stock_032__by_enchanted_stock.jpg" alt="">
-            <div class="carousel-caption">
-              <h4>Second Thumbnail label</h4>
-              <p>Cras justo odio, dapibus ac facilisis in, egestas eget quam. Donec id elit non mi porta gravida at eget metus. Nullam id dolor id nibh ultricies vehicula ut id elit.</p>
-            </div>
-          </div>
+
+    <h1>Choose a template:</h1>
+    <div id="myCarousel" class="carousel slide" data-interval="false">
+    <div class="carousel-inner">
+    {% for template in templates %}
+      <div class="item active" data-name="{{template.name}}">
+        <img src="{{template.image.url}}" alt="">
+        <div class="carousel-caption">
+          <h4>{{template.name}}</h4>
         </div>
-        <a class="left carousel-control" href="#myCarousel" data-slide="prev">&lsaquo;</a>
-        <a class="right carousel-control" href="#myCarousel" data-slide="next">&rsaquo;</a>
       </div>
+    {% endfor %}
+    </div>
+    <a class="left carousel-control" href="#myCarousel" data-slide="prev">&lsaquo;</a>
+    <a class="right carousel-control" href="#myCarousel" data-slide="next">&rsaquo;</a>
+    </div>
     
     
     
@@ -85,17 +76,7 @@
 
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
     	<script src="../static/transcription/assets/js/bootstrap-transition.js"></script>
-		<script src="../static/transcription/assets/js/bootstrap-alert.js"></script>
-		<script src="../static/transcription/assets/js/bootstrap-modal.js"></script>
-		<script src="../static/transcription/assets/js/bootstrap-dropdown.js"></script>
-		<script src="../static/transcription/assets/js/bootstrap-scrollspy.js"></script>
-		<script src="../static/transcription/assets/js/bootstrap-tab.js"></script>
-		<script src="../static/transcription/assets/js/bootstrap-tooltip.js"></script>
-		<script src="../static/transcription/assets/js/bootstrap-popover.js"></script>
-		<script src="../static/transcription/assets/js/bootstrap-button.js"></script>
-		<script src="../static/transcription/assets/js/bootstrap-collapse.js"></script>
 		<script src="../static/transcription/assets/js/bootstrap-carousel.js"></script>
-		<script src="../static/transcription/assets/js/bootstrap-typeahead.js"></script>
 <script src="../static/jQuery-File-Upload/js/vendor/jquery.ui.widget.js"></script>
 <script src="../static/jQuery-File-Upload/js/jquery.iframe-transport.js"></script>
 <script src="../static/jQuery-File-Upload/js/jquery.fileupload.js"></script>
@@ -112,7 +93,10 @@ $(function () {
             var $row = $('<tr>');
             var uploadFunction = function() {
                 data.context.text('Uploading...');
-                data.formData = {example: $('.item.active').data('name')};
+                data.formData = {
+                    example: $('.item.active').data('name'),
+                    batchName: $('.batchName').val()
+                };
                 data.submit();
                 $('body').off('click', '.upload-everything', uploadFunction);
             };
@@ -121,7 +105,7 @@ $(function () {
             $row.append($('<td>').text(data.files[0].name));
             $row.append(data.context);
             $('.files').append($row);
-            $('body').off('click', '.upload-everything', uploadFunction);
+            $('body').on('click', '.upload-everything', uploadFunction);
             $upload.click(uploadFunction);
             $cancel.click(function(){
                 $row.remove();
