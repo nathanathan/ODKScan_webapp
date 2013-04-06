@@ -75,7 +75,7 @@ def save_transcriptions(request):
 def uploader(request):
     t = loader.get_template('uploader.html')
     c = RequestContext(request, {
-        'templates' : Template.objects
+        'templates' : Template.objects.all()
     })
     return HttpResponse(t.render(c))
 
