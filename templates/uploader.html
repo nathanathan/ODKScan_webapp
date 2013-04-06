@@ -25,6 +25,22 @@
 </head>
 <body>
 <div class="container">
+
+
+      <div class="masthead">
+        <h3 class="muted">Form Image Uploader</h3>
+        <div class="navbar">
+          <div class="navbar-inner">
+            <div class="container">
+              <ul class="nav">
+                <li><a href="../">Home</a></li>
+                <li><a href="../admin/ODKScan_webapp/formimage/">View Uploaded Forms</a></li>
+              </ul>
+            </div>
+          </div>
+        </div><!-- /.navbar -->
+      </div>
+
     <div class="page-header">
         <h1>ODKScan Form Image Uploader</h1>
     </div>
@@ -105,7 +121,7 @@ $(function () {
                 data.context.text('Uploading...');
                 data.formData = {
                     template: $('.item.active').data('name'),
-                    batch: $('.batchName').val()
+                    batch: $('#batchName').val()
                 };
                 data.submit();
                 $('body').off('click', '.upload-everything', uploadFunction);
