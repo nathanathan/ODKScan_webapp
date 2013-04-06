@@ -91,39 +91,13 @@ def handle_upload(request):
             fieldStorage.name)
         result['type'] = fieldStorage.content_type
         props = {
-            'template' : None,
+            'template' : request.POST["template"],
+            'batch' : request.POST["batch"],
             'image' : fieldStorage
         }    
         instance = FormImage(**props)
         instance.save()
         results.append(result)
-        #result['size'] = get_file_size(fieldStorage.file)
-    #     if validate(result):
-    #         blob_keys.append(blob_key)
-    #         result['delete_type'] = 'DELETE'
-    #         result['delete_url'] = request.host_url +\
-    #             '/?key=' + urllib.quote(blob_key, '')
-    #         if (IMAGE_TYPES.match(result['type'])):
-    #             try:
-    #                 result['url'] = images.get_serving_url(
-    #                     blob_key,
-    #                     secure_url=request.host_url\
-    #                         .startswith('https')
-    #                 )
-    #                 result['thumbnail_url'] = result['url'] +\
-    #                     THUMBNAIL_MODIFICATOR
-    #             except: # Could not get an image serving url
-    #                 pass
-    #         if not 'url' in result:
-    #             result['url'] = request.host_url +\
-    #                 '/' + blob_key + '/' + urllib.quote(
-    #                     result['name'].encode('utf-8'), '')
-    #     results.append(result)
-    # deferred.defer(
-    #     cleanup,
-    #     blob_keys,
-    #     _countdown=EXPIRATION_TIME
-    # )
     return HttpResponse(json.dumps({'files' : results}, indent=4), mimetype="application/json")
     
     

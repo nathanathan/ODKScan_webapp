@@ -18,7 +18,7 @@
     padding-bottom: 50% ; /* % of width, defines aspect ratio*/
     
     background-repeat: no-repeat;
-    background-position: center center;
+    background-position: top center;
     background-size: cover;  
 }
 </style>
@@ -34,11 +34,11 @@
     </blockquote>
     <br>
 
-    <h1>Choose a template:</h1>
+    <h2>Choose a template:</h2>
     <div id="myCarousel" class="carousel slide" data-interval="false">
     <div class="carousel-inner">
     {% for template in templates %}
-      <div class="item" data-name="{{template.name}}">
+      <div class="item{% if forloop.first %} active{% endif %}" data-name="{{template.name}}">
         <div class="ratio" style="background-image:url('{{template.image.url}}')" ></div>
         <div class="carousel-caption">
           <h4>{{template.name}}</h4>
@@ -50,8 +50,7 @@
     <a class="right carousel-control" href="#myCarousel" data-slide="next">&rsaquo;</a>
     </div>
     
-    
-    
+
     <!-- The file upload form used as target for the file upload widget -->
     <form id="fileupload">
         <!-- The fileupload-buttonbar contains buttons to add/delete files and start/cancel the upload -->
@@ -105,8 +104,8 @@ $(function () {
             var uploadFunction = function() {
                 data.context.text('Uploading...');
                 data.formData = {
-                    example: $('.item.active').data('name'),
-                    batchName: $('.batchName').val()
+                    template: $('.item.active').data('name'),
+                    batch: $('.batchName').val()
                 };
                 data.submit();
                 $('body').off('click', '.upload-everything', uploadFunction);
