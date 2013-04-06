@@ -82,7 +82,6 @@ def uploader(request):
 @csrf_exempt
 def handle_upload(request):
     results = []
-    blob_keys = []
     for name, fieldStorage in request.FILES.items():
         if type(fieldStorage) is unicode:
             continue
@@ -91,10 +90,10 @@ def handle_upload(request):
             fieldStorage.name)
         result['type'] = fieldStorage.content_type
         props = {
-            'template' : request.POST["template"],
+            'template' : Template.objects.get(name=request.POST["template"]),
             'batch' : request.POST["batch"],
             'image' : fieldStorage
-        }    
+        }
         instance = FormImage(**props)
         instance.save()
         results.append(result)
