@@ -19,7 +19,11 @@
     
     background-repeat: no-repeat;
     background-position: top center;
-    background-size: cover;  
+    background-size: cover;
+    -webkit-transform: perspective(600px) translateZ( -50px ) translateX( 30px ) rotateY( 5deg );
+}
+.carousel-inner {
+    background-image: -webkit-gradient( linear, left bottom, left top, color-stop(0.14, rgb(191,191,191)), color-stop(0.57, rgb(252,252,252)));
 }
 </style>
 </head>
