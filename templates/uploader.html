@@ -10,7 +10,18 @@
 <link rel="stylesheet" href="../static/jQuery-File-Upload/css/style.css">
 <!-- CSS to style the file input field as button and adjust the Bootstrap progress bars -->
 <link rel="stylesheet" href="../static/jQuery-File-Upload/css/jquery.fileupload-ui.css">
-
+<style>
+.ratio{
+    position:relative;
+    width: 100%;
+    height: 0;
+    padding-bottom: 50% ; /* % of width, defines aspect ratio*/
+    
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: cover;  
+}
+</style>
 </head>
 <body>
 <div class="container">
@@ -27,8 +38,9 @@
     <div id="myCarousel" class="carousel slide" data-interval="false">
     <div class="carousel-inner">
     {% for template in templates %}
-      <div class="item active" data-name="{{template.name}}">
-        <img src="{{template.image.url}}" alt="">
+      <div class="item" data-name="{{template.name}}">
+        <div class="ratio" style="background-image:url('{{template.image.url}}')" />
+        <center><img src="" alt=""></center>
         <div class="carousel-caption">
           <h4>{{template.name}}</h4>
         </div>
