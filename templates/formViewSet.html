@@ -23,7 +23,7 @@
 		    {% for json_output in json_outputs %}
 		    	<li>
 					<a class="tab" href="/formView?formLocation=/media/{{json_output.outputDir}}/&formId={{json_output.form_id}}&user={{user}}">
-						{{json_output.outputDir}}
+						{{json_output.imageName}}
 					</a>
 				</li>
 			{% empty %}

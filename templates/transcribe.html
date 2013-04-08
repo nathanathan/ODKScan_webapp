@@ -17,7 +17,6 @@
       
     <div class="navbar header">
       <div class="navbar-inner">
-        <div class="container">
         <button class="btn save" type="submit">
     		Save
 		</button>
@@ -83,7 +82,11 @@
 								{% endfor %}
 							</select>
 						{% else %}
-							<input name="{{json_output.form_id}}-{{field.name}}" value="{% if autofill %}{% firstof field.transcription field.value %}{% endif %}"></input>
+							<input
+                                name="{{json_output.form_id}}-{{field.name}}"
+                                value="{% if autofill %}
+                                    {{ field.transcription|default_if_none:field.value }}
+                                {% endif %}"></input>
 						{% endif %}
 						<br />
 						<div class="segments">

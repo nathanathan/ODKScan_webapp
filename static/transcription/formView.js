@@ -111,6 +111,62 @@ function renderMarkedupForm(form){
                         if(typeof field.transcription === 'undefined'){
                         	strokeStyle = isSelected ? "#fff200" : "#ffb700";
                         }
+                        var createModal = function(){
+                            //TODO: Do this with a template.
+                            //currently it modifies the modal included in the HTML.
+                            var $body = $('.modal-body');
+                            $body.empty();
+                            $(field.segments).each(function(segment_idx) {
+                                $body.append(
+                                $('<img>').attr('src', formLocation + "segments/" + field.name + '_image_' + segment_idx + '.jpg'));
+                            });
+		                    $('.modal-header').find('h3').text(field.label || field.name);
+                            var $control;
+                            if (field.type.indexOf('select') >= 0) {
+                                var $select = $('<select>').addClass('transcription').change(modified);
+                                if (field.type === 'select') {
+                                    $select.attr("multiple", "multiple");
+                                }
+                                $select.append($('<option value>'));
+                                var items = field.items || field.segments[0].items;
+                                $.each(items, function(item_idx, item) {
+                                    var $option = $('<option>');
+                                    $option.text(item.label || item.value);
+                                    if("transcription" in item){
+                                        $option.val(item.transcription);
+                                    } else {
+                                        $option.val(item.value);
+                                    }
+                                    $select.append($option);
+                                });
+                                $control = $select;
+                            
+                            } else {
+                                $control = $('<input>').addClass('transcription').keydown(modified);
+                            }
+                            $control.attr('name', formId + '-' + field.name);
+                            $control.val($("canvas").getLayer("field_" + field_idx + "_text").text);
+                            $body.append($('<div>').append($control));
+                            //$body.find('select').chosen();
+                            
+                            var $saveBtn = $('<button>').addClass("btn").addClass("btn-primary");
+                            $saveBtn.attr("type", "submit").text('set').addClass('setBtn');
+                            $saveBtn.click(function() {
+                                $saveBtn.attr("disabled", true).text('setting...');
+                                saveModified(function() {
+                                    $canvas.getLayer("field_" + field_idx + "_text").text = $control.val();
+                                    var layers = $canvas.getLayerGroup("field_" + field_idx);
+                                    $(layers).each(function(layer_idx) {
+                                        layers[layer_idx].strokeStyle = "#00ff09";
+                                    });
+                                    $canvas.click();
+                                    $('#myModal').modal('hide');
+                                });
+                            });
+                            $(".setBtn").replaceWith($saveBtn);
+                            $('#myModal').modal('show');
+                            $control.focus();
+                        };
                         $canvas.addLayer({
                         	group: "field_" + field_idx,
                             method: 'drawLine',
@@ -130,84 +186,14 @@ function renderMarkedupForm(form){
                             click: function(layer) {
                                 var segmentQuad = $(this);
                                 var oldclick = layer.click;
-                                layer.click = function() {}; //disable click
+                                //disable click during animation.
+                                layer.click = function() {};
                                 segmentQuad.animateLayer(layer, {
                                     strokeStyle: "#00ff09"
                                 }, 10, function() {
-                                	//Logging:
-								    var params = {
-								    	activity : "form-view-click-segment",
-								    	url : String(window.location),
-								    	formImage : formId,
-								    	segment : field.name + '_image_' + segment_idx
-								    };
-                                    /*
-								    $.ajax({
-									  url: "/log/",
-									  type: "POST",
-									  data: params,
-									  cache: false
-									}).fail(function( xhr ) {
-										$('body').replaceWith($('<pre>').text(xhr.responseText));
-									});
-                                    */
-                                	
-                                    /*
-                                    if (typeof Android !== 'undefined') {
-                                        Android.makePopup(field.name, segment_idx, field_idx);
-                                        
-                                        Android.launchCollect(field.name, segment_idx, field_idx);
-                                        layer.click = oldclick;//TODO: This should happen on callback or after a delay
-                                        
-                                    }
-                                    */
+                                    //re-enable click.
                                     layer.click = oldclick;
-                                    var $body = $('.modal-body');
-                                    $body.empty();
-                                    $(field.segments).each(
-
-                                    function(segment_idx) {
-                                        $body.append(
-                                        $('<img>').attr('src', formLocation + "segments/" + field.name + '_image_' + segment_idx + '.jpg'));
-                                    });
-				                    $('.modal-header').find('h3').text(field.label || field.name);
-                                    var $control;
-				                    if(field.type.indexOf('select') >= 0){
-				                        var $select = $('<select>').addClass('transcription').change(modified);
-				                        if(field.type === 'select'){
-				                        	$select.attr("multiple", "multiple");
-				                        }
-				                        $select.append($('<option value>'));
-				                        var items = field.items || field.segments[0].items;
-				                        $(items).each(function(item_idx){//We might have a problem here
-					                    	$select.append($('<option>').text(items[item_idx].label || items[item_idx].value).val(items[item_idx].value));
-				                        });
-                                        $control = $select;
-				                        
-				                    } else {
-				                        $control = $('<input>').addClass('transcription').keydown(modified);
-				                    }
-                                    $control.attr('name', formId + '-' + field.name);
-                                    $control.val($("canvas").getLayer("field_" + field_idx + "_text").text);
-                                    $body.append($('<div>').append($control));
-                                    //$body.find('select').chosen();
-                                    
-                                    var $saveBtn = $('<button>').addClass("btn").addClass("btn-primary");
-                                    $saveBtn.attr("type", "submit").text('set').addClass('setBtn');
-                                    $saveBtn.click(function(){
-                                    	$saveBtn.attr("disabled", true).text('setting...');
-                                    	saveModified(function(){
-	                                    	$canvas.getLayer("field_" + field_idx + "_text").text = $control.val();
-	                                    	var layers = $canvas.getLayerGroup("field_" + field_idx);
-	                                    	$(layers).each(function(layer_idx){layers[layer_idx].strokeStyle = "#00ff09";});
-	                                        $canvas.click();
-	                                        $('#myModal').modal('hide');
-                                    	});
-                                    });
-                                    $(".setBtn").replaceWith($saveBtn);
-                                    $('#myModal').modal('show');
-                                    $control.focus();
-                                    //$('#myModal').find('select').chosen();
+                                    createModal();
                                 });
 
                             }

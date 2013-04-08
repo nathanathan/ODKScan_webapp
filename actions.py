@@ -134,16 +134,13 @@ finalize.short_description = "Finalize selected forms."
 
 def generate_csv(modeladmin, request, queryset):
     """
-    Outputs a csv where the columns are the fields in the selected group of forms.
+    Outputs a csv where the form fields are columns.
     """
     def json_output_to_field_dict(json_output):
-        field_dict = {
-            '__formName__': json_output.get('name'),
-            '__imageName__': json_output.get('imageName'),
-        }
+        field_dict = {}
         for field in json_output.get('fields'):
             field_value = field.get('transcription', field.get('value'))
-            if field_value:
+            if field_value is not None:
                 field_dict[field['name']] = field_value
         return field_dict
     dict_array = []
@@ -160,10 +157,14 @@ def generate_csv(modeladmin, request, queryset):
         elif form_template.name != formImage.template.name:
             raise Exception("Mixed templates: " + form_template.name +
                              " and " + formImage.template.name)
-        fp = codecs.open(json_path, mode="r", encoding="utf-8")
-        pyobj = json.load(fp, encoding='utf-8')#This is where we load the json output
-        fp.close()
-        dict_array.append(json_output_to_field_dict(pyobj))
+        with codecs.open(json_path, mode="r", encoding="utf-8") as fp:
+            json_output = json.load(fp, encoding='utf-8')
+            base_dict = {
+                '__formTitle__': json_output.get('form_title'),
+                '__imageName__': str(formImage),
+            }
+            base_dict.update(json_output_to_field_dict(json_output))
+            dict_array.append(base_dict)
     temp_file = tempfile.mktemp()
     with open(temp_file, 'wb') as csvfile:
         utils.dict_to_csv(dict_array, csvfile)
