@@ -85,7 +85,11 @@
 							<input
                                 name="{{json_output.form_id}}-{{field.name}}"
                                 value="{% if autofill %}
-                                    {{ field.transcription|default_if_none:field.value }}
+                                    {% if "transcription" in field %}
+                                         {{ field.transcription }}
+                                    {% else %}
+                                        {{ field.value }}
+                                    {% endif %}
                                 {% endif %}"></input>
 						{% endif %}
 						<br />
