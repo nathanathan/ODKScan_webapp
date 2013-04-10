@@ -1,12 +1,36 @@
 {% extends "admin/change_list.html" %}
 {% load i18n %}
-{% block object-tools %}
-{% if has_add_permission %}
-<ul class="object-tools">
-	<li><a href="add/" class="addlink">{% blocktrans with name as name %}Add {{ name }}{% endblocktrans %}</a></li>
-    <li><a href="/static/TemplateMaker/index.html" class="viewsitelink" target="_blank">
-        {% trans "Template Maker" %}</a>
-    </li>
-</ul>
-{% endif %}
+
+{% block extrastyle %}
+  {{ block.super }}
+    <style>
+      #header {
+          background-color: black;
+      }
+    </style>
+{% endblock %}
+
+{% block title %}{{ title }} | {% trans 'Django site admin' %}{% endblock %}
+{% block branding %}<h1 id="site-name"><a href="/">ODK Scan</a></h1>{% endblock %}
+{% block breadcrumbs %}{% endblock %}
+
+{% block pretitle %}
+
+<h3>Templates</h3>
+<p>
+Templates consist of a form image, and a json document that
+defines what and where all the data is on the form. You can generate them from
+spreadsheets using <a href="/xlsform">this</a> tool.
+</p>
+{% endblock %}
+
+{% block object-tools-items %}
+<li>
+  <a href="{% url cl.opts|admin_urlname:'add' %}{% if is_popup %}?_popup=1{% endif %}" class="addlink">
+    {% blocktrans with cl.opts.verbose_name as name %}Add {{ name }}{% endblocktrans %}
+  </a>
+</li>
+<li>
+  <a href="/uploader" class="addlink">Add Batch</a>
+</li>
 {% endblock %}
