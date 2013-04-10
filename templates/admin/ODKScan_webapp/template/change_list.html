@@ -23,14 +23,3 @@ defines what and where all the data is on the form. You can generate them from
 spreadsheets using <a href="/xlsform">this</a> tool.
 </p>
 {% endblock %}
-
-{% block object-tools-items %}
-<li>
-  <a href="{% url cl.opts|admin_urlname:'add' %}{% if is_popup %}?_popup=1{% endif %}" class="addlink">
-    {% blocktrans with cl.opts.verbose_name as name %}Add {{ name }}{% endblocktrans %}
-  </a>
-</li>
-<li>
-  <a href="/uploader" class="addlink">Add Batch</a>
-</li>
-{% endblock %}
