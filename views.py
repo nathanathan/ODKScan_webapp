@@ -11,10 +11,31 @@ from django.template import RequestContext, loader
 import ODKScan_webapp.utils as utils
 
 from threading import Thread
+import subprocess
+APP_ROOT = os.path.dirname(__file__)
 
-def process_image():
-    import time
-    time.sleep(6)
+def process_image(obj):
+    obj.status = 'w'
+    obj.save()
+    stdoutdata, stderrdata = subprocess.Popen(['./ODKScan.run',
+                      os.path.dirname(obj.template.image.path) + '/',
+                      obj.image.path,
+                      obj.output_path
+                      ],
+        cwd=os.path.join(APP_ROOT,
+                         'ODKScan-core'),
+        #env={'LD_LIBRARY_PATH':'/usr/local/lib'}, #TODO: This could cause problems on other systems, document or fix
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT).communicate()
+    print >>sys.stdout, stdoutdata
+    obj.processing_log = stdoutdata
+    json_path = os.path.join(obj.output_path, 'output.json')
+    if os.path.exists(json_path):
+        #process_json_output(json_path)#Not sure I need this.
+        obj.status = 'p'
+    else:
+        obj.status = 'e'
+    obj.save()
     print "Image processed."
 
 # def index(request):
@@ -104,8 +125,8 @@ def handle_upload(request):
         instance = FormImage(**props)
         instance.save()
         results.append(result)
-    thread = Thread(target = process_image, args = (1, ))
-    thread.start()
+        thread = Thread(target = process_image, args = (instance, ))
+        thread.start()
     return HttpResponse(json.dumps({'files' : results}, indent=4), mimetype="application/json")
     
     
