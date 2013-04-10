@@ -56,6 +56,7 @@ class TemplateAdmin(admin.ModelAdmin):
 admin.site.register(Template, TemplateAdmin)
 
 class FormImageAdmin(admin.ModelAdmin):
+    title = "test"
     list_display = ['filename', 'upload_time', 'status',]
     list_filter = (CompleteFilter, 'status', 'template', 'batch', )#'upload_time', 
     fields = ('image', 'template', 'batch', 'processing_log', )

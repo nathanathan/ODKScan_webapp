@@ -37,6 +37,10 @@
 
 {% block coltype %}flex{% endblock %}
 
+{% block title %}{{ title }} | {% trans 'Django site admin' %}{% endblock %}
+{% block branding %}<h1 id="site-name">ODK Scan</h1>{% endblock %}
+{% block breadcrumbs %}{% endblock %}
+
 {% block pretitle %}
 <h3>Transcribing</h3>
 <p>
