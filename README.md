@@ -197,3 +197,5 @@ If scanned:
 If transcribed:
 [uuid]/transcription.json
 ```
+One thing to keep in mind is that django does not delete file when their models are deleted,
+furthermore, the additional files genereated by Scan are not deleted either.
