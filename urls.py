@@ -2,7 +2,7 @@ from django.conf.urls import patterns, include, url
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.contrib.auth.decorators import login_required
 from django.views.generic import TemplateView
-from django.views.generic.simple import redirect_to
+from django.views.generic import redirect_to
 
 import os
 APP_NAME = os.path.split(os.path.dirname(__file__))[-1]
