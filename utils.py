@@ -1,5 +1,6 @@
-import json, codecs, os
-import subprocess
+import json, codecs
+import os
+import sys, subprocess
 APP_ROOT = os.path.dirname(__file__)
 
 def process_image(obj):
@@ -24,7 +25,6 @@ def process_image(obj):
     else:
         obj.status = 'e'
     obj.save()
-    print "Image processed."
 
 def dict_to_csv(dict_array, csvfile):
     """
