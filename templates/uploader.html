@@ -86,11 +86,17 @@ margin: 30px 0;
         <div class="row fileupload-buttonbar">
             <div class="span7">
             
+                <a class="btn btn-primary view-uploaded-batch" style="float:right;">
+                    <span>View Uploaded Batch</span>
+                </a>
+            
                 <div class="input-prepend" style="float:right;">
                   <span class="add-on">Batch Name:</span><!--
                   --><input class="span2" id="batchName" type="text" value="{{ user.username }} {% now "SHORT_DATE_FORMAT" %}">
                 </div>
-            
+                
+
+
                 <!-- The fileinput-button span is used to style the file input field as button -->
                 <span class="btn btn-success fileinput-button">
                     <i class="icon-plus icon-white"></i>
