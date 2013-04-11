@@ -116,7 +116,7 @@ def transcribe(modeladmin, request, queryset):
     t = loader.get_template('transcribe.html')
     c = transcription_context(modeladmin, request, queryset, autofill=True, showSegs=True)
     return HttpResponse(t.render(c))
-transcribe.short_description = "Transcribe (table view)"
+transcribe.short_description = "Transcribe Selected Forms"
 
 def transcribeFormView(modeladmin, request, queryset):
     t = loader.get_template('formViewSet.html')

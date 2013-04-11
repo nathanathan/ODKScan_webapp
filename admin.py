@@ -62,7 +62,7 @@ class FormImageAdmin(admin.ModelAdmin):
     readonly_fields = ('processing_log',)
     actions = [actions.process_forms,
                actions.transcribe,
-               actions.transcribeFormView,
+               #actions.transcribeFormView,
                actions.finalize,
                actions.generate_csv]
 
