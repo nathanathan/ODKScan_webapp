@@ -21,14 +21,18 @@ margin: 30px 0;
 body{
   padding-top: 60px;
 }
-.docs table, .docs td {
-border: 1px solid black;
+.docs td {
+border: 1px solid gray;
 }
 .docs h2 {
-border-bottom: 1px solid black;
+border-bottom: 2px solid gray;
+margin-top: 1em;
+margin-bottom: .5em;
 }
 .docs h3 {
-border-bottom: 1px solid gray;
+border-bottom: 1px solid lightgray;
+margin-top: 1em;
+margin-bottom: .5em;
 }
 	</style>
 </head>
@@ -104,37 +108,38 @@ All XLSForms require a survey sheet. The survey worksheet contains the structure
 
 Example survey sheet:
 
-|| *type* || *name*   || *label*            ||
-|| text   || user_name|| What is your name? ||
-|| integer|| user_age || How old are you?   ||
+| *type* | *name*   | *label*            |
+| text   | user_name| What is your name? |
+| integer| user_age | How old are you?   |
 
 h3. survey sheet columns:
 
 h4. type
 
-|| text   || Write-in text input. ||
-|| integer|| Integer (i.e. whole number) input.||
-|| decimal|| Decimal input. ||
-|| note   || Displays a label with no input. ||
-|| select_one `choice_list` || Multiple choice question; only one answer can be selected. ||
-|| select_multiple `choice_list` || Multiple choice question; multiple answers can be selected.||
+| text   | Write-in text input. |
+| integer| Integer (i.e. whole number) input.|
+| decimal| Decimal input. |
+| note   | Displays a label with no input. |
+| select_one `choice_list` | Multiple choice question; only one answer can be selected. |
+| select_multiple `choice_list` | Multiple choice question; multiple answers can be selected.|
 
 Scan specific types:
-|| tally `number` || Print the specified number of bubbles, and count up how many are filled in. ||
-|| markup || A label that only appears on the printed form. ||
 
-Groups:
+| tally `number` | Print the specified number of bubbles, and count up how many are filled in. |
+| markup | A label that only appears on the printed form. |
+
+h4. Groups:
 Groups are drawn as columns. Nested groups are drawn as rows within a column. For example:
 
-|| *type* || *name*   || *label*            ||
-|| begin group|| || ||
-|| note|| || This is in the left column ||
-|| begin group|| || ||
-|| note|| || These are ||
-|| note|| || in rows in  ||
-|| note|| || the right column  ||
-|| end group|| || ||
-|| end group|| || ||
+| *type* | *name*   | *label*            |
+| begin group| | |
+| note| | This is in the left column |
+| begin group| | |
+| note| | These are |
+| note| | in rows in  |
+| note| | the right column  |
+| end group| | |
+| end group| | |
 
 h4. name
 
@@ -160,17 +165,17 @@ h4. itemProperties.y_offset
 
 If a question's label overlaps its bubbles, it may be necessary to manually set the pixel distance from the top of the segment where the bubbles begin using this property.
 
-== choices ==
+h3. choices
 
 The choices sheet allows you to specify choices for use with `select_` type questions.
 
 Example choices sheet:
 
-|| *list_name* || *name*  || *label* ||
-|| cities      || seattle || Seattle ||
-|| cities      || paris   || Paris   ||
-|| cities      || new_york|| New York||
-|| cities      || mumbai  || Mumbai  ||
+| *list_name* | *name*  | *label* |
+| cities      | seattle | Seattle |
+| cities      | paris   | Paris   |
+| cities      | new_york| New York|
+| cities      | mumbai  | Mumbai  |
 
 h3. choices sheet columns:
 
@@ -178,8 +183,8 @@ h4. list_name
 
 The list_name is used to group choices into lists that can be referenced from the survey sheet. The example above could be referenced as follows:
 
-|| *type*           || *name*       || *label*                       ||
-|| select_one cities||cities_visited|| Which cities have you visited?||
+| *type*           | *name*       | *label*                       |
+| select_one cities||cities_visited| Which cities have you visited?|
 
 h4. name
 
@@ -193,8 +198,8 @@ h2. settings
 
 Example settings sheet:
 
-|| *form_title* || *font*                   ||
-|| Example Form || 12pt Verdana, sans-serif ||
+| *form_title* | *font*                   |
+| Example Form | 12pt Verdana, sans-serif |
 
 h3. settings sheet columns:
 
