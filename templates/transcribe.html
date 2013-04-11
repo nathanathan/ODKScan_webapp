@@ -87,13 +87,13 @@
 						{% else %}
 							<input
                                 name="{{json_output.form_id}}-{{field.name}}"
-                                value="{% if autofill %}
+                                value="{% if autofill %}<!--
                                     {% if "transcription" in field %}
-                                         {{ field.transcription }}
+                                         -->{{ field.transcription }}<!--
                                     {% else %}
-                                        {{ field.value }}
+                                        -->{{ field.value }}<!--
                                     {% endif %}
-                                {% endif %}"></input>
+                                -->{% endif %}"></input>
 						{% endif %}
 						<br />
 						<div class="segments">
