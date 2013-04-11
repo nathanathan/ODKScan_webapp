@@ -2,7 +2,7 @@ from django.conf.urls import patterns, include, url
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.contrib.auth.decorators import login_required
 from django.views.generic import TemplateView
-from django.views.generic import redirect_to
+from django.views.generic import RedirectView
 
 import os
 APP_NAME = os.path.split(os.path.dirname(__file__))[-1]
@@ -41,7 +41,7 @@ urlpatterns = patterns(APP_NAME,
     #XLSForm scannable paper form generator
     url(r'^xlsform/$', 'xlsform.views.index'),
     #This is a redirect to avoid breaking the links I've given to VR.
-    (r'^xlsform/scan$', redirect_to, {'url': '/xlsform/'}),
+    (r'^xlsform/scan$', RedirectView.as_view(url='/xlsform/')),
     
     (r'^xlsform/download/(?P<path>.*)$', 'xlsform.views.download'),
     (r'^xlsform/serve_json/(?P<path>.*)$', 'xlsform.views.serve_json'),
