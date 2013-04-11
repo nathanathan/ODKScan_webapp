@@ -16,14 +16,13 @@
   	<form action="/save_transcription/" method="post">{% csrf_token %}
       
     <div class="navbar navbar-fixed-top">
-      <div class="navbar-inner">
-        <button class="btn save" type="submit">
-    		Save
-		</button>
-
-        <a class="brand" href="#">{{template_name}}</a>
-     
-        <div class="nav">
+        <div class="navbar-inner">
+          <a class="brand" href="#">{{template_name}}</a>
+          <div class="navbar-form form-inline">
+            <button class="btn save" type="submit">
+        		Save
+        	</button>
+        
             <div class="btn-toolbar">
                 <a class='btn' onclick="window.history.back();">
                     Go Back
@@ -33,8 +32,8 @@
                     <a class="btn shrink">Shrink images <i class="icon-minus"></i></a>
                 </div>
             </div>
+          </div>
         </div>
-      </div>
     </div>
     
     <div style="height: 50px;"></div>
@@ -87,13 +86,13 @@
 						{% else %}
 							<input
                                 name="{{json_output.form_id}}-{{field.name}}"
-                                value="{% if autofill %}<!--
+                                value={% if autofill %}
                                     {% if "transcription" in field %}
-                                         -->{{ field.transcription }}<!--
+                                         "{{ field.transcription }}"
                                     {% else %}
-                                        -->{{ field.value }}<!--
+                                        "{{ field.value }}"
                                     {% endif %}
-                                -->{% endif %}"></input>
+                                {% endif %}></input>
 						{% endif %}
 						<br />
 						<div class="segments">
