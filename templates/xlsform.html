@@ -11,19 +11,30 @@
 	white-space: pre-wrap;
 	white-space: -moz-pre-wrap;
 }
-/* Custom container */
-.container-narrow {
+.custom-container {
 margin: 0 auto;
-max-width: 700px;
+max-width: 1024px;
 }
-.container-narrow > hr {
+.custom-container > hr {
 margin: 30px 0;
+}
+body{
+  padding-top: 60px;
+}
+.docs table, .docs td {
+border: 1px solid black;
+}
+.docs h2 {
+border-bottom: 1px solid black;
+}
+.docs h3 {
+border-bottom: 1px solid gray;
 }
 	</style>
 </head>
 <body>
 
-<div class="container-narrow">
+<div class="custom-container">
 
     <div class="masthead">
     <ul class="nav nav-pills pull-right">
@@ -81,9 +92,11 @@ margin: 30px 0;
 
 {% begin_textile %}
 
-= Worksheets =
+h1. XLS Format documentation
 
-A workbook is composed of one or more worksheets. Most spreadsheet programs have controls in the bottom-left corner for adding and removing worksheets. Some worksheet names have special meanings in XLSForms, they are [#survey survey], [#choices choices], and [#settings settings].
+The form converter expects workbooks with 3 sheets: survey, choices and settings.
+They are individually described in the sections below.
+Most spreadsheet programs have controls in the bottom-left corner where you can create them.
 
 h2. survey
 
