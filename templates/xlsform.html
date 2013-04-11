@@ -50,11 +50,11 @@ margin-bottom: .5em;
     <hr>
       
     <blockquote>
-    {% begin_textile %}
-    This tool will create printable form images as well as a template needed by Scan to process the generated form.
-    XLSForms are xls or xlsx workbooks that can be used to generate forms for ODK Scan and other ODK tools. Below the XLSForm format for ODK Scan forms is described:
-    "An example form is available here.":https://docs.google.com/spreadsheet/ccc?key=0Ak1svGcuI9iqdEFiRFpEZ0NTNUMzb0VaUm5sby1pbUE 
-    {% end_textile %}
+{% begin_textile %}
+This tool will create printable form images as well as a template needed by Scan to process the generated form.
+XLSForms are xls or xlsx workbooks that can be used to generate forms for ODK Scan and other ODK tools. Below the XLSForm format for ODK Scan forms is described:
+"An example form is available here.":https://docs.google.com/spreadsheet/ccc?key=0Ak1svGcuI9iqdEFiRFpEZ0NTNUMzb0VaUm5sby1pbUE 
+{% end_textile %}
     </blockquote>
     <br>
 
@@ -123,12 +123,14 @@ h4. type
 | select_one `choice_list` | Multiple choice question; only one answer can be selected. |
 | select_multiple `choice_list` | Multiple choice question; multiple answers can be selected.|
 
+
 Scan specific types:
 
 | tally `number` | Print the specified number of bubbles, and count up how many are filled in. |
 | markup | A label that only appears on the printed form. |
 
 h4. Groups:
+
 Groups are drawn as columns. Nested groups are drawn as rows within a column. For example:
 
 | *type* | *name*   | *label*            |
@@ -183,8 +185,8 @@ h4. list_name
 
 The list_name is used to group choices into lists that can be referenced from the survey sheet. The example above could be referenced as follows:
 
-| *type*           | *name*       | *label*                       |
-| select_one cities||cities_visited| Which cities have you visited?|
+| *type*           | *name*        | *label*                       |
+| select_one cities|cities_visited | Which cities have you visited?|
 
 h4. name
 
