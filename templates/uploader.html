@@ -127,7 +127,7 @@ margin: 30px 0;
 <script>
 $(function () {
     $('.view-batch').click(function(){
-        window.location = '/admin/ODKScan_webapp/formimage/?batch=' + window.encodeURIComponent(('#batchName').val());
+        window.location = '/admin/ODKScan_webapp/formimage/?batch=' + window.encodeURIComponent($('#batchName').val());
     });
     $('#fileupload').fileupload({
         url: '../uploadForms',

@@ -17,20 +17,18 @@
       
     <div class="navbar navbar-fixed-top">
         <div class="navbar-inner">
-          <a class="brand" href="#">{{template_name}}</a>
-          <div class="navbar-form form-inline">
+          <div class="container">
+            <a class="brand" href="#">{{template_name}}</a>
             <button class="btn save" type="submit">
-        		Save
+            	Save
         	</button>
-        
-            <div class="btn-toolbar">
-                <a class='btn' onclick="window.history.back();">
-                    Go Back
-                </a>
-                <div class="btn-group">
-                    <a class="btn zoom"><i class="icon-plus"></i> Zoom images</a>
-                    <a class="btn shrink">Shrink images <i class="icon-minus"></i></a>
-                </div>
+
+            <a class='btn' onclick="window.history.back();">
+                Go Back
+            </a>
+            <div class="btn-group" style="display:inline-block;">
+                <a class="btn zoom"><i class="icon-plus"></i> Zoom images</a>
+                <a class="btn shrink">Shrink images <i class="icon-minus"></i></a>
             </div>
           </div>
         </div>
