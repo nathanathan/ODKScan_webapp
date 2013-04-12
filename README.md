@@ -20,7 +20,7 @@ Start with 32bit ubuntu 12.04 LTS
 
 ```bash
 sudo apt-get update 
-sudo apt-get install git python-imaging
+sudo apt-get install git python-imaging supervisor
 ```
 
 ### Install OpenCV:
@@ -68,12 +68,23 @@ sudo pip install -r requirements.pip
 
 ### Configure celery:
 
-* Add `djcelery` to INSTALLED_APPS in settings.py
+*Waring*: this is the easy way to configure celery.
+[It has some limitations](http://docs.celeryproject.org/en/master/getting-started/brokers/django.html).
+To overcome them it may be a good idea to use a different message broker.
+
+* Add `djcelery` and `` to INSTALLED_APPS in settings.py
+* Add `BROKER_URL = 'django://'` to settings.py
 * Put this in settings.py and wsgi.py
 
 ```python
 import djcelery
 djcelery.setup_loader()
+```
+
+Now you copy the supervisordconf file in this repo to make celery automatically start on reboots.
+
+```bash
+sudo cat supervisord.conf > /etc/supervisord.conf
 ```
 
 ### Configure the scan_admin project's urls.py:
