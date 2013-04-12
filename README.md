@@ -84,10 +84,9 @@ djcelery.setup_loader()
 Now you copy the supervisordconf file in this repo to make celery automatically start on reboots.
 
 ```bash
-sudo cp celeryd.conf /etc/supervisor/celeryd.conf
+sudo cp celeryd.conf /etc/supervisor/conf.d/celeryd.conf
 sudo supervisorctl -c /etc/supervisor/supervisord.conf reload
 ```
-
 
 ### Configure the scan_admin project's urls.py:
 
