@@ -4,6 +4,7 @@ from django.http import HttpResponseRedirect
 import json, codecs
 import sys, os, tempfile
 import ODKScan_webapp.utils as utils
+import tasks
 
 APP_ROOT = os.path.dirname(__file__)
 
@@ -34,7 +35,8 @@ APP_ROOT = os.path.dirname(__file__)
 
 def process_forms(modeladmin, request, queryset):
         for obj in queryset:
-            utils.process_image(obj)
+            #utils.process_image(obj)
+            tasks.process_image.delay(obj.id)
 process_forms.short_description = "Process selected forms."
 
 def transcription_context(modeladmin, request, queryset, autofill=None, showSegs=None, formView=None):

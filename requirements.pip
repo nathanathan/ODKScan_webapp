@@ -1,2 +1,3 @@
 xlrd==0.8.0
 textile==2.1.5
+django-celery==3.0.17

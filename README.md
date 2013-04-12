@@ -66,6 +66,16 @@ sudo pip install -r requirements.pip
 `/home/ubuntu/scan_admin/scan.db`
 * Add "ODKScan_webapp" to INSTALLED_APPS and uncomment the admin entries.
 
+### Configure celery:
+
+* Add `djcelery` to INSTALLED_APPS in settings.py
+* Put this in settings.py and wsgi.py
+
+```python
+import djcelery
+djcelery.setup_loader()
+```
+
 ### Configure the scan_admin project's urls.py:
 
 * Uncomment all the admin stuff.

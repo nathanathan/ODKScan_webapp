@@ -9,6 +9,7 @@ from django.shortcuts import render_to_response, redirect
 from django.core.context_processors import csrf
 from django.template import RequestContext, loader
 import ODKScan_webapp.utils as utils
+import tasks
 
 #from threading import Thread
 
@@ -95,7 +96,8 @@ def handle_upload(request):
         instance = FormImage(**props)
         instance.save()
         results.append(result)
-        utils.process_image(instance)
+        tasks.process_image.delay(instance.id)
+        #utils.process_image(instance)
         #thread = Thread(target = process_image, args = (instance, ))
         #thread.start()
     return HttpResponse(json.dumps({'files' : results}, indent=4), mimetype="application/json")
