@@ -132,8 +132,10 @@ h4. type
 
 h4. Scan specific types:
 
-| tally `number` | Print the specified number of bubbles, and count up how many are filled in. |
-| markup | A label that only appears on the printed form. |
+| tally `number`     | Print the specified number of bubbles, and count up how many are filled in. |
+| markup             | A label that only appears on the printed form. |
+| bub_num `digits`   | Create a field for inputing numbers by filling in numeric bubbles |
+| bub_word `letters` | Create a field for writing in words by filling in alphabetic bubbles. |
 
 h4. Groups:
 
@@ -222,6 +224,10 @@ This sets the form title's font.
 h4. font
 
 This sets the font of all text used in the form.
+
+h4. qrcode_data
+
+The data to include in the form's qr code. By default it will be the form title.
 {% end_textile %}
 </div>
 <script src="../static/transcription/assets/js/jquery.js"></script>

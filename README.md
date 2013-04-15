@@ -65,6 +65,7 @@ sudo pip install -r requirements.pip
 * set database engine to sqlite3 and name it with an _absolute_ path, e.g.:
 `/home/ubuntu/scan_admin/scan.db`
 * Add "ODKScan_webapp" to INSTALLED_APPS and uncomment the admin entries.
+* Once everything is working set `DEBUG` to False.
 
 ### Configure celery:
 
