@@ -1,6 +1,6 @@
 {% extends "admin/change_form.html" %}
 {% block field_sets %}
-    <h1>{% name %}</h1>
+    <h1>{% adminform.name %}</h1>
     <img src="{% adminform.image.url %}"></img>
     <a href="{% adminform.json.url %}">Download JSON</a>
 {% endblock %}
