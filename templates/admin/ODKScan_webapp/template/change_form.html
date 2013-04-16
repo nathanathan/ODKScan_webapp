@@ -7,6 +7,10 @@
       #header {
           background-color: black;
       }
+      h1 {
+          /* Hack to get rid of Change Tempalte */
+          display: none;
+      }
     </style>
 {% endblock %}
 
@@ -15,7 +19,7 @@
 {% block breadcrumbs %}{% endblock %}
 
 {% block content %}
-    <h1>{{ adminform.form.instance.name }}</h1>
+    <h2>Template Name: {{ adminform.form.instance.name }}</h2>
     <img src="{{ adminform.form.instance.image.url }}"></img>
-    <a href="{{ adminform.form.instance.json.url }}">Download JSON</a>
+    <p><a href="{{ adminform.form.instance.json.url }}">View JSON</a></p>
 {% endblock %}
