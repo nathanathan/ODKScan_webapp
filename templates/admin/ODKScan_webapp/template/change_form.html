@@ -1,6 +1,23 @@
 {% extends "admin/change_form.html" %}
+
+{% extends "admin/change_list.html" %}
+{% load i18n %}
+
+{% block extrastyle %}
+  {{ block.super }}
+    <style>
+      #header {
+          background-color: black;
+      }
+    </style>
+{% endblock %}
+
+{% block title %}{{ title }} | {% trans 'Django site admin' %}{% endblock %}
+{% block branding %}<h1 id="site-name"><a href="/">ODK Scan</a></h1>{% endblock %}
+{% block breadcrumbs %}{% endblock %}
+
 {% block content %}
-    <h1>{{ name }}</h1>
-    <img src="{{ adminform.image.url }}"></img>
-    <a href="{{ adminform.json.url }}">Download JSON</a>
+    <h1>{{ adminform.form.instance.name }}</h1>
+    <img src="{{ adminform.form.instance.image.url }}"></img>
+    <a href="{{ adminform.form.instance.json.url }}">Download JSON</a>
 {% endblock %}
