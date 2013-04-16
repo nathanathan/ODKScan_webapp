@@ -134,8 +134,8 @@ h4. Scan specific types:
 
 | tally `number`     | Print the specified number of bubbles, and count up how many are filled in. |
 | markup             | A label that only appears on the printed form. |
-| bub_num `digits`   | Create a field for inputing numbers by filling in numeric bubbles |
-| bub_word `letters` | Create a field for writing in words by filling in alphabetic bubbles. |
+| bub_num `digits`   | (in development) Create a field for inputing numbers by filling in numeric bubbles |
+| bub_word `letters` | (in development) Create a field for writing in words by filling in alphabetic bubbles. |
 
 h4. Groups:
 
@@ -170,6 +170,10 @@ When scanned forms are exported to Collect the default and constraint columns ca
 h4. font
 
 Using the font column it is possible to customize the font of individual labels.
+
+h4. itemProperties.items_per_row
+
+Limits the number of bubble items in a row. If there is no limit they will fill whatever space is available.
 
 h4. itemProperties.y_offset
 
@@ -228,6 +232,7 @@ This sets the font of all text used in the form.
 h4. qrcode_data
 
 The data to include in the form's qr code. By default it will be the form title.
+
 {% end_textile %}
 </div>
 <script src="../static/transcription/assets/js/jquery.js"></script>
