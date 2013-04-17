@@ -21,10 +21,10 @@
 
 {% block content %}
     {% if add %}
+        {{ block.super }}
+    {% else %} 
         <h2>Template Name: {{ adminform.form.instance.name }}</h2>
         <img src="{{ adminform.form.instance.image.url }}"></img>
         <p><a href="{{ adminform.form.instance.json.url }}">View JSON</a></p>
-    {% else %}
-        {{ block.super }}
     {% endif %}
 {% endblock %}
