@@ -52,7 +52,8 @@ class FormImageInline(admin.TabularInline):
 class TemplateAdmin(admin.ModelAdmin):
     fields = ('name', 'json', 'image',)
     list_display = ('name',)
-    #inlines = [FormImageInline]
+    inlines = [FormImageInline]
+    
 admin.site.register(Template, TemplateAdmin)
 
 class FormImageAdmin(admin.ModelAdmin):
