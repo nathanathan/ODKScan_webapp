@@ -18,13 +18,3 @@
 {% block title %}{{ title }} | {% trans 'Django site admin' %}{% endblock %}
 {% block branding %}<h1 id="site-name"><a href="/">ODK Scan</a></h1>{% endblock %}
 {% block breadcrumbs %}{% endblock %}
-
-{% block content %}
-    {% if add %}
-        {{ block.super }}
-    {% else %} 
-        <h2>Template Name: {{ adminform.form.instance.name }}</h2>
-        <img src="{{ adminform.form.instance.image.url }}"></img>
-        <p><a href="{{ adminform.form.instance.json.url }}">View JSON</a></p>
-    {% endif %}
-{% endblock %}
