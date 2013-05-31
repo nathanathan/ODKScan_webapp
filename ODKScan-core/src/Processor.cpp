@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) 2012 University of Washington
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 #include "configuration.h"
 #include "Processor.h"
 #include "FileUtils.h"
@@ -14,15 +29,40 @@
 
 #include <json/json.h>
 
+//QRCode stuff:
+#include "ImageReaderSource.h"
+#include <zxing/common/Counted.h>
+#include <zxing/Binarizer.h>
+#include <zxing/MultiFormatReader.h>
+#include <zxing/Result.h>
+#include <zxing/ReaderException.h>
+//#include <zxing/common/GlobalHistogramBinarizer.h>
+#include <zxing/common/HybridBinarizer.h>
+#include <exception>
+#include <zxing/Exception.h>
+#include <zxing/common/IllegalArgumentException.h>
+#include <zxing/BinaryBitmap.h>
+#include <zxing/DecodeHints.h>
+#include <zxing/qrcode/QRCodeReader.h>
+#include <zxing/multi/qrcode/QRCodeMultiReader.h>
+#include <zxing/multi/ByQuadrantReader.h>
+//#include <zxing/multi/MultipleBarcodeReader.h>
+//#include <zxing/multi/GenericMultipleBarcodeReader.h>
+
+using namespace zxing;
+using namespace zxing::multi;
+using namespace zxing::qrcode;
+
 #include <iostream>
 #include <fstream>
 #include <map>
 #include <time.h>
+
 // This sets the resolution of the form at which to perform segment alignment and classification.
 // It is a percentage of the size specified in the template.
 #define SCALEPARAM 1.0
 
-// Creates a buffer around segments porpotional to their size.
+// Creates a buffer around segments proportional to their size.
 // I think .5 is the largest value that won't cause ambiguous cases.
 #define SEGMENT_BUFFER .25
 
@@ -31,13 +71,17 @@
 	NameGenerator namer;
 #endif
 
-//#define TIME_IT
-
-#define REFINE_ALL_BUBBLE_LOCATIONS true
-
 using namespace std;
 using namespace cv;
 
+//Serialize the JSON into an unstyled string.
+//See also: Json::Value::toStyledString
+const string stringify(const Json::Value& theJson){
+	stringstream ss;
+	Json::FastWriter writer;
+	ss << writer.write( theJson );
+	return ss.str();
+}
 //Iterates over a field's segments and items to determine it's value.
 Json::Value computeFieldValue(const Json::Value& field){
 	Json::Value output;
@@ -46,35 +90,51 @@ Json::Value computeFieldValue(const Json::Value& field){
 		const Json::Value segment = segments[i];
 		const Json::Value items = segment["items"];
 		if( items.isNull() ){
-			return Json::Value();
+			//If the segment already has a value,
+			//probably from a qrcode, use that.
+			return segment.get("value", Json::Value());
 		}
 		for ( size_t j = 0; j < items.size(); j++ ) {
 			const Json::Value classification = items[j].get("classification", false);
-			const Json::Value itemValue = items[j]["value"];
-			switch ( classification.type() )
+			Json::Value cValue;
+			if(classification.isObject()){
+				cValue = classification.get("value", false);
+			} else {
+				cValue = classification;
+			}
+			Json::Value itemValue = items[j]["value"];
+			switch ( cValue.type() )
 			{
 				case Json::stringValue:
 					//This case isn't used right now.
 					//It's for classifiers that picks up letters.
 					//The idea is to concatenate all the letters into a word.
 					output = Json::Value(output.asString() +
-						             classification.asString());
+						             cValue.asString());
 				break;
 				case Json::booleanValue:
 					if(!itemValue.isNull()){
+						if(!itemValue.isString()) {
+							//Hack to convert ints to strings.
+							string s = itemValue.toStyledString();
+							itemValue = Json::Value(s.substr(0, s.length() - 1));
+						}
 						//This case is for selects.
 						//The values of the filled (i.e. true) items
 						//are stored in a space delimited string.
-						if(classification.asBool()){
+						if(cValue.asBool()){
 							if( output.asString().length() == 0 ){
 								output = Json::Value(itemValue.asString());
 							}
 							else{
-								output = Json::Value(output.asString() + " " +
+								output = Json::Value(output.asString() +
+									     field.get("delimiter", " ").asString() +
 									     itemValue.asString());
 							}
 						}
-						else{
+						else {
+							//Set the output to be a string.
+							//If this is not done, we get a null when no bubbles are selected.
 							output = Json::Value(output.asString());
 						}
 						break;
@@ -83,10 +143,10 @@ Json::Value computeFieldValue(const Json::Value& field){
 					//for a tally.
 				case Json::intValue:
 				case Json::uintValue:
-					output = Json::Value(output.asInt() + classification.asInt());
+					output = Json::Value(output.asInt() + cValue.asInt());
 				break;
 				case Json::realValue:
-					output = Json::Value(output.asDouble() + classification.asDouble());
+					output = Json::Value(output.asDouble() + cValue.asDouble());
 				break;
 				default:
 				break;
@@ -95,6 +155,7 @@ Json::Value computeFieldValue(const Json::Value& field){
 	}
 	return output;
 }
+//Generate a marked up version of the form image that shows classifications and values.
 Mat markupForm(const Json::Value& bvRoot, const Mat& inputImage, bool drawCounts) {
 	Mat markupImage;
 	cvtColor(inputImage, markupImage, CV_GRAY2RGB);
@@ -139,17 +200,25 @@ Mat markupForm(const Json::Value& bvRoot, const Mat& inputImage, bool drawCounts
 				const Json::Value Item = items[k];
 				Point ItemLocation(jsonToPoint(Item["absolute_location"]));
 				Json::Value classification = Item["classification"];
-
-				if(classification.isBool()){
-					circle(markupImage, ItemLocation, 2, 	getColor(classification.asBool()), 1, CV_AA);
+				Json::Value cValue = classification["value"];
+				double confidence = abs(classification.get("confidence", 1.0).asDouble()) / 2.0;
+				
+				if(cValue.isBool()){
+					circle(markupImage, ItemLocation, 2, 	getColor(cValue.asBool()) * confidence, 1, CV_AA);
 				}
-				else if(classification.isInt()){
-					circle(markupImage, ItemLocation, 2, 	getColor(classification.asInt()), 1, CV_AA);
+				else if(cValue.isInt()){
+					circle(markupImage, ItemLocation, 2, 	getColor(cValue.asInt()) * confidence, 1, CV_AA);
+				}
+				else if(cValue.isString()){
+
+					putText(markupImage, cValue.asString(), ItemLocation + Point(0, -10),
+						FONT_HERSHEY_SIMPLEX, 0.8, Scalar::all(0), 3, CV_AA);
+					putText(markupImage, cValue.asString(), ItemLocation + Point(0, -10),
+						FONT_HERSHEY_SIMPLEX, 0.8, boxColor, 2, CV_AA);
 				}
 				else{
-					cout << "Don't know what this is" << endl;
+					cout << "Don't know what this is: " << cValue << endl;
 				}
-				
 			}
 		}
 		if(field.isMember("value")){
@@ -167,13 +236,14 @@ Mat markupForm(const Json::Value& bvRoot, const Mat& inputImage, bool drawCounts
 			string markupString(ss.str());
 			markupString = markupString.substr(0, markupString.length() - 1);
 			putText(markupImage, markupString, textBoxTL,
-			        FONT_HERSHEY_SIMPLEX, 1., Scalar::all(0), 3, CV_AA);
+			        FONT_HERSHEY_SIMPLEX, 0.8, Scalar::all(0), 3, CV_AA);
 			putText(markupImage, markupString, textBoxTL,
-			        FONT_HERSHEY_SIMPLEX, 1., boxColor, 2, CV_AA);
+			        FONT_HERSHEY_SIMPLEX, 0.8, boxColor, 2, CV_AA);
 		}
 	}
 	return markupImage;
 }
+//deprecated
 Json::Value minifyJsonOutput(const Json::Value& JsonOutput){
 	Json::Value minifiedOutput;
 	Json::Value minifiedOutputFields;
@@ -213,6 +283,8 @@ const std::string currentDateTime() {
 }
 class Processor::ProcessorImpl
 {
+public:
+	string trainingDataPath;
 private:
 	Mat formImage;
 
@@ -225,43 +297,40 @@ private:
 	ClassiferMap classifiers;
 
 	string templPath;
-	string appRootDir;
-	//string imageDir;
 
 	#ifdef TIME_IT
 		clock_t init;
 	#endif
 
-
-//NOTE: training_data_uri must be a directory with no leading or trailing slashes.
-Ptr<PCA_classifier>& getClassifier(const Json::Value& classifier){
-
+//Creates a classifier based on the given JSON classifier specification.
+//Classifiers are cached in memory via the "classifiers" map. 
+//Trained classifier parameters are cached on the file system.
+//Cached data is keyed by the classifier's training_data_uri and dimensions.
+Ptr<PCA_classifier>& getClassifier(const Json::Value& classifier) {
+	//NOTE: training_data_uri must be a directory with no leading or trailing slashes.
 	const string& training_data_uri = classifier["training_data_uri"].asString();
 
-	Size acutal_classifier_size = SCALEPARAM * Size(classifier["classifier_width"].asInt(),
+	Size scaled_classifier_size = SCALEPARAM * Size(classifier["classifier_width"].asInt(),
 	                                                classifier["classifier_height"].asInt());
 	ostringstream ss;
-	ss << acutal_classifier_size.height << 'x' << acutal_classifier_size.width;
+	ss << scaled_classifier_size.height << 'x' << scaled_classifier_size.width;
 	string key(training_data_uri + ss.str());
 
 	ClassiferMap::iterator it = classifiers.find(key);
-/*
-	#ifdef DEBUG_PROCESSOR
-		cout << "erasing old classifier (if it exisits)" << endl;
-		if( it != classifiers.end() ) cout << "erased: " << classifiers.erase(key) << endl;
-		cout << "erased" << endl;
-	#endif
-*/
+
+	//If the classifier is not loaded into memory...
 	if( it == classifiers.end() ) {
 		//PCA_classifier classifier = classifiers[key];
 		classifiers[key] = Ptr<PCA_classifier>(new PCA_classifier);
 		
-		string dataPath = appRootDir + "training_examples/" + training_data_uri;
+		string dataPath = trainingDataPath + training_data_uri;
 		string cachedDataPath = dataPath + "/cached_classifier_data_" + ss.str() + ".yml";
 
 		classifiers[key]->set_classifier_params(classifier);
 
 		try{
+			//Uncomment this to always retrain.
+			//throw new exception();
 			classifiers[key]->load(cachedDataPath);
 			#ifdef DEBUG_PROCESSOR
 				cout << "found cached classifier..." << endl;
@@ -272,6 +341,9 @@ Ptr<PCA_classifier>& getClassifier(const Json::Value& classifier){
 				cout << "training new classifier..." << endl;
 			#endif
 			vector<string> filepaths;
+			if(!fileExists(dataPath)){
+				CV_Error( -1, "Could not find classifier data: " + dataPath);
+			}
 			CrawlFileTree(dataPath, filepaths);//TODO: Check if this dir exists and show a log message if not.
 			
 			/*
@@ -282,13 +354,14 @@ Ptr<PCA_classifier>& getClassifier(const Json::Value& classifier){
 				cout << classifiers.size() << endl;
 			#endif
 			*/
+
+			//TODO: Move more of this code into the PCA classifier class.
 			const Json::Value advanced = classifier.get("advanced", Json::Value());
 			bool success = classifiers[key]->train_PCA_classifier( filepaths,
-				                                               acutal_classifier_size,
+				                                               scaled_classifier_size,
 				                                               advanced.get("eigenvalues", 9).asInt(),
 			                                                       advanced.get("flip_training_data", true).asBool());
 			if( !success ) {
-				//TODO: A better error message here when the training data isn't found would be a big help.
 				LOGI("\n\nCould not train classifier.\n\n");
 				return classifiers[key];
 			}
@@ -302,10 +375,7 @@ Ptr<PCA_classifier>& getClassifier(const Json::Value& classifier){
 	}
 	return classifiers[key];
 }
-Json::Value segmentFunction(const Json::Value& segmentTemplate, const Json::Value& parentProperties) {
-	Json::Value extendedSegment = Json::Value(parentProperties);
-	extend(extendedSegment, segmentTemplate);
-	Json::Value segmentJsonOut;
+Json::Value segmentFunction(Json::Value& segmentJsonOut, const Json::Value& extendedSegment) {
 	Mat segmentImg;
 	vector <Point> segBubbleLocs;
 	vector <int> bubbleVals;
@@ -317,13 +387,10 @@ Json::Value segmentFunction(const Json::Value& segmentTemplate, const Json::Valu
 	Mat transformation = (Mat_<double>(3,3) << 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0);
 	Point offset = segmentRect.tl();
 
-	//Get the cropped segment image:
-	if(extendedSegment.get("align_segment", false).asBool()) {
-		//Segment alignment is off by default because it seems to perform worse.
+
 		Rect expandedRect = resizeRect(segmentRect, 1 + SEGMENT_BUFFER);
 	
 		//Reduce the segment buffer if it goes over the image edge.
-		//TODO: see if you can do this with the rectangle intersection method.
 		if(expandedRect.x < 0){
 			expandedRect.x = 0;
 		}
@@ -337,12 +404,24 @@ Json::Value segmentFunction(const Json::Value& segmentTemplate, const Json::Valu
 			expandedRect.height = formImage.rows - expandedRect.y;
 		}
 
+	//Get the cropped (transformed) segment image:
+	//QR codes are not aligned because the interpolation
+	//can actually make detection less reliable.
+	if(extendedSegment.get("type", 0) == "qrcode"){
+		//note that the expected ROI is used
+		//because we don't want misalined qrcodes to be cut off
+		//And for some reason detection is more reliable when there is a large margin.
+		segmentImg = formImage(expandedRect);
+		segmentJsonOut["quad"] = quadToJsonArray(rectToQuad( segmentRect ));
+	}
+	else if(extendedSegment.get("align_segment", true).asBool()) {
 		segmentImg = formImage(expandedRect);
 
 		vector<Point2f> quad;
 		findSegment(segmentImg, segmentRect - expandedRect.tl(), quad);
 
-		if(testQuad(quad, segmentRect, .15)){
+		#define MAX_SIZE_VARIATION 0.4
+		if(testQuad(quad, segmentRect, MAX_SIZE_VARIATION)){
 			#ifdef DEBUG_PROCESSOR
 				//This makes a stream of dots so we can see how fast things are going.
 				//we get a ! when things go wrong.
@@ -351,7 +430,8 @@ Json::Value segmentFunction(const Json::Value& segmentTemplate, const Json::Valu
 			transformation = quadToTransformation(quad, segmentRect.size());
 			offset = expandedRect.tl();
 			Mat alignedSegment(0, 0, CV_8U);
-			warpPerspective(segmentImg, alignedSegment, transformation, segmentRect.size());
+			//debugShow(formImage(segmentRect));
+			warpPerspective(segmentImg, alignedSegment, transformation, segmentRect.size());//debugShow(alignedSegment);
 			segmentImg = alignedSegment;
 			segmentJsonOut["quad"] = quadToJsonArray( quad, offset );
 		}
@@ -360,9 +440,12 @@ Json::Value segmentFunction(const Json::Value& segmentTemplate, const Json::Valu
 				//Bad quad alignment detected
 				cout << "!" << flush;
 			#endif
-			segmentJsonOut["quad"] = quadToJsonArray(quad, expandedRect.tl());
+			//segmentJsonOut["quad"] = quadToJsonArray(quad, expandedRect.tl());
 			segmentJsonOut["notFound"] = true;
-			return segmentJsonOut;
+			//If the quad is not found we don't do segment alignment and go with what's
+			//in the template even though there's a good chance it's wrong.
+			segmentImg = formImage(segmentRect);
+			segmentJsonOut["quad"] = quadToJsonArray(rectToQuad( segmentRect ));
 		}
 	}
 	else {
@@ -375,30 +458,99 @@ Json::Value segmentFunction(const Json::Value& segmentTemplate, const Json::Valu
 	if(!items.isNull()){
 		Json::Value itemsJsonOut;
 		Json::Value classifierJson = extendedSegment["classifier"];
-		double alignment_radius = classifierJson.get("alignment_radius", 0.0).asDouble();
+		double alignment_radius = classifierJson.get("alignment_radius", 2.0).asDouble();
 		Ptr<PCA_classifier> classifier = getClassifier(classifierJson);
-		
+		vector<Point> locations;
+		vector<Point> deltas;
+		//Align items:
+		for (size_t i = 0; i < items.size(); i++) {
+			Point initLocation = SCALEPARAM * Point(items[i]["item_x"].asDouble(), items[i]["item_y"].asDouble());
+			Point itemLocation = initLocation;
+			if(alignment_radius > .1){
+				itemLocation = classifier->align_item(segmentImg, initLocation, alignment_radius);
+			}
+			locations.push_back(itemLocation);
+			deltas.push_back(itemLocation - initLocation);
+
+		}
+
+		//Catch runaway items:
+		Point avgDelta = Point(0,0);
+		for (size_t i = 0; i < deltas.size(); i++) {
+			avgDelta += deltas[i];
+		}
+		avgDelta *= 1.0 / items.size();
+
+		for (size_t i = 0; i < locations.size(); i++) {
+			//Draw a circle centered at the average delta, with the radius porportional to the alignment_radius.
+			//If the bubble's delta does not fall within that cirlce it is a runaway.
+			if(norm(deltas[i] - avgDelta) >  (alignment_radius / 2)){
+				locations[i] = locations[i] - deltas[i] + avgDelta;
+			}
+		}
+
+		//Classify items
 		for (size_t i = 0; i < items.size(); i++) {
 			Json::Value itemJsonOut = items[i];
-
-			//Classify the item
-			Point itemLocation = SCALEPARAM * Point(items[i]["item_x"].asDouble(), items[i]["item_y"].asDouble());
-			if(alignment_radius > .1){
-				itemLocation = classifier->align_item(segmentImg, itemLocation, alignment_radius);
-			}
-			itemJsonOut["classification"] = classifier->classify_item(segmentImg, itemLocation);
-
-			//Create JSON output
-			Mat absoluteLocation = transformation.inv() * Mat(Point3d( itemLocation.x,
-		                                                                   itemLocation.y, 1.0));
+			itemJsonOut["classification"] = classifier->classify_item(segmentImg, locations[i]);
+			/*
+			Point rectOffset = segmentRect.tl() - expandedRect.tl();
+			Mat absoluteLocation = transformation.inv() * Mat(Point3d( locations[i].x  + rectOffset.x,
+					locations[i].y  + rectOffset.y, 1.0)) + Mat(Point3d(-rectOffset.x, -rectOffset.y, 0));
+			*/
+			Mat absoluteLocation = transformation.inv() * Mat(Point3d( locations[i].x,
+					locations[i].y, 1.0));
 			itemJsonOut["absolute_location"] = pointToJson(
-				Point( absoluteLocation.at<double>(0.0,0.0) / absoluteLocation.at<double>(2.0, 0.0),
-				       absoluteLocation.at<double>(1.0,0.0) / absoluteLocation.at<double>(2.0, 0.0)) +
+				Point( absoluteLocation.at<double>(0u,0u) / absoluteLocation.at<double>(2, 0u),
+				       absoluteLocation.at<double>(1,0u) / absoluteLocation.at<double>(2, 0u)) +
 				offset);
 
 			itemsJsonOut.append(itemJsonOut);
 		}
 		segmentJsonOut["items"] = itemsJsonOut;
+	}  else if(extendedSegment.get("type", 0) == "qrcode"){
+		LOGI("scanning qr code...");
+		
+		//Blowing up the image can make decoding work sometimes,
+		//but making it too big can also break it. AFAICT 2x is optimal.
+		Mat largeSegment;
+		resize(segmentImg, largeSegment, 2*segmentImg.size());
+		
+		/*
+		Mat tmp;
+		//Add a border can also make decoding work sometimes.
+		int borderSize = 40;
+		copyMakeBorder( segmentImg, tmp, borderSize, borderSize, borderSize, borderSize, BORDER_CONSTANT, 0 );
+		debugShow(tmp);
+		*/
+		//I modifieid this zxing class to take OpenCV mats
+		Ref<LuminanceSource> source = ImageReaderSource::create(largeSegment);
+
+		string result;
+		try {
+			Ref < Binarizer > binarizer;
+			binarizer = new HybridBinarizer(source);
+			DecodeHints hints(DecodeHints::DEFAULT_HINT);
+			//Not sure if this makes any difference.
+			hints.setTryHarder(true);
+			Ref < BinaryBitmap > binary(new BinaryBitmap(binarizer));
+			Ref<Reader> reader(new MultiFormatReader);
+			vector<Ref<Result> > results(1, reader->decode(binary, hints));
+			//LOGI("decoded!");
+			result = results[0]->getText()->getText();
+		} catch (const ReaderException& e) {
+			//This happens when the qrcode is not recognized.
+			result = string(e.what());
+		} catch (const zxing::IllegalArgumentException& e) {
+			result = "zxing::IllegalArgumentException: "
+					+ string(e.what());
+		} catch (const zxing::Exception& e) {
+			result = "zxing::Exception: " + string(e.what());
+		} catch (const std::exception& e) {
+			result = "std::exception: " + string(e.what());
+		}
+		segmentJsonOut["value"] = result;
+		cout << "qrcode: " << result << endl;
 	}
 	
 	//Output the segment image:
@@ -406,34 +558,28 @@ Json::Value segmentFunction(const Json::Value& segmentTemplate, const Json::Valu
 	cvtColor(segmentImg, segment_out, CV_GRAY2RGB);
 	resize(segment_out, tmp, 2*segment_out.size());
 	segment_out = tmp;
-	/*
-	vector <Point> expectedBubbleLocs = getBubbleLocations(*classifier, segmentImg, segmentTemplate["items"], false);
 
-	Point classifier_size = jsonToPoint( segmentTemplate["classifier_size"] );
-
-	for(size_t i = 0; i < expectedBubbleLocs.size(); i++){
-		rectangle(segment_out, expectedBubbleLocs[i] - .5 * classifier_size,
-		          expectedBubbleLocs[i] + .5 * classifier_size,
-		          colors[bubbleVals[i]]);
-						   
-		circle(segment_out, segBubbleLocs[i], 1, Scalar(255, 2555, 255), -1);
-	}
-	*/
 	string segmentOutPath;
 	string segmentName;
 	try{
 		segmentOutPath = extendedSegment.get("output_path", 0).asString() + "segments/";
 		segmentName = extendedSegment["name"].asString() + "_image_" +
 		              intToStr(extendedSegment.get("index", 0).asInt()) + ".jpg";
+
+		/*
+		rectangle(segment_out, expectedBubbleLocs[i] - .5 * classifier_size,
+		          expectedBubbleLocs[i] + .5 * classifier_size,
+		          colors[bubbleVals[i]]);
+
+		circle(segment_out, segBubbleLocs[i], 1, Scalar(255, 2555, 255), -1);
+		*/
+
 		imwrite(segmentOutPath + segmentName, segment_out);
 		segmentJsonOut["image_path"] = segmentOutPath + segmentName;
 	}
 	catch(...){
-		LOGI(("Could not output segment to: " + segmentOutPath+segmentName).c_str());
+		LOGI(("Could not output segment to: " + segmentOutPath + segmentName).c_str());
 	}
-	segmentJsonOut.removeMember("classifier");
-	segmentJsonOut.removeMember("index");
-	segmentJsonOut.removeMember("output_path");
 	return segmentJsonOut;
 }
 Json::Value fieldFunction(const Json::Value& field, const Json::Value& parentProperties){
@@ -450,15 +596,22 @@ Json::Value fieldFunction(const Json::Value& field, const Json::Value& parentPro
 	}
 
 	#ifdef OUTPUT_BUBBLE_IMAGES
+		//namer.setPrefix(field.get("classifier", Json::Value()).get("training_data_uri", "na").asString());
 		namer.setPrefix(field.get("label", "unlabeled").asString());
 	#endif
 
 	for ( size_t j = 0; j < segments.size(); j++ ) {
 		const Json::Value segment = segments[j];
-		Json::Value outSegment = segmentFunction(segment, extendedField);
-		outSegment["index"] = (int)j;
-		if(!outSegment.isNull()){
-			outSegments.append(outSegment);
+		Json::Value segmentJsonOut(segment);
+		segmentJsonOut["index"] = (int)j;
+
+		Json::Value extendedSegment = Json::Value(extendedField);
+		extend(extendedSegment, segmentJsonOut);
+
+		segmentJsonOut = segmentFunction(segmentJsonOut, extendedSegment);
+
+		if(!segmentJsonOut.isNull()){
+			outSegments.append(segmentJsonOut);
 		}
 	}
 	outField["segments"] = outSegments;
@@ -493,7 +646,7 @@ Json::Value formFunction(const Json::Value& templateRoot){
 
 public:
 
-ProcessorImpl(const string& appRootDir) : appRootDir(string(appRootDir)) {}
+ProcessorImpl()  {}
 
 bool setTemplate(const char* templatePathArg) {
 	#ifdef DEBUG_PROCESSOR
@@ -507,7 +660,8 @@ bool setTemplate(const char* templatePathArg) {
 }
 bool loadFormImage(const char* imagePath, const char* calibrationFilePath) {
 	#ifdef DEBUG_PROCESSOR
-		cout << "loading form image..." << flush;
+		LOGI("loading form image...");
+		cout << flush;
 	#endif
 	#ifdef TIME_IT	
 		init = clock();
@@ -565,30 +719,27 @@ bool loadFormImage(const char* imagePath, const char* calibrationFilePath) {
 }
 bool alignForm(const char* alignedImageOutputPath, size_t formIdx) {
 	#ifdef DEBUG_PROCESSOR
-		cout << "aligning form..." << endl;
+		LOGI("aligning form...");
+		cout << endl;
 	#endif
 	#ifdef TIME_IT	
 		init = clock();
 	#endif
 	Mat straightenedImage;
-	try{
-		Size form_sz(root.get("width", 0).asInt(), root.get("height", 0).asInt());
-		
-		if( form_sz.width <= 0 || form_sz.height <= 0)
-			CV_Error(CV_StsError, "Invalid form dimension in template.");
-		
-		//If the image was not set (because form detection didn't happen) set it.
-		if( aligner.currentImg.empty() ) aligner.setImage(formImage);
 
+	Size form_sz(root.get("width", 0).asInt(), root.get("height", 0).asInt());
+
+	if( form_sz.width <= 0 || form_sz.height <= 0) {
+		CV_Error(CV_StsError, "Invalid form dimension in template.");
+	}
+
+	//If the image was not set (because form detection didn't happen) set it.
+	if( aligner.currentImg.empty() ) aligner.setImage(formImage);
+
+	//TODO: Move this try/catch into alignFormImage perhaps?
+	try {
 		aligner.alignFormImage( straightenedImage, SCALEPARAM * form_sz, formIdx );
-	}
-	catch(cv::Exception& e){
-		LOGI(e.what());
-		return false;
-	}
-	
-	if(straightenedImage.empty()) {
-		cout << "does this ever happen?" << endl;
+	} catch(cv::Exception& e){
 		return false;
 	}
 
@@ -606,9 +757,10 @@ bool alignForm(const char* alignedImageOutputPath, size_t formIdx) {
 	#endif
 	return writeFormImage(alignedImageOutputPath);
 }
-bool processForm(const string& outputPath, bool minifyJson) {
+bool processForm(const string& outputPath, const string& jsonOutputPath, const string& markedupImagePath, bool minifyJson) {
 	#ifdef  DEBUG_PROCESSOR
-		cout << "Processing form" << endl;
+		LOGI("Processing form");
+		cout << endl;
 	#endif
 	#ifdef TIME_IT	
 		init = clock();
@@ -631,10 +783,10 @@ bool processForm(const string& outputPath, bool minifyJson) {
 	#endif
 	
 	//Create the marked up image:
-	imwrite(outputPath + "markedup.jpg", markupForm(JsonOutput, formImage, true));
+	imwrite(markedupImagePath, markupForm(JsonOutput, formImage, true));
 	
 	//Create the json output file
-	ofstream outfile((outputPath + "output.json").c_str(), ios::out | ios::binary);
+	ofstream outfile(jsonOutputPath.c_str(), ios::out | ios::binary);
 	if(minifyJson){
 		Json::FastWriter writer;
 		outfile << writer.write( minifyJsonOutput(JsonOutput) );
@@ -656,19 +808,18 @@ bool processForm(const string& outputPath, bool minifyJson) {
 bool writeFormImage(const char* outputPath) {
 	return imwrite(outputPath, formImage);
 }
+//Loads feature data for the given template into memory.
+//This can be called multiple times, so multiple templates are loaded into memeory for detection.
 bool loadFeatureData(const char* templatePathArg) {
-	try{
-		string templatePath = addSlashIfNeeded(templatePathArg);
-		aligner.loadFeatureData(templatePath + "form.jpg",
-		                        templatePath + "template.json",
-		                        templatePath + "cached_features.yml");
-	}
-	catch(cv::Exception& e){
-		LOGI(e.what());
-		return false;
-	}
+	string templatePath = addSlashIfNeeded(templatePathArg);
+	aligner.loadFeatureData(templatePath + "form.jpg",
+	                        templatePath + "template.json",
+	                        templatePath + "cached_features.yml");
+
 	return true;
 }
+//Detect which form we are using from among the loaded feature data sets.
+//A return value of 0 indicates the first data loaded, 1 indicates the second, etc..
 int detectForm(){
 	int formIdx;
 	try{
@@ -685,17 +836,25 @@ int detectForm(){
 };
 
 /* This stuff hooks the Processor class up to the implementation class: */
-Processor::Processor() : processorImpl(new ProcessorImpl("")){
+Processor::Processor() : processorImpl(new ProcessorImpl()){
+	processorImpl->trainingDataPath = "training_examples/";
 	LOGI("Processor successfully constructed.");
 }
-Processor::Processor(const char* appRootDir) : processorImpl(new ProcessorImpl(addSlashIfNeeded(appRootDir))){
+Processor::Processor(const char* appRootDir) : processorImpl(new ProcessorImpl()){
+	processorImpl->trainingDataPath = addSlashIfNeeded(appRootDir) + "training_examples/";
 	LOGI("Processor successfully constructed.");
 }
 bool Processor::loadFormImage(const char* imagePath, const char* calibrationFilePath){
 	return processorImpl->loadFormImage(imagePath, calibrationFilePath);
 }
 bool Processor::loadFeatureData(const char* templatePath){
-	return processorImpl->loadFeatureData(templatePath);
+	try{
+		return processorImpl->loadFeatureData(templatePath);
+	}
+	catch(cv::Exception& e){
+		LOGI(e.what());
+		return false;
+	}
 }
 int Processor::detectForm(){
 	return processorImpl->detectForm();
@@ -705,11 +864,175 @@ bool Processor::setTemplate(const char* templatePath){
 }
 bool Processor::alignForm(const char* alignedImageOutputPath, int formIdx){
 	if(formIdx < 0) return false;
-	return processorImpl->alignForm(alignedImageOutputPath, (size_t)formIdx);
+	try{
+		return processorImpl->alignForm(alignedImageOutputPath, (size_t)formIdx);
+	}
+	catch (...) {
+	    return false;
+	}
 }
 bool Processor::processForm(const char* outputPath, bool minifyJson) {
-	return processorImpl->processForm(addSlashIfNeeded(outputPath), minifyJson);
+	try{
+		string normalizedOutDir = addSlashIfNeeded(outputPath);
+		return processorImpl->processForm(normalizedOutDir, normalizedOutDir + "output.json",
+				normalizedOutDir + "markedup.jpg", minifyJson);
+	}
+	catch (...) {
+	    return false;
+	}
+}
+const string Processor::scanAndMarkup(const char* outputPath) {
+	try{
+		string normalizedOutDir = addSlashIfNeeded(outputPath);
+		if(processorImpl->processForm(normalizedOutDir, normalizedOutDir + "output.json",
+				normalizedOutDir + "markedup.jpg", false)) {
+			return "";//success
+		} else {
+			return "Could not process form.";
+		}
+	}
+	catch(cv::Exception& e){
+		return e.what();
+	}
+	catch(std::exception& e){
+		return e.what();
+	}
+	catch (...) {
+	    return "Unknown expection.";
+	}
+}
+/**
+processViaJSON tries to  mimic a restful client-server interface.
+It expects a JSON string like this:
+{
+	"inputImage" : "",
+	"outputDirectory" : "",
+	"alignedFormOutputPath" : outputDirectory + "aligned.jpg",
+	"markedupFormOutputPath" : outputDirectory + "markedup.jpg",
+	"jsonOutputPath" : outputDirectory + "output.json",
+	"alignForm" : true,
+	"processForm" : true,
+	"templatePath" : "",
+	"templatePaths" : [],
+	"calibrationFilePath" : "",
+	"trainingDataDirectory" : "training_examples/"
+}
+You only need to specify the inputImage, outputDirectory and templatePath(s).
+The JSON above contains all the default values.
+
+It returns a JSON string like this:
+{
+	"errorMessage" : "This is only here if there's an error",
+	"templatePath" : "path/to/template/that/was/used/for/processing"
+}
+
+The benefits are as follows:
+- Only a single call is required to use the whole processing pipeline
+  (all the pipeline logic remains in here).
+- Keyword arguments make it clearer what the args do,
+  and allow for more flexible default behavior when they are not specified.
+- Extra properties can be passed in without both ends supporting them in advance.
+- The output JSON could be passed back this way without requiring use of the file system.
+*/
+const string Processor::processViaJSON(const char* jsonString) {
+	Json::Value result(Json::objectValue);
+	try {
+		Json::Value config;// will contain the root value after parsing.
+		Json::Reader reader;
+		bool parsingSuccessful = reader.parse( jsonString, config );
+		if(!parsingSuccessful){
+			result["errorMessage"] = "Could not parse JSON configuration string.";
+			return stringify(result);
+		}
+		if(!config.isMember("inputImage")){
+			result["errorMessage"] = "Missing input image path.";
+			return stringify(result);
+		}
+		if(!config.isMember("outputDirectory")){
+			result["errorMessage"] = "Missing output image path.";
+			return stringify(result);
+		}
+		string outputDirectory = config["outputDirectory"].asString();
+		processorImpl->loadFormImage(config["inputImage"].asString().c_str(), config.get("calibrationFilePath", "").asString().c_str());
+
+		int formIdx = 0;
+
+		if(config.isMember("templatePath")){
+			if(!processorImpl->loadFeatureData(config["templatePath"].asString().c_str())) {
+				result["errorMessage"] = "Could not load feature data.";
+				return stringify(result);
+			}
+			if(!processorImpl->setTemplate(config["templatePath"].asString().c_str())) {
+				result["errorMessage"] = "Could not set template.";
+				return stringify(result);
+			}
+			result["templatePath"] = config["templatePath"];
+		} else if(config.isMember("templatePaths")) {
+			Json::Value templatePaths = config["templatePaths"];
+			for ( size_t j = 0; j < templatePaths.size(); j++ ) {
+				const Json::Value templatePath = templatePaths[j];
+				if(!processorImpl->loadFeatureData(templatePath.asString().c_str())) {
+					result["errorMessage"] = "Could not load feature data.";
+					return stringify(result);
+				}
+			}
+			formIdx = processorImpl->detectForm();
+			if(formIdx < 0) {
+				result["errorMessage"] = "Could not detect form.";
+				return stringify(result);
+			}
+			result["templatePath"] = templatePaths[formIdx];
+			if(!processorImpl->setTemplate(templatePaths[formIdx].asString().c_str())) {
+				result["errorMessage"] = "Could not set template.";
+				return stringify(result);
+			}
+		} else {
+			result["errorMessage"] = "One or more template paths are required.";
+			return stringify(result);
+		}
+
+		if(config.get("alignForm", true).asBool()){
+			string alignedFormOutputPath = config.get("alignedFormOutputPath",
+					addSlashIfNeeded(outputDirectory) + "aligned.jpg").asString();
+			if(!processorImpl->alignForm(alignedFormOutputPath.c_str(), (size_t)formIdx)){
+				result["errorMessage"] = "Could not align form.";
+				return stringify(result);
+			}
+		}
+		if(config.get("processForm", true).asBool()){
+			processorImpl->trainingDataPath = config.get("trainingDataDirectory", "training_examples/").asString();
+			string normalizedOutDir = addSlashIfNeeded(outputDirectory);
+			string jsonOutputPath = config.get("jsonOutputPath",
+					normalizedOutDir + "output.json").asString();
+			string markedupFormOutputPath = config.get("markedupFormOutputPath",
+					normalizedOutDir + "markedup.jpg").asString();
+			if(!processorImpl->processForm(normalizedOutDir, jsonOutputPath, markedupFormOutputPath, false)){
+				result["errorMessage"] = "Could not process form.";
+				return stringify(result);
+			}
+		}
+	}
+	catch(cv::Exception& e){
+		result["errorMessage"] = e.what();
+		return stringify(result);
+	}
+	catch(std::exception& e){
+		result["errorMessage"] = e.what();
+		return stringify(result);
+	}
+	catch (...) {
+		result["errorMessage"] = "Unknown expection.";
+		return stringify(result);
+	}
+	return stringify(result);
 }
 bool Processor::writeFormImage(const char* outputPath) const{
 	return processorImpl->writeFormImage(outputPath);
 }
+
+const string Processor::jniEchoTest(const char* testStr) const{
+	Json::Value result(Json::objectValue);
+	result["stuff"] = testStr;
+	return stringify(result);
+}
+

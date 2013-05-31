@@ -1,0 +1,38 @@
+body {
+    padding: 1em;
+}
+.docs {
+    margin: auto;
+    width: 800px;
+}
+.title {
+    display: block;
+}
+@media screen and (max-width:800px) {
+    .docs {
+        margin: auto;
+        width: 600px;
+    }
+    .title {
+        display: none;
+    }
+}
+.docs table {
+    margin: 5px;
+    margin-left: auto;
+    margin-right: auto;
+}
+.docs td {
+    border: 1px solid lightgray;
+    padding: 3px;
+}
+.docs h2 {
+    border-bottom: 2px solid gray;
+    margin-top: 1em;
+    margin-bottom: .5em;
+}
+.docs h3 {
+    border-bottom: 1px solid lightgray;
+    margin-top: 1em;
+    margin-bottom: .5em;
+}

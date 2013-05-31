@@ -1,0 +1,209 @@
+/* Bootstrap resets */
+label {
+    font-size: inherit;
+    line-height: initial;
+    font-weight: inherit;
+    margin-bottom: 0;
+}
+.checkbox {
+    min-height: initial;
+    padding-left: initial;
+}
+img {
+    max-width: initial;
+}
+/* Main stuff */
+.formImage {
+    background-color: white;
+    padding: 2%;
+    position: relative;
+    padding: 0;
+}
+.formImage .heading {
+    text-align: center;
+    padding-top: 20px;
+}
+.formImage .fiducial {
+    position:absolute;
+    margin: 5px;
+}
+.formImage .tl {
+    top:0;
+    left:0;
+}
+.formImage .tr {
+    top:0;
+    right:0;
+}
+.formImage .bl {
+    bottom:0;
+    left:0;
+}
+.formImage .br {
+    bottom:0;
+    right:0;
+}
+
+.formFields {
+    width: 96%;
+    margin: 2%;
+    border: 1px solid rgb(170, 169, 164);
+}
+.fieldRowTable {
+    width: 100%;
+}
+.fieldRow >  .field {
+    border-right: 1px solid rgb(170, 169, 164);
+}
+.fieldRow >  .field:last-child {
+    border-right: 0;
+}
+.fieldColumn > .field {
+    border-bottom: 1px solid rgb(170, 169, 164);
+}
+.fieldColumn > .field:last-child {
+    border-bottom: 0;
+}
+.field {
+    vertical-align: top;
+    margin: 0;
+    padding: 5px;
+    height: 100%;
+    min-height: 100%;
+}
+.scanField {
+    padding: 8px;
+}
+.segment-container {
+    width: 100%;
+    min-height: 30px;
+    /* the height 30px is only necessairy for firefox */
+    height: 30px;
+    margin-bottom: 4px;
+}
+.segments {
+    width: 0;
+}
+.segment {
+    line-height: 0;
+}
+.segment, .labels {
+    border: 1px solid black;
+    padding: 5px;
+}
+.labels {
+    border-left: 1px solid black;
+    border-right: 0;
+}
+/* 
+This is only for bub_x widgets
+Making the inner borders ligher
+makes it less likely they will be
+used instead of the outerborder
+during alignment.
+*/
+.labels + .segment {
+    border-left: 1px solid gray;
+    border-right: 0;
+}
+.segment + .segment {
+    border-left: 1px solid gray;
+    border-right: 0;
+}
+.segment:last-child {
+    border-right: 1px solid black;
+}
+label {
+    margin-bottom: 5px;
+}
+.labels > label {
+    margin-bottom: 0;
+}
+
+.item {
+    display: inline-block;
+}
+.item > * {
+    vertical-align: middle;
+}
+.item label {
+    display: inline;
+}
+.classifiableObject {
+    display: inline-block;
+    border: 1px solid black;
+}
+/* 
+.bubble {
+    border-radius: 50%;
+}
+ */
+.classifiableObject.number {
+    display: inline-block;
+    border: 1px solid black;
+    position: relative;
+}
+.guide-dot {
+    position: absolute;
+    display: inline-block;
+    border: 1px solid blue;
+    margin: 25%;
+}
+.guide-dot:nth-of-type(1){
+    top: 0;
+    right: 0;
+}
+.guide-dot:nth-of-type(2){
+    top: 0;
+    left: 0;
+}
+.guide-dot:nth-of-type(3){
+    bottom: 28%;
+    right: 0;
+}
+.guide-dot:nth-of-type(4){
+    bottom: 28%;
+    left: 0;
+}
+.guide-dot:nth-of-type(5){
+    bottom: 0;
+    right: 0;
+}
+.guide-dot:nth-of-type(6){
+    bottom: 0;
+    left: 0;
+}
+.vertical {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: right;
+    line-height: initial;
+}
+.vertical > label {
+    display: none;
+}
+
+
+/* For writing in values above bub_x prompts */
+.writein {
+    height: 1.2em;
+    border-bottom: 1px solid black;
+    margin-left: -3px;
+    margin-right: -3px;
+}
+/* the lines for text prompts */
+.text-line {
+    height: 1.2em;
+    border-bottom: 1px solid black;
+}
+
+/* Helper classes */
+label .inv {
+    margin-left: -5px;
+    margin-right: -5px;
+    padding-left: 5px;
+    padding-right: 5px;
+    color: white;
+    background-color: black;
+}

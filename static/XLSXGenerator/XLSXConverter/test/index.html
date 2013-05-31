@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>JsonDiffPatch Demo</title>
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js" ></script>
+        </script>
+        <script type="text/javascript">
+            (function () {
+                if (!window.JSON) {
+                    // include JSON for old browser without native JSON support
+                    var script = document.createElement('script');
+                    script.src = 'http://cdnjs.cloudflare.com/ajax/libs/json3/3.2.2/json3.min.js';
+                    var head = document.getElementsByTagName("head")[0] || document.documentElement;
+                    head.appendChild(script);
+                }
+            })();
+        </script>
+        
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <link rel="stylesheet" href="style.css" type="text/css" media="screen" />
+        <link rel="stylesheet" href="JsonDiffPatch/src/jsondiffpatch.html.css" type="text/css" media="screen" />
+        <!-- START: required libs -->
+        <script type='text/javascript' src='JsonDiffPatch/src/jsondiffpatch.js'>
+        </script>
+        <script type='text/javascript' src='JsonDiffPatch/src/jsondiffpatch.html.js'>
+        </script>
+        <script type='text/javascript' src='JsonDiffPatch/lib/diff_match_patch_uncompressed.js'>
+        </script>
+        <!-- END: required libs -->
+    </head>
+    <body>
+        <p>This is a diff of the imnci json files in the "expected" and "output" folders.</p>
+        <div class="results">
+            <table>
+                <thead>
+                    <tr>
+                        <th>
+                            <h2>Visual Diff</h2>
+                            <div class="header-options">
+                                <input id="showunchanged" type="checkbox">
+                                <label for="showunchanged">
+                                    Show unchanged values
+                                </label>
+                            </div>
+                        </th>
+                        <th>
+                            <h2>JSON Diff</h2>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="visualdiff">
+                            <p class="visualdiff" id="visualdiff">
+                            </p>
+                        </td>
+                        <td class="jsondiff">
+                            <p>
+                                (<span id="jsondifflength"></span>
+                                KB)
+                            </p>
+                            <pre id="jsondiff">
+                            </pre>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <script type="text/javascript">
+            
+            jsondiffpatch.config.objectHash = function(obj) {
+                return obj._id || obj.id || obj.name || JSON.stringify(obj);
+            };
+            
+            var parseJson = function(id){
+                $('#json' + id).removeClass('json-error');
+                $('#json' + id + 'errormessage').text('');
+                try {
+                    var txt = $.trim($('#json' + id).val());
+                    if (txt.slice(0,1) !== '{' && txt.slice(0,1) !== '[') {
+                        return txt;
+                    }
+                    else {
+                        return JSON.parse(txt);
+                    }
+                } 
+                catch (err) {
+                    $('#json' + id).addClass('json-error');
+                    $('#json' + id + 'errormessage').text(err + '');
+                }
+            };
+            
+            var arraysToObjects = function(obj){
+                if(!$.isArray(obj) && !$.isPlainObject(obj)){
+                    return obj;
+                }
+                var outObj = {};
+                $.each(obj, function(key, value){
+                    outObj[String(key)] = arraysToObjects(value);
+                });
+                return outObj;
+            };
+            
+            $(function(){
+                
+                $('#showunchanged').change(function(){
+                    $('.jsondiffpatch-unchanged')[this.checked ? 'slideDown' : 'slideUp']();
+                });
+                
+                var compare = function(json1, json2){
+                    
+                    if (typeof json1 == 'undefined' || typeof json2 == 'undefined') {
+                        $('.results').hide();
+                        return;
+                    }
+                    
+                    var d = jsondiffpatch.diff(json1, json2);
+                    
+                    if (typeof d == 'undefined') {
+                        $('#jsondiff').val('');
+                        $('#jsondifflength').text('0');
+                        $('#visualdiff').empty().text('no diff');
+                        $('.jsondiff').hide();
+                    }
+                    else {
+                        $('#jsondiff').text(JSON.stringify(d, null, 2));
+                        $('#jsondifflength').text(Math.round(JSON.stringify(d).length / 102.4) / 10.0);
+                        $('#visualdiff').empty().append(jsondiffpatch.html.diffToHtml(json1, json2, d));
+                        $('.jsondiff').show();
+                    }
+                    $('.jsondiffpatch-unchanged')[$('#showunchanged').get(0).checked ? 'show' : 'hide']();
+                    
+                    $('.results').show();
+                };
+                
+                $.getJSON("expected/imnci.json", function(json1){
+                    $.getJSON("output/imnci.json", function(json2){
+                        compare(arraysToObjects(json1), arraysToObjects(json2))
+                    });
+                });
+                
+                $('.results').hide();
+
+            });
+        </script>
+        <footer>
+            <a href="https://github.com/benjamine/JsonDiffPatch">Diff generated via JsonDiffPatch</a><br>
+        </footer>
+    </body>
+</html>

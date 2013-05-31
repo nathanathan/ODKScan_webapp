@@ -1,0 +1,112 @@
+body {
+    margin: 0;
+    padding-top: 0;
+}
+
+.modal-gallery {
+    width: auto;
+	max-height: none;
+	margin: 2em;
+	top: 0;
+	left: 0;
+	position: relative;
+	float: left;
+}
+.modal-gallery .modal-body {
+	max-height: none;
+}
+.instructions {
+    color:white;
+    /* text-align: center; */
+    line-height: 2em;
+}
+#drop {
+    background-color: white;
+    border:2px dashed #bbb;
+    -moz-border-radius:5px;
+    -webkit-border-radius:5px;
+    border-radius:5px;
+    padding:25px;
+    text-align:center;
+	font:20pt bold;
+    color:#bbb
+}
+#out {
+    clear: both;
+    height: 500px;
+    width: 100%;
+}
+#save {
+    float: right;
+    font-size: 15pt;
+    margin-top: 15px;
+    font-family: "Times New Roman"; 
+}
+#errors p {
+    background-color: pink;
+    margin-top: 1em;
+    margin-bottom: 1em;
+    padding: .5em;
+}
+#warnings p {
+    background-color: orange;
+    margin-top: 1em;
+    margin-bottom: 1em;
+    padding: .5em;
+}
+#download div {
+    background-color: lightgreen;
+    margin-top: 1em;
+    margin-bottom: 1em;
+    padding: .5em;
+}
+.panel {
+    background-color: #f5f5f5;
+    border: 1px solid lightgray;
+    padding: 1em;
+    padding-top: .5em;
+    padding-bottom: .5em;
+}
+.panel label {
+    display: inline;
+    font-weight: bolder;
+}
+.panel input {
+    margin: 0;
+}
+.formImage {
+    /*
+    margin-right: auto;
+    margin-left: auto;
+    */
+    margin-bottom: 1em;
+}
+.formImage, .instructions {
+    margin-left: 20px;
+}
+@media screen and (max-width:800px) {
+    .formImage .instructions {
+        margin-left: 0;
+    }
+}
+
+.help {
+    float: right;
+}
+#myModal {
+    width:800px;
+    margin-left:-400px;
+}
+
+
+.outImgs {
+    display: none;
+}
+@media print {
+    .main {
+        display: none;
+    }
+    .outImgs {
+        display: block;
+    }
+}

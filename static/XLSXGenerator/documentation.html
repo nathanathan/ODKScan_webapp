@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>XLSX Form Generator Documentation</title>
+    <meta name="viewport" content="width=device-width, initial-scale=.3">
+    <meta name="author" content="Nathan Breit">
+
+    <link href="assets/css/bootstrap.css" rel="stylesheet">
+    <link href="assets/js/google-code-prettify/prettify.css" rel="stylesheet">
+    <link href="documentation.css" rel="stylesheet">
+    <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+
+    <body>
+        <div class="title">
+            <h1>XLSX Form Generator Documentation</h1>
+            <hr />
+        </div>
+        <div class="docs"></div>
+
+    </body>
+    <script src="assets/js/jquery.js"></script>
+    <script src="assets/js/jquery.qrcode.min.js"></script>
+    
+    <script src="assets/js/bootstrap-modal.js"></script>
+    
+    <script src="assets/js/handlebars.js"></script>
+    <script type="text/javascript" src="assets/html2canvas/build/html2canvas.js"></script>
+    
+<script src="assets/js/textile.js"></script>
+<script>
+$(function(){
+    $( '.docs' ).html( textile( $("#docs-textile").html() ) );
+});
+</script>
+
+<script id="docs-textile" type="text/x-textile">
+h1. Getting Started
+
+    There is an example spreadsheet available "here":scanExample.xlsx which you can use a starting point.
+    To add a question create a row like this:
+
+| *type* | *name*   | *label*            |
+| text   | user_name| What is your name? |
+
+(Below in the XLSX Format section many other types, columns and settings are described.)
+
+p.
+    When your spreadsheet is ready upload it and you will see a preview of the generated form.
+    You will also see a download link appear for the ODK Scan form definition.
+    You can print your form by printing the webpage (only tested in chrome),
+    or by printing the jpgs included in the template folder. Black and white or color printing works.
+
+--------------------------------------------------------------------------------
+
+h1. XLSX Format
+
+    The XLSX Format is based on "XLSForm":http://opendatakit.org/help/form-design/xlsform/
+    The form generator expects workbooks with 3 sheets: survey, choices and settings.
+    They are individually described in the sections below.
+    Most spreadsheet programs have controls in the bottom-left corner where you can create them.
+
+h2. survey
+
+    All forms require a survey sheet.
+    The survey worksheet contains the structure and most of the content of the form.
+    It contains the full list of questions and information about how they should be presented.
+    Most rows represent a question; the rest of the rows specify control structures such as groups.
+
+Example survey sheet:
+
+| *type* | *name*   | *label*            |
+| text   | user_name| What is your name? |
+| integer| user_age | How old are you?   |
+
+h3. survey sheet columns:
+
+h4. type
+
+    The type colum indications what type of question you are asking.
+    These are the available types taken from XLSForm: 
+
+| text   | Write-in text input. |
+| integer| Integer (i.e. whole number) input.|
+| decimal| Decimal input. |
+| note   | Displays a label with no input. |
+| select_one `choice_list` | Multiple choice question; only one answer can be selected. |
+| select_multiple `choice_list` | Multiple choice question; multiple answers can be selected.|
+
+
+
+
+h5. Scan specific types:
+
+
+
+| tally `number`
+| Print the specified number of bubbles, and count up how many are filled in. |
+| markup
+| A label that only appears on the printed form.                       |
+| bub_num `digits`
+| Create a field for inputting numbers by filling in numeric bubbles   |
+| bub_word `letters`
+| Create a field for inputting words by filling in alphabetic bubbles. |
+| qrcode `data`
+| A QR code containing the given data. Used for keeping track of variations of a form that share a template. |
+| pagebreak
+| Pagebreaks allow you to create multi-page forms.                     |
+| writein_num `digits`
+| With writein_num prompts you can use scannable "connect-the-dots" numbers in your form.
+  However, these are experimental and may not perform as well as bub_num prompts.
+  !assets/img/writein_num.jpg! |
+
+h4. Groups:
+
+Groups are drawn as columns. Nested groups are drawn as rows within a column. For example:
+
+| *type* | *name*   | *label*            |
+| begin group| | |
+| note| | This is in the left column |
+| begin group| | |
+| note| | These are |
+| note| | in rows in  |
+| note| | the right column  |
+| end group| | |
+| end group| | |
+
+h4. name
+
+The name sets the variable the answer is stored under.
+
+h4. label
+
+    The label is typically the question you want to ask.
+    Labels can contain HTML for formatting, however this formatting will be removed when it is viewed in Collect.
+    For example, if you want to set the label to use a custom font, you could do something like this:
+
+<pre>
+<code>
+<span style="font:12px times;">I'm a stylish label.</span>
+</code>
+</pre>
+
+h4. default/constraint/required
+
+    When scanned forms are exported to Collect the default and
+    constraint columns can be used to set default values to be entered as answers,
+    as well as xpath constraints on the answers.
+    "For more information see the XLSForm documentation.":http://opendatakit.org/help/form-design/xlsform/
+
+h4. qrcode_size
+
+    When generating a number of variations of a form that use diffing qrcode,
+    it may be necessairy to constrain the qrcodes size so that the layout
+    remains the same across all the forms.
+
+h2. choices
+
+The choices sheet allows you to specify choices for use with `select_` type questions.
+
+Example choices sheet:
+
+| *list_name* | *name*  | *label* |
+| cities      | seattle | Seattle |
+| cities      | paris   | Paris   |
+| cities      | new_york| New York|
+| cities      | mumbai  | Mumbai  |
+
+h3. choices sheet columns:
+
+h4. list_name
+
+The list_name is used to group choices into lists that can be referenced from the survey sheet. The example above could be referenced as follows:
+
+| *type*           | *name*        | *label*                       |
+| select_one cities|cities_visited | Which cities have you visited?|
+
+h4. name
+
+The name sets the value that the choice is stored as. This is useful in constraint formulas, and for formatting exports.
+
+h4. label
+
+Label sets the text that is drawn next to each choice bubble. There is a limited amount of space for them.
+
+h2. settings
+
+Example settings sheet:
+
+| *setting*    | *value*                         |
+| form_title   | Example Form                    |
+| font         | 12pt Verdana, sans-serif        |
+
+h3. settings sheet columns:
+
+h4. form_title
+
+This sets the form title displayed at the top of the form.
+
+h4. font
+
+This sets the form's overall font.
+
+h4. title_font
+
+This sets the font of the form's title
+
+--------------------------------------------------------------------------------
+
+h1. Extra notes
+
+h3. offline use
+
+    "The Form Generator site can be downloaded here for offline conversion.":https://github.com/UW-ICTD/XLSXGenerator/archive/gh-pages.zip
+    The offline version has one limitation if you view it from your filesystem:
+    Due to a security restriction the default fiducials will not appear in the template file,
+    so it is necessairy to replace them all with custom fiducials.
+
+h3. custom css
+
+    If you use the offline version, the formImage.css file can be altered to apply
+    custom styles to the form images generated. If you need to condense yor form
+    this could be an effective way to do it.
+
+h3. post-editing
+
+    This application allows you to edit the labels, fiducials and possibly other aspects
+    of the generated html form.
+    However, these modifications need to be redone every time the form is regenerated.
+
+</script>
+</html>

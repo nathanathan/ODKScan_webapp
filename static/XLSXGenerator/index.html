@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Form View</title>
+    <meta name="viewport" content="width=device-width, initial-scale=.3">
+    <meta name="author" content="Nathan Breit">
+
+    <link href="assets/css/bootstrap.css" rel="stylesheet">
+    <link href="assets/js/google-code-prettify/prettify.css" rel="stylesheet">
+    <link href="formImage.css" rel="stylesheet">
+    <link href="app.css" rel="stylesheet">
+  </head>
+
+    <body data-spy="scroll" data-target=".subnav" data-offset="50" style="background-color:black;">
+
+        <div class="outImgs"></div>
+    
+        <div class="main">
+        
+            <div class="panel">
+                <label>Upload an XLSX file here:</label>
+                <input class="xlsxfile" type="file"></input>
+                <a class="btn btn-info help" href="#myModal" role="button" data-toggle="modal">Help</a>
+            </div>
+            
+            <div id="download"></div>
+            <div id="errors"></div>
+            <div id="warnings"></div>
+            
+            <p class="instructions">You can drag & drop custom images onto the corners of the form below.</p>
+            <p class="instructions">These images affect alignment, so it is adivsable to use unique, high contrast pictures.</p>
+            
+            <div class="fContainer"></div>
+            
+            <!-- Documentation Modal -->
+            <div id="myModal" class="modal hide fade" tabindex="-1" role="dialog"
+            aria-labelledby="myModalLabel" aria-hidden="true">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                    <h3 id="myModalLabel">Scan XLSX Form generator documentation</h3>
+                </div>
+                <div class="modal-body">
+                    <iframe src="documentation.html" seamless='seamless' style="width:100%;height:340px"></iframe>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+                </div>
+            </div>
+
+        </div>
+        <script src="assets/js/jquery.js"></script>
+        <script src="assets/js/jquery.qrcode.min.js"></script>
+        
+        <script src="assets/js/bootstrap-modal.js"></script>
+        
+        <script src="assets/js/handlebars.js"></script>
+        <script type="text/javascript" src="assets/html2canvas/build/html2canvas.js"></script>
+        
+        <script src="assets/js/textile.js"></script>
+        
+        <script src="XLSXConverter/js-xlsx/jszip.js"></script>
+        
+        <!-- JsZip is Doubly included because the xlsx one has trouble generating blobs -->
+        <!-- I modified the source so this one is called MyJsZip -->
+        <script src="assets/js/jszip/jszip.js"></script>
+        <script src="assets/js/jszip/jszip-load.js"></script>
+        
+        <script src="XLSXConverter/js-xlsx/xlsx.js"></script>
+        <script src="XLSXConverter/underscore.js"></script>
+        <script src="XLSXConverter/XLSXConverter.js"></script>
+
+        <script src="app.js"></script>
+
+<!-- Templates below here: -->
+
+<script id="download-notice" type="text/x-handlebars-template">
+    <div>
+        <a class="btn btn-success download">Download Form Definition</a>
+        This is a zip file and may require using a program like
+        <a href="http://www.7-zip.org/">7-zip</a> to open on some systems.
+    </div>
+</script>
+
+<script id="form-template" type="text/x-handlebars-template">
+    <img class="tl fiducial" src="fiducials/ScanLogoSm.png">
+    <img class="tr fiducial" src="fiducials/villagereach.png">
+    <img class="bl fiducial" src="fiducials/cs.jpg">
+    <img class="br fiducial" src="fiducials/change.jpg">
+    
+    <h2 class="heading" style="font:{{title_font}};">
+        {{{title}}}
+    </h1>
+    <div class="formFields" style="font:{{font}};">
+        {{#if prompts}}
+            {{> fieldColumn}}
+        {{/if}}
+    </div>
+</script>
+
+<script id="field-row-template" type="text/x-handlebars-template">
+    <table class="fieldRowTable"><tbody><tr class="fieldRow">
+    {{#each prompts}}
+        <td class="field {{#unless prompts}}scanField{{/unless}}"
+            data-name="{{name}}">
+        
+        {{#if label}}<label>{{{label}}}</label>{{/if}}
+        
+        {{#if prompts}}
+            {{> fieldColumn}}
+        {{/if}}
+        
+        {{#if segments}}
+            {{> segments}}
+        {{/if}}
+        
+        </td>
+    {{/each}}
+    </tr></tbody></table>
+</script>
+
+<script id="field-column-template" type="text/x-handlebars-template">
+    <div class="fieldColumn">
+    {{#each prompts}}
+        <div class="field {{#unless prompts}}scanField{{/unless}}"
+            data-name="{{name}}">
+        
+        {{#if label}}<label>{{{label}}}</label>{{/if}}
+        
+        {{#if prompts}}
+            {{> fieldRow}}
+        {{/if}}
+        
+        {{#if segments}}
+            {{> segments}}
+        {{/if}}
+        
+        </div>
+    {{/each}}
+    </div>
+</script>
+
+<script id="segments-template" type="text/x-handlebars-template">
+    <table class="segment-container {{#if segments.[1]}}segments{{/if}}"><tbody>
+        <tr>
+            {{#if segments.[1]}}
+            
+                {{#if labels}}
+                    <td class="labels">
+                        <div class="writein"></div>
+                        {{#each labels}}
+                            <label class="vertical">{{this}}</label>
+                        {{/each}}
+                    </td>
+                {{/if}}
+                
+                {{#each segments}}
+                    <td class="segment">
+                        <div class="writein"></div>
+                        {{> segment}}
+                    </td>
+                {{/each}}
+        
+            {{else}}
+                {{#with segments.[0]}}
+                    <td class="segment">
+                        {{> segment}}
+                    </td>
+                {{/with}}
+            {{/if}}
+        </tr>
+    </tbody></table>
+</script>
+
+<script id="segment-template" type="text/x-handlebars-template">
+    {{#if qrcode}}
+        <div class="qrcode">
+        {{qrcodeImg qrcode}}
+        </div>
+    {{/if}}
+    
+    {{#each rows}}
+        <div class="text-line"></div>
+    {{/each}}
+    
+    {{#each items}}
+        <span class="item {{class}}" data-value="{{value}}">
+            {{#if label}}
+                <label>{{{label}}}</label>
+            {{/if}}
+            <span class="classifiableObject {{objectClass}}">
+            </span>
+        </span>
+    {{/each}}
+    </td>
+</script>
+
+    </body>
+</html>

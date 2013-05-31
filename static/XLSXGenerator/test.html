@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Form View</title>
+    <meta name="viewport" content="width=device-width, initial-scale=.3">
+    <meta name="author" content="Nathan Breit">
+
+    <link href="assets/css/bootstrap.css" rel="stylesheet">
+    <link href="assets/js/google-code-prettify/prettify.css" rel="stylesheet">
+    <link href="formImage.css" rel="stylesheet">
+    <link href="app.css" rel="stylesheet">
+  </head>
+
+    <body data-spy="scroll" data-target=".subnav" data-offset="50" style="background-color:black;">
+
+        <div class="outImgs"></div>
+    
+        <div class="main">
+            
+            <div id="download"></div>
+            <div id="errors"></div>
+            <div id="warnings"></div>
+            <div class="fContainer"></div>
+            <div class="diffs"></div>
+        </div>
+        <script src="assets/js/jquery.js"></script>
+        <script src="assets/js/jquery.qrcode.min.js"></script>
+        
+        <script src="assets/js/bootstrap-modal.js"></script>
+        
+        <script src="assets/js/handlebars.js"></script>
+        <script type="text/javascript" src="assets/html2canvas/build/html2canvas.js"></script>
+        
+        <script src="assets/js/textile.js"></script>
+        
+        <script src="XLSXConverter/js-xlsx/jszip.js"></script>
+        
+        <!-- JsZip is Doubly included because the xlsx one has trouble generating blobs -->
+        <!-- I modified the source so this one is called MyJsZip -->
+        <script src="assets/js/jszip/jszip.js"></script>
+        <script src="assets/js/jszip/jszip-load.js"></script>
+        
+        <script src="XLSXConverter/js-xlsx/xlsx.js"></script>
+        <script src="XLSXConverter/underscore.js"></script>
+        <script src="XLSXConverter/XLSXConverter.js"></script>
+        
+        <script src="app.js"></script>
+        
+<link rel="stylesheet" href="XLSXConverter/test/JsonDiffPatch/src/jsondiffpatch.html.css" type="text/css" media="screen" />
+<!-- START: required libs -->
+<script type='text/javascript' src='XLSXConverter/test/JsonDiffPatch/src/jsondiffpatch.js'>
+</script>
+<script type='text/javascript' src='XLSXConverter/test/JsonDiffPatch/src/jsondiffpatch.html.js'>
+</script>
+<script type='text/javascript' src='XLSXConverter/test/JsonDiffPatch/lib/diff_match_patch_uncompressed.js'>
+</script>
+
+<script type='text/javascript' src='assets/js/Resemble.js/resemble.js'>
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){
+        //This could be cleaned up a lot.
+        //Also, it would be a good idea to make sure that app is in window
+        //before this runs.
+    
+    var getBlob = function(path, callback){
+
+        var xhr=new XMLHttpRequest();
+        xhr.open("GET",path,true);
+        xhr.responseType = 'blob';
+        xhr.onload=function(){
+            if (this.status==200){
+                callback(this.response)
+            }
+        };
+        xhr.send();
+    };
+    
+    var arraysToObjects = function(obj){
+        if(!$.isArray(obj) && !$.isPlainObject(obj)){
+            return obj;
+        }
+        var outObj = {};
+        $.each(obj, function(key, value){
+            outObj['' + key] = arraysToObjects(value);
+        });
+        return outObj;
+    };
+    
+    
+  /**
+   * From filer.js:
+   * 
+   * Creates and returns a blob from a data URL (either base64 encoded or not).
+   *
+   * @param {string} dataURL The data URL to convert.
+   * @return {Blob} A blob representing the array buffer data.
+   */
+  var dataURLToBlob = function(dataURL) {
+    var BASE64_MARKER = ';base64,';
+    if (dataURL.indexOf(BASE64_MARKER) == -1) {
+      var parts = dataURL.split(',');
+      var contentType = parts[0].split(':')[1];
+      var raw = parts[1];
+
+      return new Blob([raw], {type: contentType});
+    }
+
+    var parts = dataURL.split(BASE64_MARKER);
+    var contentType = parts[0].split(':')[1];
+    var raw = window.atob(parts[1]);
+    var rawLength = raw.length;
+
+    var uInt8Array = new Uint8Array(rawLength);
+
+    for (var i = 0; i < rawLength; ++i) {
+      uInt8Array[i] = raw.charCodeAt(i);
+    }
+
+    return new Blob([uInt8Array], {type: contentType});
+  }
+    
+    var compare = function(actual){
+        _.each(actual, function(actualValue, key){
+            if(key.slice(-4) === "json") {
+                $.getJSON('testExpectedOutput/' + key, function(expectedJson){
+                    //TODO: Do JSON Diff
+                    console.log(actual[key], expectedJson);
+                    var json1 = arraysToObjects(actualValue);
+                    var json2 = arraysToObjects(expectedJson);
+                    var d = jsondiffpatch.diff(json1, json2); 
+                    if(d){
+                        $('.diffs').append(jsondiffpatch.html.diffToHtml(json1, json2, d));
+                    } else {
+                        $('.diffs').append("No difference");
+                    }
+                });
+            } else {
+                getBlob('testExpectedOutput/' + key, function(blob){
+                    resemble(dataURLToBlob(actualValue)).compareTo(blob).onComplete(function(data){
+                        var $img = $('<img>');
+                        $img.attr('src', data.getImageDataUrl());
+                        $('.diffs').append($img);
+                        /*
+                        {
+                          misMatchPercentage : 100, // %
+                          isSameDimensions: true, // or false
+                          getImageDataUrl: function(){}
+                        }
+                        */
+                    });
+
+                });
+            }
+        });
+    };
+    getBlob('scanExample.xlsx', function(blob){
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            var data = e.target.result;
+            window.app.processXLSX(data, 'scanExample.xlsx', compare);
+        };
+        try {
+            reader.readAsBinaryString(blob);
+        } catch(e) {
+            $("#errors").append("<p>Could not read file.</p>");
+            throw e;
+        }
+    });
+
+});
+</script>
+
+<!-- Templates below here: -->
+
+<script id="download-notice" type="text/x-handlebars-template">
+    <div>
+        <a class="btn btn-success download">Download Form Definition</a>
+        This is a zip file and may require using a program like
+        <a href="http://www.7-zip.org/">7-zip</a> to open on some systems.
+    </div>
+</script>
+
+<script id="form-template" type="text/x-handlebars-template">
+    <img class="tl fiducial" src="fiducials/ScanLogoSm.png">
+    <img class="tr fiducial" src="fiducials/villagereach.png">
+    <img class="bl fiducial" src="fiducials/cs.jpg">
+    <img class="br fiducial" src="fiducials/change.jpg">
+    
+    <h2 class="heading" style="font:{{title_font}};">
+        {{{title}}}
+    </h1>
+    <div class="formFields" style="font:{{font}};">
+        {{#if prompts}}
+            {{> fieldColumn}}
+        {{/if}}
+    </div>
+</script>
+
+<script id="field-row-template" type="text/x-handlebars-template">
+    <table class="fieldRowTable"><tbody><tr class="fieldRow">
+    {{#each prompts}}
+        <td class="field {{#unless prompts}}scanField{{/unless}}"
+            data-name="{{name}}">
+        
+        {{#if label}}<label>{{{label}}}</label>{{/if}}
+        
+        {{#if prompts}}
+            {{> fieldColumn}}
+        {{/if}}
+        
+        {{#if segments}}
+            {{> segments}}
+        {{/if}}
+        
+        </td>
+    {{/each}}
+    </tr></tbody></table>
+</script>
+
+<script id="field-column-template" type="text/x-handlebars-template">
+    <div class="fieldColumn">
+    {{#each prompts}}
+        <div class="field {{#unless prompts}}scanField{{/unless}}"
+            data-name="{{name}}">
+        
+        {{#if label}}<label>{{{label}}}</label>{{/if}}
+        
+        {{#if prompts}}
+            {{> fieldRow}}
+        {{/if}}
+        
+        {{#if segments}}
+            {{> segments}}
+        {{/if}}
+        
+        </div>
+    {{/each}}
+    </div>
+</script>
+
+<script id="segments-template" type="text/x-handlebars-template">
+    <table class="segment-container {{#if segments.[1]}}segments{{/if}}"><tbody>
+        <tr>
+            {{#if segments.[1]}}
+            
+                {{#if labels}}
+                    <td class="labels">
+                        <div class="writein"></div>
+                        {{#each labels}}
+                            <label class="vertical">{{this}}</label>
+                        {{/each}}
+                    </td>
+                {{/if}}
+                
+                {{#each segments}}
+                    <td class="segment">
+                        <div class="writein"></div>
+                        {{> segment}}
+                    </td>
+                {{/each}}
+        
+            {{else}}
+                {{#with segments.[0]}}
+                    <td class="segment">
+                        {{> segment}}
+                    </td>
+                {{/with}}
+            {{/if}}
+        </tr>
+    </tbody></table>
+</script>
+
+<script id="segment-template" type="text/x-handlebars-template">
+    {{#if qrcode}}
+        <div class="qrcode">{{qrcodeImg qrcode}}</div>
+    {{/if}}
+    
+    {{#each rows}}
+        <div class="text-line"></div>
+    {{/each}}
+    
+    {{#each items}}
+        <span class="item {{class}}" data-value="{{value}}">
+            {{#if label}}
+                <label>{{{label}}}</label>
+            {{/if}}
+            <span class="classifiableObject {{objectClass}}"></span>
+        </span>
+    {{/each}}
+    </td>
+</script>
+
+    </body>
+</html>

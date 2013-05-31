@@ -15,6 +15,7 @@ Full setup directions:
 --------------------------------------------------------------------------------
 
 Start with 32bit ubuntu 12.04 LTS
+(Older versions might not have the OpenCV apt package)
 
 ### Install these dependencies:
 
@@ -222,3 +223,16 @@ If transcribed:
 ```
 One thing to keep in mind is that django does not delete file when their models are deleted,
 furthermore, the additional files genereated by Scan are not deleted either.
+
+XLS Form Generator
+--------------------------------------------------------------------------------
+This project includes a deprecated form generator accessible at xlsform/scan
+VR might be using. It has been replaced by XLSXGenerator, which is included in the
+static assets.
+
+If it's safe to delete the legacy version,
+you can remove the following files and folders:
+
+xlsform
+templates/xlsform.html
+static/formDrawer
