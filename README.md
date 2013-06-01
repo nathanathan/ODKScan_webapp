@@ -233,6 +233,6 @@ static assets.
 If it's safe to delete the legacy version,
 you can remove the following files and folders:
 
-xlsform
-templates/xlsform.html
-static/formDrawer
+* xlsform
+* templates/xlsform.html
+* static/formDrawer

@@ -11,9 +11,6 @@ from django.template import RequestContext, loader
 import ODKScan_webapp.utils as utils
 import tasks
 
-#from threading import Thread
-
-
 def group_by_prefix(dict):
     """
     Creates a new dictionary that groups the entries in the given dictionary by
@@ -41,6 +38,9 @@ def query_dict_to_dict(q_dict, joiner=','):
     return dict
 
 def save_transcriptions(request):
+    """
+    Save the sumitted group of transcriptions to the file system.
+    """
     c = {}
     c.update(csrf(request))
     if request.method == 'POST': # If the form has been submitted...
@@ -69,9 +69,11 @@ def save_transcriptions(request):
     else:
         return HttpResponseBadRequest("Only post requests please.")
 
-
-#Add login requirement
+#Add login requirement?
 def uploader(request):
+    """
+    Serve the batch image uploader.
+    """
     t = loader.get_template('uploader.html')
     c = RequestContext(request, {
         'templates' : Template.objects.all()
@@ -80,6 +82,9 @@ def uploader(request):
 
 @csrf_exempt
 def handle_upload(request):
+    """
+    Handle the form images uploaded by the batch uploader.
+    """
     results = []
     for name, fieldStorage in request.FILES.items():
         if type(fieldStorage) is unicode:
@@ -112,7 +117,6 @@ def handle_upload(request):
 #     t = loader.get_template('fieldView.html')
 #     c = RequestContext(request, {})
 #     return HttpResponse(t.render(c))
-
 # def log(request):
 #     c = {}
 #     c.update(csrf(request))

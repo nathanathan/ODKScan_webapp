@@ -7,6 +7,9 @@
       #header {
           background-color: black;
       }
+      .embeded-docs {
+          max-width: 800px;
+      }
     </style>
 {% endblock %}
 
@@ -15,11 +18,12 @@
 {% block breadcrumbs %}{% endblock %}
 
 {% block pretitle %}
-
-<h3>Templates</h3>
-<p>
-Templates consist of a form image, and a json document that
-defines what and where all the data is on the form. You can generate them from
-spreadsheets using <a href="/xlsform">this</a> tool.
-</p>
+<div class="embeded-docs">
+    <h3>Templates</h3>
+    <p>
+    Templates consist of a form image, and a json document that
+    defines what and where all the data is on the form. You can generate them from
+    spreadsheets using <a href="/xlsform">this</a> tool.
+    </p>
+</div>
 {% endblock %}

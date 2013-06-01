@@ -16,7 +16,6 @@
     width: 100%;
     height: 0;
     padding-bottom: 50% ; /* % of width, defines aspect ratio*/
-    
     background-repeat: no-repeat;
     background-position: top center;
     background-size: cover;
@@ -42,7 +41,10 @@ margin: 30px 0;
     margin: 2px;
 }
 .file-row {
-    line-height: 25px;
+    height: 42px;
+}
+.file-row > td {
+    vertical-align: middle;
 }
 </style>
 </head>
@@ -137,8 +139,13 @@ $(function () {
         dataType: 'json',
         fileTypes: /^.*$/,//   /^image\/(gif|jpeg|png)$/,
         maxFileSize: 20000000, // 20MB
+        /**
+         * When a file is dropped into the browser this code creates a row
+         * for it and binds it's upload function to the upload everything button.
+         * TODO: It might help to throttle the uploads.
+         **/
         add: function (e, data) {
-            //data.files only contains one file, but if it were to contain more
+            //data.files only contains one file, if it were to contain more
             //this code will break.
             var $row = $('<tr class="file-row">');
             var $upload = $('<button class="btn btn-primary"><i class="icon-upload icon-white"></i> Upload</button>');

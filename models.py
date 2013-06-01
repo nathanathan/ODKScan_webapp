@@ -5,6 +5,7 @@ import datetime
 
 #TODO: At the moment templates (and maybe form images) can only be saved once.
 #        because django doesn't overwrite or delete the previous versions.
+
 def get_template_path(instance, filename):
     root, ext = os.path.splitext(filename)
     if(ext == '.json'):
@@ -12,6 +13,9 @@ def get_template_path(instance, filename):
     else:
         return os.path.join(instance.name, 'form' + ext)
 class Template(models.Model):
+    """
+    Used for keeping track of the templates used to process form images.
+    """
     name = models.CharField(max_length=200, unique=True)
     #Make json a text input?
     json = models.FileField(upload_to=get_template_path)
@@ -35,6 +39,10 @@ STATUSES = (
     ('f', 'Finalized'),
 )
 def get_form_image_path(instance, filename):
+    """
+    Create a directory to save our image in that 
+    wont collide.
+    """
     import uuid
     #uuid1 documentation:
     #Generate a UUID from a host ID, sequence number, and the current time.
@@ -45,6 +53,9 @@ def get_form_image_path(instance, filename):
     root, ext = os.path.splitext(filename)
     return os.path.join(output_dir, 'photo', filename)
 class FormImage(models.Model):
+    """
+    Used for keeping track of uploaded form pictures.
+    """
     template = models.ForeignKey(Template, blank=True, null=True)
     batch = models.CharField(max_length=255)
     image = models.ImageField(upload_to=get_form_image_path)
@@ -61,8 +72,11 @@ class FormImage(models.Model):
 
 #Models below here are not needed:
 
-#For logging:
 class LogItem(models.Model):
+    """
+    Deprecated
+    Logging model used during study.
+    """
     user = models.ForeignKey(User, blank=True, null=True)
     url = models.CharField(max_length=1000, null=True)#Just to be sure nothing gets left out.
     formImage = models.ForeignKey(FormImage, null=True)
@@ -81,6 +95,10 @@ LOCATIONS = (
 )
 
 class UserProfile(models.Model):
+    """
+    Deprecated
+    User survery used during study.
+    """
     user = models.OneToOneField(User, primary_key=True)
     age = models.IntegerField(null=True, blank=True)
     GENDERS = (
@@ -152,6 +170,10 @@ class UserProfile(models.Model):
     location = models.CharField(max_length=1, choices=LOCATIONS)
 
 class UserFormCondition(models.Model):
+    """
+    Deprecated
+    Used to keep track of users/forms and conditions during study.
+    """
     class Meta:
         unique_together = ['user', 'formImage']
     user = models.ForeignKey(User)
