@@ -1,5 +1,5 @@
 /*
- * jQuery File Upload Plugin 5.28.8
+ * jQuery File Upload Plugin 5.31.2
  * https://github.com/blueimp/jQuery-File-Upload
  *
  * Copyright 2010, Sebastian Tschan
@@ -115,6 +115,23 @@
             // By default, uploads are started automatically when adding files:
             autoUpload: true,
 
+            // Error and info messages:
+            messages: {
+                uploadedBytes: 'Uploaded bytes exceed file size'
+            },
+
+            // Translation function, gets the message key to be translated
+            // and an object with context specific data as arguments:
+            i18n: function (message, context) {
+                message = this.messages[message] || message.toString();
+                if (context) {
+                    $.each(context, function (key, value) {
+                        message = message.replace('{' + key + '}', value);
+                    });
+                }
+                return message;
+            },
+
             // Additional form data to be sent along with the file uploads can be set
             // using this option, which accepts an array of objects with name and
             // value properties, a function returning such an array, a FormData
@@ -139,9 +156,10 @@
             // data.submit().done(func).fail(func).always(func);
             add: function (e, data) {
                 if (data.autoUpload || (data.autoUpload !== false &&
-                        ($(this).data('blueimp-fileupload') ||
-                        $(this).data('fileupload')).options.autoUpload)) {
-                    data.submit();
+                        $(this).fileupload('option', 'autoUpload'))) {
+                    data.process().done(function () {
+                        data.submit();
+                    });
                 }
             },
 
@@ -205,8 +223,9 @@
             cache: false
         },
 
-        // A list of options that require a refresh after assigning a new value:
-        _refreshOptionsList: [
+        // A list of options that require reinitializing event listeners and/or
+        // special initialization code:
+        _specialOptions: [
             'fileInput',
             'dropZone',
             'pasteZone',
@@ -420,13 +439,13 @@
         },
 
         _initIframeSettings: function (options) {
+            var targetHost = $('<a></a>').prop('href', options.url).prop('host');
             // Setting the dataType to iframe enables the iframe transport:
             options.dataType = 'iframe ' + (options.dataType || '');
             // The iframe transport accepts a serialized array as form data:
             options.formData = this._getFormData(options);
             // Add redirect url to form data on cross-domain uploads:
-            if (options.redirect && $('<a></a>').prop('href', options.url)
-                    .prop('host') !== location.host) {
+            if (options.redirect && targetHost && targetHost !== location.host) {
                 options.formData.push({
                     name: options.redirectParamName || 'redirect',
                     value: options.redirect
@@ -548,9 +567,20 @@
             return this._enhancePromise(promise);
         },
 
-        // Adds convenience methods to the callback arguments:
+        // Adds convenience methods to the data callback argument:
         _addConvenienceMethods: function (e, data) {
-            var that = this;
+            var that = this,
+                getPromise = function (data) {
+                    return $.Deferred().resolveWith(that, [data]).promise();
+                };
+            data.process = function (resolveFunc, rejectFunc) {
+                if (resolveFunc || rejectFunc) {
+                    data._processQueue = this._processQueue =
+                        (this._processQueue || getPromise(this))
+                            .pipe(resolveFunc, rejectFunc);
+                }
+                return this._processQueue || getPromise(this);
+            };
             data.submit = function () {
                 if (this.state() !== 'pending') {
                     data.jqXHR = this.jqXHR =
@@ -568,6 +598,9 @@
             data.state = function () {
                 if (this.jqXHR) {
                     return that._getDeferredState(this.jqXHR);
+                }
+                if (this._processQueue) {
+                    return that._getDeferredState(this._processQueue);
                 }
             };
             data.progress = function () {
@@ -612,7 +645,7 @@
                 return true;
             }
             if (ub >= fs) {
-                file.error = 'Uploaded bytes exceed file size';
+                file.error = options.i18n('uploadedBytes');
                 return this._getXHRPromise(
                     false,
                     options.context,
@@ -648,7 +681,7 @@
                         // Create a progress event if no final progress event
                         // with loaded equaling total has been triggered
                         // for this chunk:
-                        if (o._progress.loaded === currentLoaded) {
+                        if (currentLoaded + o.chunkSize - o._progress.loaded) {
                             that._onProgress($.Event('progress', {
                                 lengthComputable: true,
                                 loaded: ub - o.uploadedBytes,
@@ -1118,12 +1151,12 @@
         },
 
         _setOption: function (key, value) {
-            var refresh = $.inArray(key, this._refreshOptionsList) !== -1;
-            if (refresh) {
+            var reinit = $.inArray(key, this._specialOptions) !== -1;
+            if (reinit) {
                 this._destroyEventHandlers();
             }
             this._super(key, value);
-            if (refresh) {
+            if (reinit) {
                 this._initSpecialOptions();
                 this._initEventHandlers();
             }
@@ -1145,10 +1178,35 @@
             }
         },
 
-        _create: function () {
-            var options = this.options;
+        _getRegExp: function (str) {
+            var parts = str.split('/'),
+                modifiers = parts.pop();
+            parts.shift();
+            return new RegExp(parts.join('/'), modifiers);
+        },
+
+        _isRegExpOption: function (key, value) {
+            return key !== 'url' && $.type(value) === 'string' &&
+                /^\/.*\/[igm]{0,3}$/.test(value);
+        },
+
+        _initDataAttributes: function () {
+            var that = this,
+                options = this.options;
             // Initialize options set via HTML5 data-attributes:
-            $.extend(options, $(this.element[0].cloneNode(false)).data());
+            $.each(
+                $(this.element[0].cloneNode(false)).data(),
+                function (key, value) {
+                    if (that._isRegExpOption(key, value)) {
+                        value = that._getRegExp(value);
+                    }
+                    options[key] = value;
+                }
+            );
+        },
+
+        _create: function () {
+            this._initDataAttributes();
             this._initSpecialOptions();
             this._slots = [];
             this._sequence = this._getXHRPromise(true);
