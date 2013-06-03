@@ -10,11 +10,18 @@
       .embeded-docs {
           max-width: 800px;
       }
+      #site-name {
+        display: inline-block;
+        width: 100px;
+      }
     </style>
 {% endblock %}
 
 {% block title %}{{ title }} | {% trans 'Django site admin' %}{% endblock %}
-{% block branding %}<h1 id="site-name"><a href="/">ODK Scan</a></h1>{% endblock %}
+{% block branding %}
+<h1 id="site-name"><a href="/">ODK Scan</a></h1>
+<a href="../formimage/">Form Images</a> | <a href="../template/">Templates</a>
+{% endblock %}
 {% block breadcrumbs %}{% endblock %}
 
 {% block pretitle %}
