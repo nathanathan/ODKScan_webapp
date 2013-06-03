@@ -21,9 +21,17 @@
 <div class="embeded-docs">
     <h3>Templates</h3>
     <p>
-    Templates consist of a form image, and a json document that
-    defines what and where all the data is on the form. You can generate them from
-    spreadsheets using <a href="/xlsform">this</a> tool.
+    Templates consist of a form image and a json document. The json document specifies
+    where all the data is on the image, and what kind of data it is.
+    You can automatically generate the from image and the corresponding json from XLSX
+    spreadsheets using <a href="/static/XLSXGenerator/index.html">this tool</a>.
     </p>
 </div>
+{% endblock %}
+
+{% block object-tools-items %}
+{{ block.super }}
+<li>
+  <a href="/static/XLSXGenerator/index.html" class="addlink">Create Template</a>
+</li>
 {% endblock %}
