@@ -69,7 +69,6 @@ def save_transcriptions(request):
     else:
         return HttpResponseBadRequest("Only post requests please.")
 
-#Add login requirement?
 def uploader(request):
     """
     Serve the batch image uploader.

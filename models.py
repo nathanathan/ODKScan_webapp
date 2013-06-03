@@ -3,9 +3,6 @@ from django.contrib.auth.models import User
 import os
 import datetime
 
-#TODO: At the moment templates (and maybe form images) can only be saved once.
-#        because django doesn't overwrite or delete the previous versions.
-
 def get_template_path(instance, filename):
     root, ext = os.path.splitext(filename)
     if(ext == '.json'):
@@ -15,6 +12,8 @@ def get_template_path(instance, filename):
 class Template(models.Model):
     """
     Used for keeping track of the templates used to process form images.
+    Once created these models probably should not be modified.
+    I've overridded the change form to prevent users from modifying them.
     """
     name = models.CharField(max_length=200, unique=True)
     #Make json a text input?
@@ -55,6 +54,9 @@ def get_form_image_path(instance, filename):
 class FormImage(models.Model):
     """
     Used for keeping track of uploaded form pictures.
+    Form images can be modified, but it could cause some unexpected behaviors.
+    The original images are not deleted, and processing output remains the same
+    unless you run process form from the actions menu.
     """
     template = models.ForeignKey(Template, blank=True, null=True)
     batch = models.CharField(max_length=255)

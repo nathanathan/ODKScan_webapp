@@ -65,6 +65,7 @@ class FormImageAdmin(admin.ModelAdmin):
                #actions.transcribeFormView,
                actions.finalize,
                actions.generate_csv]
+               #The delete action will not remove files, only the database entry.
 
     def filename(self, obj):
         return os.path.split(obj.image.name)[1]

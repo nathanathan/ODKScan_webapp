@@ -34,12 +34,20 @@ APP_ROOT = os.path.dirname(__file__)
 #     return pyobj
 
 def process_forms(modeladmin, request, queryset):
-        for obj in queryset:
-            #utils.process_image(obj)
-            tasks.process_image.delay(obj.id)
+    """
+    (re)Process the selected forms.
+    Forms uploaded via batch mode are automatically processed.
+    """
+    for obj in queryset:
+        #utils.process_image(obj)
+        tasks.process_image.delay(obj.id)
 process_forms.short_description = "Process selected forms."
 
 def transcription_context(modeladmin, request, queryset, autofill=None, showSegs=None, formView=None):
+    """
+    Function for organizing the data that will be rendered by one of the
+    transcription view tempaltes.
+    """
     form_template = None
     json_outputs = []
     for formImage in queryset:
@@ -93,12 +101,18 @@ def transcription_context(modeladmin, request, queryset, autofill=None, showSegs
                  })
 
 def transcribe(modeladmin, request, queryset):
+    """
+    Transcribe the selected forms in a table view.
+    """
     t = loader.get_template('transcribe.html')
     c = transcription_context(modeladmin, request, queryset, autofill=True, showSegs=True)
     return HttpResponse(t.render(c))
 transcribe.short_description = "Transcribe selected forms."
 
 def transcribeFormView(modeladmin, request, queryset):
+    """
+    Transcribe the forms via a view of the full form.
+    """
     t = loader.get_template('formViewSet.html')
     c = transcription_context(modeladmin, request, queryset, formView=True)
     return HttpResponse(t.render(c))
@@ -155,4 +169,3 @@ def generate_csv(modeladmin, request, queryset):
     fo.close()
     return response
 generate_csv.short_description = "Generate CSV from selected forms."
-
