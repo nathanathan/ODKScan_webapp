@@ -192,10 +192,13 @@ Here's some links to documentation on the primary Django components in use:
 * [The Django Admin](https://docs.djangoproject.com/en/dev/ref/contrib/admin/)
 * [Admin Actions](https://docs.djangoproject.com/en/dev/ref/contrib/admin/actions/)
 
+
 Additional notes:
 
 * actions.py contains code for processing forms with ODK Scan, rendering transcription pages and generating csvs.
 * The ODKScan-core directory contains the image processing code which is also used in the android app.
+* The image processing is done on separate worker thread using Celery.
+  This makes is so responces are not delayed and it throttles batch processing so only one images is done at a time.
 * The UI for the transcription interfaces is contained in static/transcription and in the templates directory.
 
 ## Media
@@ -236,3 +239,8 @@ you can remove the following files and folders:
 * xlsform
 * templates/xlsform.html
 * static/formDrawer
+
+Issues:
+--------------------------------------------------------------------------------
+
+* Multipage forms are not supported
