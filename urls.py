@@ -47,5 +47,6 @@ urlpatterns = patterns(APP_NAME,
     (r'^xlsform/serve_json/(?P<path>.*)$', 'xlsform.views.serve_json'),
     
     url(r'^uploadForms', 'views.handle_upload'),
-    (r'^uploader/', login_required('views.uploader')),
+    (r'^uploader/', 'views.uploader'),
+    (r'^uploader2/', 'views.uploader2'),
 )

@@ -68,12 +68,24 @@ def save_transcriptions(request):
         return HttpResponse()
     else:
         return HttpResponseBadRequest("Only post requests please.")
-
+        
+from django.contrib.auth.decorators import login_required
+@login_required
 def uploader(request):
     """
     Serve the batch image uploader.
     """
     t = loader.get_template('uploader.html')
+    c = RequestContext(request, {
+        'templates' : Template.objects.all()
+    })
+    return HttpResponse(t.render(c))
+
+def uploader2(request):
+    """
+    Serve the batch image uploader.
+    """
+    t = loader.get_template('uploader2.html')
     c = RequestContext(request, {
         'templates' : Template.objects.all()
     })
