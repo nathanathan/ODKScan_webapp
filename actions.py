@@ -137,6 +137,7 @@ def generate_csv(modeladmin, request, queryset):
             if field_value is not None:
                 field_dict[field['name']] = field_value
         return field_dict
+    
     dict_array = []
     form_template = None
     for formImage in queryset:
@@ -154,18 +155,22 @@ def generate_csv(modeladmin, request, queryset):
         with codecs.open(json_path, mode="r", encoding="utf-8") as fp:
             json_output = json.load(fp, encoding='utf-8')
             base_dict = {
-                '__formTitle__': json_output.get('form_title'),
+                '__formTitle__': json_output.get('form_title',
+                                                  formImage.template.name),
                 '__imageName__': str(formImage),
             }
             base_dict.update(json_output_to_field_dict(json_output))
             dict_array.append(base_dict)
-    temp_file = tempfile.mktemp()
-    with open(temp_file, 'wb') as csvfile:
-        utils.dict_to_csv(dict_array, csvfile)
     response = HttpResponse(mimetype='application/octet-stream')
     response['Content-Disposition'] = 'attachment; filename=output.csv'
-    fo = open(temp_file)
-    response.write(fo.read())
-    fo.close()
-    return response
+    utils.dict_to_csv(dict_array, response)
+    # temp_file = tempfile.mktemp()
+    # with open(temp_file, 'wb') as csvfile:
+    #     utils.dict_to_csv(dict_array, csvfile)
+    # response = HttpResponse(mimetype='application/octet-stream')
+    # response['Content-Disposition'] = 'attachment; filename=output.csv'
+    # fo = open(temp_file)
+    # response.write(fo.read())
+    # fo.close()
+    # return response
 generate_csv.short_description = "Generate CSV from selected forms."

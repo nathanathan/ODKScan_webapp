@@ -244,3 +244,7 @@ Issues:
 --------------------------------------------------------------------------------
 
 * Multipage forms are not supported
+* CSV outputs do not perserve column order
+* Batch upload UI can only handle ~100 files at once.
+  I think the jq file upload UI widget seems to be able to handle more,
+  so it would be good to configure it.
