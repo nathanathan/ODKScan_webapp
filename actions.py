@@ -164,6 +164,7 @@ def generate_csv(modeladmin, request, queryset):
     response = HttpResponse(mimetype='application/octet-stream')
     response['Content-Disposition'] = 'attachment; filename=output.csv'
     utils.dict_to_csv(dict_array, response)
+    return response
     # temp_file = tempfile.mktemp()
     # with open(temp_file, 'wb') as csvfile:
     #     utils.dict_to_csv(dict_array, csvfile)
