@@ -17,12 +17,12 @@ def process_image(id):
     stdoutdata, stderrdata = subprocess.Popen(['./ODKScan.run',
         json.dumps({
             "inputImage" : obj.image.path,
-        	"outputDirectory" : obj.output_path,
-        	"alignForm" : True,
-        	"processForm" : True,
+            "outputDirectory" : obj.output_path,
+            "alignForm" : True,
+            "processForm" : True,
             "detectOrientation" : True,
-        	"templatePath" : os.path.dirname(obj.template.image.path) + '/',
-        	"trainingDataDirectory" : "training_examples/"
+            "templatePath" : os.path.dirname(obj.template.image.path) + '/',
+            "trainingDataDirectory" : "training_examples/"
         })],
         cwd=os.path.join(APP_ROOT,
                          'ODKScan-core'),
