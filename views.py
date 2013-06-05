@@ -110,6 +110,7 @@ def handle_upload(request):
             'image' : fieldStorage
         }
         instance = FormImage(**props)
+        instance.status = 'q'
         instance.save()
         results.append(result)
         tasks.process_image.delay(instance.id)

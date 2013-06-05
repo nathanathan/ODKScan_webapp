@@ -16,7 +16,7 @@ and their default values. More may be added in the future.
 The JSON API is forwards compatible so extra properties can be 
 passed in that aren't yet supported.
 
-```json
+```javascript
 {
   "inputImage" : "",
 	"outputDirectory" : "",
@@ -25,6 +25,7 @@ passed in that aren't yet supported.
 	"jsonOutputPath" : outputDirectory + "output.json",
 	"alignForm" : true,
 	"processForm" : true,
+	"detectOrientation" : true,
 	"templatePath" : "",
 	"templatePaths" : [],
 	"calibrationFilePath" : "",

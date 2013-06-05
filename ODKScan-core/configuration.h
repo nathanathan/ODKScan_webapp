@@ -12,9 +12,4 @@ It defines platform specific constants
 //For printing in a android comapatible way.
 #define LOGI(x) (cout << (x) << endl)
 
-//Processor.cpp
-#define DEBUG_PROCESSOR
-//FormAlignmnet.cpp
-#define DEBUG_ALIGN_IMAGE
-
 #endif

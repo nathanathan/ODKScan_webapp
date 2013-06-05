@@ -37,11 +37,19 @@ Below is a description of the JSON structure. Annotations added to the output ar
 						//Each item is a classifiable object.
 						{
 							//Annotation
+							//Indicates the pixel location of the item
+							//relative to the top-left corner of the
+							//form image *after alignment*
 							"absolute_location" : [ 49, 129 ],
 							//Annotation
 							"classification" : 
 							{
-								"value" : "1"
+								"value" : "1",
+								//The confidence is only shown
+								//if the classifier used
+								//returns some kind of 
+								//confidence metric.
+								"confidence" : 1.0
 							},
 							"item_x" : 18,
 							"item_y" : 22.50
@@ -94,6 +102,9 @@ Below is a description of the JSON structure. Annotations added to the output ar
 		//in the map the default classification
 		//is used.
 		"default_classification": false,
+		//If this property is present 2-class classification
+		//will be done so a confidence rating can be returned.
+		"negative_label" : "empty"
 		//The directory contianing the classifier
 		//training examples
 		"training_data_uri": "bubbles",

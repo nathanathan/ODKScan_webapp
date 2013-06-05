@@ -36,11 +36,21 @@ APP_ROOT = os.path.dirname(__file__)
 def process_forms(modeladmin, request, queryset):
     """
     (re)Process the selected forms.
-    Forms uploaded via batch mode are automatically processed.
+    Notes:
+    - Forms uploaded via batch mode are automatically processed.
+    - queued, finalized and modified forms are not processed.
     """
+    unprocessable = []
     for obj in queryset:
         #utils.process_image(obj)
-        tasks.process_image.delay(obj.id)
+        if obj.status == 'q' or obj.status == 'f' or obj.status == 'm':
+            unprocessable.append(obj)
+        else:
+            obj.status = 'q'
+            tasks.process_image.delay(obj.id)
+    # if len(unprocessable) > 0:
+    #     t = loader.get_template('failed_action.html')
+    #     return HttpResponse(t.render(RequestContext(request, {objs : unprocessable})))
 process_forms.short_description = "Process selected forms."
 
 def transcription_context(modeladmin, request, queryset, autofill=None, showSegs=None, formView=None):
@@ -165,13 +175,5 @@ def generate_csv(modeladmin, request, queryset):
     response['Content-Disposition'] = 'attachment; filename=output.csv'
     utils.dict_to_csv(dict_array, response)
     return response
-    # temp_file = tempfile.mktemp()
-    # with open(temp_file, 'wb') as csvfile:
-    #     utils.dict_to_csv(dict_array, csvfile)
-    # response = HttpResponse(mimetype='application/octet-stream')
-    # response['Content-Disposition'] = 'attachment; filename=output.csv'
-    # fo = open(temp_file)
-    # response.write(fo.read())
-    # fo.close()
-    # return response
+
 generate_csv.short_description = "Generate CSV from selected forms."

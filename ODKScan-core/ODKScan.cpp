@@ -15,6 +15,16 @@ using namespace std;
 
 int main(int argc, char *argv[]) {
 
+	//TODO: Put this is config json instead
+	Processor myProcessor("assets/");
+	if(argc == 1) {
+		string result = myProcessor.processViaJSON(argv[1]);
+		cout << endl << "<======= RESULT =======>" << endl << result << endl;
+		return 0;
+	}
+
+	//Old API Below here:
+
 	if(argc < 3) {
 		cout << "Usage:" << endl;
 		cout << string(argv[0]) << " templatePath inputImage outputDirectory" << endl;
@@ -36,7 +46,7 @@ int main(int argc, char *argv[]) {
 	
 	cout << "Processing image: " << inputImage << endl;
 
-	Processor myProcessor("assets/");
+	
 	//TODO: Specify camera calibration somewhere else?
 	//template doesn't make sense because it a property of the input image.
 	#define CAMERA_CALIBRATION_FILE NULL

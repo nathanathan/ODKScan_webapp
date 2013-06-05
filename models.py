@@ -32,6 +32,7 @@ class Template(models.Model):
 
 STATUSES = (
     ('e', 'Error'),
+    ('q', 'Queued'),
     ('w', 'Processing...'),
     ('p', 'Processed'),
     ('m', 'Modified'),
