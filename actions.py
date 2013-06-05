@@ -47,6 +47,7 @@ def process_forms(modeladmin, request, queryset):
             unprocessable.append(obj)
         else:
             obj.status = 'q'
+            obj.save()
             tasks.process_image.delay(obj.id)
     # if len(unprocessable) > 0:
     #     t = loader.get_template('failed_action.html')
