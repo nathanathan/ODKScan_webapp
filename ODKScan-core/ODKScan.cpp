@@ -15,8 +15,7 @@ using namespace std;
 
 int main(int argc, char *argv[]) {
 
-	//TODO: Put this is config json instead
-	Processor myProcessor("assets/");
+	Processor myProcessor("");
 	if(argc == 2) {
 		string result = myProcessor.processViaJSON(argv[1]);
 		cout << endl << "<======= RESULT =======>" << endl << result << endl;

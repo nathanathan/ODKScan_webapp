@@ -25,7 +25,7 @@ def process_image(id):
         "processForm" : True,
         "detectOrientation" : True,
         "templatePath" : os.path.dirname(obj.template.image.path) + '/',
-        "trainingDataDirectory" : "training_examples/"
+        "trainingDataDirectory" : "assets/training_examples/"
     })
     stdoutdata, stderrdata = subprocess.Popen(['./ODKScan.run', config_string],
         cwd=os.path.join(APP_ROOT,
