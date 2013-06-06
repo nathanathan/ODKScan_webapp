@@ -10,7 +10,8 @@ def process_image(id):
     """
     Process the form image with the given id.
     """
-    logger = process_image.get_logger(logfile='tasks.log')
+    import logging
+    logging.basicConfig(filename='tasks.log',level=logging.DEBUG)
     obj = FormImage.objects.get(id=id)
     #w for working, because p for processing is already taken.
     obj.status = 'w'
@@ -24,7 +25,7 @@ def process_image(id):
         "templatePath" : os.path.dirname(obj.template.image.path) + '/',
         "trainingDataDirectory" : "training_examples/"
     })
-    logger.info(config_string)
+    logging.info(config_string)
     stdoutdata, stderrdata = subprocess.Popen(['./ODKScan.run', config_string],
         cwd=os.path.join(APP_ROOT,
                          'ODKScan-core'),
@@ -33,6 +34,7 @@ def process_image(id):
     # I'm in trouble if this string ever ends up in the JSON result or processing log.
     log, result_text = stdoutdata.split("<======= RESULT =======>")
     obj.processing_log = stdoutdata
+    logging.error(stderrdata)
     try:
         result = json.loads(result_text)
         if "errorMessage" in result:
@@ -67,4 +69,3 @@ def process_image(id):
 #    else:
 #        obj.status = 'e'
 #    obj.save()
-    

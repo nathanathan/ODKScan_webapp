@@ -164,6 +164,7 @@ Now restart the server for changes to take effect.
 
 ```bash
 sudo /etc/init.d/apache2 restart
+sudo supervisorctl restart celery
 ```
 
 #### Alternative way to run the server:
