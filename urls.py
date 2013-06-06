@@ -48,5 +48,7 @@ urlpatterns = patterns(APP_NAME,
     
     url(r'^uploadForms', 'views.handle_upload'),
     (r'^uploader/', 'views.uploader'),
-    (r'^uploader2/', 'views.uploader2'),
+    
+    # This version is just for experimenting with original jqu UI widget.
+    #(r'^uploader2/', 'views.uploader2'),
 )
