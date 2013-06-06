@@ -151,11 +151,11 @@ $(function () {
             $loading.hide();
         };
         var show = function() {
+            console.log("loading...");
             showing = true;
             $loading.show();
         };
         return function() {
-            console.log("loading...");
             if(showing) {
                 clearTimeout(timeout);
             } else {
