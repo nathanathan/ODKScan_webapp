@@ -5,6 +5,7 @@ import json, codecs
 import sys, os, tempfile
 import ODKScan_webapp.utils as utils
 import tasks
+from django.contrib import messages
 
 APP_ROOT = os.path.dirname(__file__)
 
@@ -49,9 +50,8 @@ def process_forms(modeladmin, request, queryset):
             obj.status = 'q'
             obj.save()
             tasks.process_image.delay(obj.id)
-    # if len(unprocessable) > 0:
-    #     t = loader.get_template('failed_action.html')
-    #     return HttpResponse(t.render(RequestContext(request, {objs : unprocessable})))
+    if len(unprocessable) > 0:
+        messages.error(request, "Some of the selected images could not be processed.")
 process_forms.short_description = "Process selected forms."
 
 def transcription_context(modeladmin, request, queryset, autofill=None, showSegs=None, formView=None):
@@ -133,7 +133,12 @@ def finalize(modeladmin, request, queryset):
     """
     Finalize prevents further editing on form image transcriptions.
     """
+    full_qs_count = queryset.all().count()
+    queryset.exclude(status__in=['f', 'w', 'q', 'e'])
+    filtered_qs_count = queryset.all().count()
     queryset.update(status='f')
+    if full_qs_count != filtered_qs_count:
+        messages.error(request, "Some of the selected images could not be finalized.")
 finalize.short_description = "Finalize selected forms."
 
 
@@ -149,9 +154,13 @@ def generate_csv(modeladmin, request, queryset):
                 field_dict[field['name']] = field_value
         return field_dict
     
+    excluded_images = []
     dict_array = []
     form_template = None
     for formImage in queryset:
+        if formImage.status in ['w', 'q', 'e']:
+            excluded_images.append(formImage)
+            continue
         json_path = os.path.join(formImage.output_path, 'transcription.json')
         if not os.path.exists(json_path):
             #No transcription.
@@ -172,9 +181,10 @@ def generate_csv(modeladmin, request, queryset):
             }
             base_dict.update(json_output_to_field_dict(json_output))
             dict_array.append(base_dict)
+    if len(excluded_images) != 0:
+        messages.error(request, "Some of the selected images were not included in the csv.")
     response = HttpResponse(mimetype='application/octet-stream')
     response['Content-Disposition'] = 'attachment; filename=output.csv'
     utils.dict_to_csv(dict_array, response)
     return response
-
 generate_csv.short_description = "Generate CSV from selected forms."
