@@ -133,14 +133,13 @@ def finalize(modeladmin, request, queryset):
     """
     Finalize prevents further editing on form image transcriptions.
     """
-    full_qs_count = queryset.all().count()
-    queryset.exclude(status__in=['f', 'w', 'q', 'e'])
-    filtered_qs_count = queryset.all().count()
-    queryset.update(status='f')
-    if full_qs_count != filtered_qs_count:
+    #full_qs_count = queryset.all().count()
+    filtered_qs = queryset.exclude(status__in=['f', 'w', 'q', 'e'])
+    #filtered_qs_count = queryset.all().count()
+    filtered_qs.update(status='f')
+    if queryset.count() != filtered_qs.count():
         messages.error(request, "Some of the selected images could not be finalized.")
 finalize.short_description = "Finalize selected forms."
-
 
 def generate_csv(modeladmin, request, queryset):
     """

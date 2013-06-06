@@ -14,6 +14,11 @@ def process_image(id):
     logger = process_image.get_logger(logfile='tasks.log')
     logger.warning("test")
     
+    obj = FormImage.objects.get(id=id)
+    #w for working, because p for processing is already taken.
+    obj.status = 'w'
+    obj.save()
+    
     #Create ouput directory for the segments:
     try:
         os.mkdir(os.path.join(obj.output_path, "segments"))
@@ -21,10 +26,6 @@ def process_image(id):
         #TODO: Put an error message somewhere
         return
     
-    obj = FormImage.objects.get(id=id)
-    #w for working, because p for processing is already taken.
-    obj.status = 'w'
-    obj.save()
     config_string = json.dumps({
         "inputImage" : obj.image.path,
         "outputDirectory" : obj.output_path,
