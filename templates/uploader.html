@@ -154,9 +154,9 @@ $(function () {
         var show = function() {
             showing = true;
             $loading.text("Loading...");
-        }
+        };
         return function() {
-            console.log("showing dialog");
+            console.log("loading...");
             if(showing) {
                 clearTimeout(timeout);
             } else {
@@ -181,34 +181,34 @@ $(function () {
          * TODO: It might help to throttle the uploads.
          **/
         add: function (e, data) {
-            //data.files only contains one file, if it were to contain more
-            //this code will break.
-            var $row = $('<tr class="file-row">');
-            var $upload = $('<button class="btn btn-primary"><i class="icon-upload icon-white"></i> Upload</button>');
-            var $cancel = $('<button type="button" class="btn btn-danger delete"><i class="icon-ban-circle icon-white"></i><span> Cancel</span></button>');
-            var uploadFunction = function() {
-                data.$context.html('<span class="label">Uploading...</span>');
-                data.formData = {
-                    template: $('.item.active').data('name'),
-                    batch: $('#batchName').val()
-                };
-                data.submit();
-                $('body').off('click', '.upload-everything', uploadFunction);
-            };
-            data.$context = $('<td class="controls">');
-            data.$context.append($upload).append($cancel);
-            $row.append($('<td>').text(data.files[0].name));
-            $row.append(data.$context);
+            //defering this to try to avoid locking up the UI with large batches.
             window.setTimeout(function(){
-                //defering this to try to avoid locking up the UI
-                 $('.files').append($row);
+                //data.files only contains one file, if it were to contain more
+                //this code will break.
+                var $row = $('<tr class="file-row">');
+                var $upload = $('<button class="btn btn-primary"><i class="icon-upload icon-white"></i> Upload</button>');
+                var $cancel = $('<button type="button" class="btn btn-danger delete"><i class="icon-ban-circle icon-white"></i><span> Cancel</span></button>');
+                var uploadFunction = function() {
+                    data.$context.html('<span class="label">Uploading...</span>');
+                    data.formData = {
+                        template: $('.item.active').data('name'),
+                        batch: $('#batchName').val()
+                    };
+                    data.submit();
+                    $('body').off('click', '.upload-everything', uploadFunction);
+                };
+                data.$context = $('<td class="controls">');
+                data.$context.append($upload).append($cancel);
+                $row.append($('<td>').text(data.files[0].name));
+                $row.append(data.$context);
+                $('.files').append($row);
+                $('body').on('click', '.upload-everything', uploadFunction);
+                $upload.click(uploadFunction);
+                $cancel.click(function(){
+                    $row.remove();
+                    $('body').off('click', '.upload-everything', uploadFunction);
+                });
             }, 0);
-            $('body').on('click', '.upload-everything', uploadFunction);
-            $upload.click(uploadFunction);
-            $cancel.click(function(){
-                $row.remove();
-                $('body').off('click', '.upload-everything', uploadFunction);
-            });
         },
         done: function (e, data) {
             console.log(data);
