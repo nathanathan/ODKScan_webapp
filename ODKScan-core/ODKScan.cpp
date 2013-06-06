@@ -17,7 +17,7 @@ int main(int argc, char *argv[]) {
 
 	//TODO: Put this is config json instead
 	Processor myProcessor("assets/");
-	if(argc == 1) {
+	if(argc == 2) {
 		string result = myProcessor.processViaJSON(argv[1]);
 		cout << endl << "<======= RESULT =======>" << endl << result << endl;
 		return 0;
@@ -25,7 +25,7 @@ int main(int argc, char *argv[]) {
 
 	//Old API Below here:
 
-	if(argc < 3) {
+	if(argc < 4) {
 		cout << "Usage:" << endl;
 		cout << string(argv[0]) << " templatePath inputImage outputDirectory" << endl;
 		return 0;

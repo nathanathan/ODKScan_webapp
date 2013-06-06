@@ -10,8 +10,10 @@ def process_image(id):
     """
     Process the form image with the given id.
     """
-    import logging
-    logging.basicConfig(filename='tasks.log',level=logging.DEBUG)
+    # I can't seem to get the celery logger to work...
+    logger = process_image.get_logger(logfile='tasks.log')
+    logger.warning("test")
+    
     obj = FormImage.objects.get(id=id)
     #w for working, because p for processing is already taken.
     obj.status = 'w'
@@ -25,17 +27,16 @@ def process_image(id):
         "templatePath" : os.path.dirname(obj.template.image.path) + '/',
         "trainingDataDirectory" : "training_examples/"
     })
-    logging.info(config_string)
     stdoutdata, stderrdata = subprocess.Popen(['./ODKScan.run', config_string],
         cwd=os.path.join(APP_ROOT,
                          'ODKScan-core'),
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT).communicate()
-    # I'm in trouble if this string ever ends up in the JSON result or processing log.
-    log, result_text = stdoutdata.split("<======= RESULT =======>")
-    obj.processing_log = stdoutdata
-    logging.error(stderrdata)
     try:
+        # I'm in trouble if the splitting string ever ends up in
+        # the JSON result or processing log.
+        log, result_text = stdoutdata.split("<======= RESULT =======>")
+        obj.processing_log = stdoutdata
         result = json.loads(result_text)
         if "errorMessage" in result:
             obj.status = 'e'
