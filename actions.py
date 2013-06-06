@@ -180,10 +180,11 @@ def generate_csv(modeladmin, request, queryset):
             }
             base_dict.update(json_output_to_field_dict(json_output))
             dict_array.append(base_dict)
-    if len(excluded_images) != 0:
-        messages.error(request, "Some of the selected images were not included in the csv.")
-    response = HttpResponse(mimetype='application/octet-stream')
-    response['Content-Disposition'] = 'attachment; filename=output.csv'
-    utils.dict_to_csv(dict_array, response)
-    return response
+    if len(excluded_images) == 0:
+        response = HttpResponse(mimetype='application/octet-stream')
+        response['Content-Disposition'] = 'attachment; filename=output.csv'
+        utils.dict_to_csv(dict_array, response)
+        return response
+    else:
+        messages.error(request, "Counld not generate CSV, some selected images have invalid status.")
 generate_csv.short_description = "Generate CSV from selected forms."
