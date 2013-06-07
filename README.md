@@ -101,6 +101,7 @@ sudo supervisorctl -c /etc/supervisor/supervisord.conf reload
 * Paste the following at the bottom of the file:
 
 ```python
+from django.conf import settings
 urlpatterns += [url(r'', include('ODKScan_webapp.urls'))]
 
 # This to serve media like uploaded/processed images.
@@ -112,8 +113,6 @@ urlpatterns += patterns('',
 )
 
 urlpatterns += [url(r'^accounts/', include('django.contrib.auth.urls'))]
-
-
 ```
 
 ### Initialize the database:
