@@ -63,13 +63,15 @@ def transcription_context(modeladmin, request, queryset, autofill=None, showSegs
     json_outputs = []
     for formImage in queryset:
         if formImage.status == 'f':
-            #TODO: Handle this without an exception.
-            raise Exception("You cannot transcribe a finalized from.")
+            messages.error(request, "You cannot transcribe a finalized from.")
+            return
         if form_template is None:
             #Set the template to the template the first image is set to.
             form_template = formImage.template
         elif form_template.name != formImage.template.name:
-            raise Exception("Mixed templates: " + form_template.name + " and " + formImage.template.name)
+            messages.error(request, "Mixed templates: " + form_template.name +
+                                    " and " + formImage.template.name)
+            return
         
         json_path = os.path.join(formImage.output_path, 'output.json')
         if not os.path.exists(json_path):
@@ -97,9 +99,10 @@ def transcription_context(modeladmin, request, queryset, autofill=None, showSegs
         with codecs.open(transcribed_json_path, mode="r", encoding="utf-8") as fp:
             pyobj = json.load(fp, encoding='utf-8')
         json_outputs.append(pyobj)
-        #print >>sys.stderr, json.dumps(pyobj, ensure_ascii=False, indent=4)
+
     if form_template is None:
-        raise Exception("no template")
+        messages.error("no template")
+        return
     form_template_fp = codecs.open(form_template.json.path, mode="r", encoding="utf-8")
     json_template = json.load(form_template_fp, encoding='utf-8')
     return RequestContext(request, {
@@ -133,12 +136,10 @@ def finalize(modeladmin, request, queryset):
     """
     Finalize prevents further editing on form image transcriptions.
     """
-    #full_qs_count = queryset.all().count()
     filtered_qs = queryset.exclude(status__in=['f', 'w', 'q', 'e'])
-    #filtered_qs_count = queryset.all().count()
-    filtered_qs.update(status='f')
     if queryset.count() != filtered_qs.count():
         messages.error(request, "Some of the selected images could not be finalized.")
+    filtered_qs.update(status='f')
 finalize.short_description = "Finalize selected forms."
 
 def generate_csv(modeladmin, request, queryset):
@@ -165,12 +166,14 @@ def generate_csv(modeladmin, request, queryset):
             #No transcription.
             json_path = os.path.join(formImage.output_path, 'output.json')
         if not os.path.exists(json_path):
-            raise Exception('No json for form image')
+            messages.error('No json for form image')
+            return
         if form_template is None:
             form_template = formImage.template
         elif form_template.name != formImage.template.name:
-            raise Exception("Mixed templates: " + form_template.name +
+            messages.error("Mixed templates: " + form_template.name +
                              " and " + formImage.template.name)
+            return
         with codecs.open(json_path, mode="r", encoding="utf-8") as fp:
             json_output = json.load(fp, encoding='utf-8')
             base_dict = {
