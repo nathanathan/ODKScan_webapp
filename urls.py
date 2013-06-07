@@ -41,7 +41,7 @@ urlpatterns = patterns(APP_NAME,
     #XLSForm scannable paper form generator
     url(r'^xlsform/$', 'xlsform.views.index'),
     #This is a redirect to avoid breaking the links I've given to VR.
-    (r'^xlsform/scan$', RedirectView.as_view(url='/xlsform/')),
+    (r'^xlsform/scan', RedirectView.as_view(url='/xlsform/')),
     
     (r'^xlsform/download/(?P<path>.*)$', 'xlsform.views.download'),
     (r'^xlsform/serve_json/(?P<path>.*)$', 'xlsform.views.serve_json'),
