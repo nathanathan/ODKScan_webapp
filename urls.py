@@ -49,6 +49,7 @@ urlpatterns = patterns(APP_NAME,
     url(r'^uploadForms', 'views.handle_upload'),
     (r'^uploader/', 'views.uploader'),
     
-    # This version is just for experimenting with original jqu UI widget.
+    # uploader2 is just for experimenting with the original
+    # jquery-file-uploader UI widget.
     #(r'^uploader2/', 'views.uploader2'),
 )

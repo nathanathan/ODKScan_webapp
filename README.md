@@ -21,14 +21,7 @@ Start with 32bit ubuntu 12.04 LTS
 
 ```bash
 sudo apt-get update 
-sudo apt-get install git python-imaging supervisor
-```
-
-### Install OpenCV:
-
-```bash
-sudo apt-get install libopencv-dev
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
+sudo apt-get install git python-setuptools python-imaging supervisor
 ```
 
 ### Install Django:
@@ -58,15 +51,27 @@ cd ODKScan_webapp
 sudo pip install -r requirements.pip
 ```
 
+### Install OpenCV and compile ODKScan-core:
+
+```bash
+sudo apt-get install libopencv-dev
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
+# assuming you have a bashrc
+echo 'export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib' >> ~/.bashrc
+cd ODKScan-core
+make
+# coffee break
+```
+
 ### Configure the scan_admin project's settings.py:
 
+* set database engine to sqlite3 and name it with an _absolute_ path, e.g.:
+`/home/ubuntu/scan_admin/scan.db`
 * Set MEDIA_ROOT to an absolute path, e.g.:
 `/home/ubuntu/scan_admin/media/`
 * Set MEDIA_URL to a path beginning with a slash, e.g.: `/media/`
-* set database engine to sqlite3 and name it with an _absolute_ path, e.g.:
-`/home/ubuntu/scan_admin/scan.db`
 * Add "ODKScan_webapp" to INSTALLED_APPS and uncomment the admin entries.
-* Once everything is working set `DEBUG` to False.
+* Once everything is working set `DEBUG` to False. *(And set ALLOWED_HOSTS)*
 
 ### Configure celery:
 
@@ -74,7 +79,7 @@ sudo pip install -r requirements.pip
 [It has some limitations](http://docs.celeryproject.org/en/master/getting-started/brokers/django.html).
 To overcome them it may be a good idea to use a different message broker.
 
-* Add `djcelery` and `` to INSTALLED_APPS in settings.py
+* Add `djcelery` and `djcelery.transport` to INSTALLED_APPS in settings.py
 * Add `BROKER_URL = 'django://'` to settings.py
 * Put this in settings.py and wsgi.py
 
@@ -98,19 +103,17 @@ sudo supervisorctl -c /etc/supervisor/supervisord.conf reload
 ```python
 urlpatterns += [url(r'', include('ODKScan_webapp.urls'))]
 
-#This to serve static media. For production servers you aren't supposed to serve media with Django.
-from django.conf import settings
-if settings.DEBUG:
-    urlpatterns += patterns('',
-        url(r'^media/(?P<path>.*)$', 'django.views.static.serve', {
-            'document_root': settings.MEDIA_ROOT,
-        }),
-   )
-
-from django.contrib.staticfiles.urls import staticfiles_urlpatterns
-urlpatterns += staticfiles_urlpatterns()
+# This to serve media like uploaded/processed images.
+# For production servers you aren't supposed to serve media with Django.
+urlpatterns += patterns('',
+    url(r'^media/(?P<path>.*)$', 'django.views.static.serve', {
+        'document_root': settings.MEDIA_ROOT,
+    }),
+)
 
 urlpatterns += [url(r'^accounts/', include('django.contrib.auth.urls'))]
+
+
 ```
 
 ### Initialize the database:
@@ -142,6 +145,20 @@ User ubuntu
 Group ubuntu
 
 WSGIScriptAlias / /home/ubuntu/scan_admin/scan_admin/wsgi.py
+
+# Serve static files: 
+DocumentRoot /home/ubuntu/scan_admin/ODKScan_webapp/
+Alias /static/admin /usr/local/lib/python2.7/dist-packages/django/contrib/admin/static/admin
+<Directory "/usr/local/lib/python2.7/dist-packages/django/contrib/admin/static/admin">
+    Order Allow,Deny
+    Allow From All
+</Directory>
+Alias /static /home/ubuntu/scan_admin/ODKScan_webapp/static
+<Directory "/home/ubuntu/scan_admin/ODKScan_webapp/static">
+    Order Allow,Deny
+    Allow From All
+</Directory>
+
 WSGIPythonPath /home/ubuntu/scan_admin
 #A bunch of stuff to make the server run in daemon mode, which is better.
 WSGIApplicationGroup scan_admin
@@ -154,8 +171,8 @@ WSGIRestrictEmbedded On
 #SetEnvIf Origin "^(.*[(github\.com)(c9\.io)])$" ORIGIN_SUB_DOMAIN=$1
 #Header set Access-Control-Allow-Origin "%{ORIGIN_SUB_DOMAIN}e" env=ORIGIN_SUB_DOMAIN
 <Files wsgi.py>
-Order deny,allow
-Allow from all
+    Order deny,allow
+    Allow from all
 </Files>
 </Directory>
 ```
@@ -164,6 +181,7 @@ Now restart the server for changes to take effect.
 
 ```bash
 sudo /etc/init.d/apache2 restart
+# You need to restart celery for tasks.py changes to take effect.
 sudo supervisorctl restart celery
 ```
 
@@ -180,6 +198,8 @@ sudo gunicorn_django -b 0.0.0.0:80 --daemon -w 4
 
 The reason I prefer the apache setup I documented is that I have some experience
 using it in the past and the server automatically starts when the machine reboots.
+
+Also, if you do this you'll need to figure out how to serve the static files.
 
 Architecture
 --------------------------------------------------------------------------------

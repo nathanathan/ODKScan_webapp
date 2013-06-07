@@ -21,8 +21,12 @@ def process_image(id):
     
     #Create ouput directory for the segments:
     try:
-        os.mkdir(os.path.join(obj.output_path, "segments"))
+        segment_dir = os.path.join(obj.output_path, "segments")
+        if not os.path.exists(segment_dir):
+            os.mkdir(segment_dir)
     except:
+        obj.status = 'e'
+        obj.save()
         #TODO: Put an error message somewhere
         return
     
@@ -35,6 +39,9 @@ def process_image(id):
         "templatePath" : os.path.dirname(obj.template.image.path) + '/',
         "trainingDataDirectory" : "assets/training_examples/"
     })
+    
+    #TODO: Make sure the app is configured correctly and ODKScan.run exisits.
+    
     stdoutdata, stderrdata = subprocess.Popen(['./ODKScan.run', config_string],
         cwd=os.path.join(APP_ROOT,
                          'ODKScan-core'),

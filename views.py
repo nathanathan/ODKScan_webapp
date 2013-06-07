@@ -114,10 +114,8 @@ def handle_upload(request):
         instance.save()
         results.append(result)
         tasks.process_image.delay(instance.id)
-        #utils.process_image(instance)
-        #thread = Thread(target = process_image, args = (instance, ))
-        #thread.start()
-    return HttpResponse(json.dumps({'files' : results}, indent=4), mimetype="application/json")
+    return HttpResponse(json.dumps({'files' : results}, indent=4),
+                        mimetype="application/json")
     
     
 # def form_view(request):

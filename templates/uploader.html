@@ -18,11 +18,12 @@
     padding-bottom: 50% ; /* % of width, defines aspect ratio*/
     background-repeat: no-repeat;
     background-position: top center;
-    background-size: cover;
-    -webkit-transform: perspective(600px) translateZ( -50px ) translateX( 30px ) translateY( 30px ) rotateY( 5deg );
+    background-size: contain;
+    -webkit-transform: perspective(600px) translateZ( 100px ) translateY( 60px ) rotateY( 5deg );
 }
 .carousel-inner {
-    background-image: -webkit-gradient( linear, left bottom, left top, color-stop(0.14, rgb(191,191,191)), color-stop(0.57, rgb(252,252,252)));
+    background-color: lightgray;
+    background-image: -webkit-gradient( linear, left bottom, left top, color-stop(0.14, rgb(191,191,191)), color-stop(0.57, rgb(250,250,250)));
 }
 
 /* Custom container */
@@ -218,7 +219,7 @@ $(function () {
         },
         fail: function (e, data) {
             console.log(e);
-            $.each(data.result.files, function (index, file) {
+            $.each(data.files, function (index, file) {
                 data.$context.html('<span class="label label-important">Error</span>');
             });
         },
