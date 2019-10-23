@@ -24,7 +24,7 @@
   ],
   "devDependencies": {
     "qunit": "0.5.x",
-    "uglify-js": "1.3.x"
+    "uglify-js": "3.6.x"
   },
   "bundleDependencies": [],
   "license": "MIT",
